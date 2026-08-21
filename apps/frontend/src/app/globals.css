@@ -1,26 +1,139 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Colors */
+  --color-on-background: #191c1e;
+  --color-background: #f7f9fb;
+  --color-tertiary-fixed: #ffddba;
+  --color-inverse-primary: #adc7f7;
+  --color-on-secondary-fixed-variant: #005049;
+  --color-on-primary-fixed-variant: #2d476f;
+  --color-error: #ba1a1a;
+  --color-primary-fixed: #d6e3ff;
+  --color-error-container: #ffdad6;
+  --color-surface-bright: #f7f9fb;
+  --color-on-secondary: #ffffff;
+  --color-tertiary-fixed-dim: #f2bc82;
+  --color-on-tertiary-fixed: #2b1700;
+  --color-on-secondary-fixed: #00201d;
+  --color-tertiary-container: #4f2e00;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-container-low: #f2f4f6;
+  --color-secondary-container: #86f2e4;
+  --color-on-primary-fixed: #001b3c;
+  --color-tertiary: #321b00;
+  --color-surface-dim: #d8dadc;
+  --color-secondary-fixed-dim: #6bd8cb;
+  --color-primary-fixed-dim: #adc7f7;
+  --color-on-primary: #ffffff;
+  --color-inverse-on-surface: #eff1f3;
+  --color-on-error-container: #93000a;
+  --color-on-tertiary-fixed-variant: #633f0f;
+  --color-on-secondary-container: #006f66;
+  --color-surface-variant: #e0e3e5;
+  --color-surface-container-high: #e6e8ea;
+  --color-outline-variant: #c4c6cf;
+  --color-secondary-fixed: #89f5e7;
+  --color-on-primary-container: #86a0cd;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #43474e;
+  --color-surface-container-lowest: #ffffff;
+  --color-primary-container: #1a365d;
+  --color-inverse-surface: #2d3133;
+  --color-surface-tint: #455f88;
+  --color-primary: #002045;
+  --color-secondary: #006a61;
+  --color-on-error: #ffffff;
+  --color-outline: #74777f;
+  --color-on-tertiary-container: #c6955e;
+  --color-surface-container: #eceef0;
+  --color-on-tertiary: #ffffff;
+  --color-surface: #f7f9fb;
+
+  /* Spacing */
+  --spacing-sidebar-width: 280px;
+  --spacing-gutter: 16px;
+  --spacing-stack-md: 12px;
+  --spacing-stack-lg: 24px;
+  --spacing-stack-sm: 4px;
+  --spacing-container-padding: 24px;
+  --spacing-base: 8px;
+
+  /* Font Families */
+  --font-headline-lg: var(--font-jakarta), sans-serif;
+  --font-headline-lg-mobile: var(--font-jakarta), sans-serif;
+  --font-body-lg: var(--font-inter), sans-serif;
+  --font-label-sm: var(--font-inter), sans-serif;
+  --font-body-md: var(--font-inter), sans-serif;
+  --font-display-lg: var(--font-jakarta), sans-serif;
+  --font-label-md: var(--font-inter), sans-serif;
+  --font-headline-md: var(--font-jakarta), sans-serif;
+
+  /* Font Sizes */
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 1.3;
+  
+  --text-headline-lg-mobile: 24px;
+  --text-headline-lg-mobile--line-height: 1.3;
+  
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.6;
+  
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 1.2;
+  
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.5;
+  
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 1.2;
+  --text-display-lg--letter-spacing: -0.02em;
+  
+  --text-label-md: 14px;
+  --text-label-md--line-height: 1.4;
+  --text-label-md--letter-spacing: 0.01em;
+  
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 1.4;
+
+  /* Emil's custom easing */
+  --ease-out-ui: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-ui: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer utilities {
+  .hero-gradient {
+    background: linear-gradient(135deg, rgba(247, 249, 251, 1) 0%, rgba(224, 227, 229, 0.5) 100%);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  /* Material Symbols Configuration */
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  
+  .material-symbols-outlined[data-weight="fill"] {
+    font-variation-settings: 'FILL' 1;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
 }
