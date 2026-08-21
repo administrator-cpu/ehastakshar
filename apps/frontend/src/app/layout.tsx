@@ -4,13 +4,13 @@ import "./globals.css";
 import { ReactNode } from "react";
 
 const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
+  variable: "--font-jakarta-sans",
   subsets: ["latin"],
   weight: ["600", "700"],
 });
 
 const inter = Inter({
-  variable: "--font-inter",
+  variable: "--font-inter-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });

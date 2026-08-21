@@ -60,14 +60,9 @@
   --spacing-base: 8px;
 
   /* Font Families */
-  --font-headline-lg: var(--font-jakarta), sans-serif;
-  --font-headline-lg-mobile: var(--font-jakarta), sans-serif;
-  --font-body-lg: var(--font-inter), sans-serif;
-  --font-label-sm: var(--font-inter), sans-serif;
-  --font-body-md: var(--font-inter), sans-serif;
-  --font-display-lg: var(--font-jakarta), sans-serif;
-  --font-label-md: var(--font-inter), sans-serif;
-  --font-headline-md: var(--font-jakarta), sans-serif;
+  --font-jakarta: var(--font-jakarta-sans), sans-serif;
+  --font-jakarta-mobile: var(--font-jakarta-sans), sans-serif;
+  --font-inter: var(--font-inter-sans), sans-serif;
 
   /* Font Sizes */
   --text-headline-lg: 32px;
