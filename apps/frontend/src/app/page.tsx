@@ -25,9 +25,9 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <button className="bg-[#0D9488] text-white px-4 py-2 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-secondary/90">
+          <Link href="/login" className="bg-[#0D9488] text-white px-4 py-2 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-secondary/90">
             Login
-          </button>
+          </Link>
         </div>
       </nav>
 
@@ -46,9 +46,9 @@ export default function Home() {
               </p>
               <div className="flex flex-col gap-3 pt-4 w-fit">
                 <div className="flex flex-wrap gap-4">
-                  <button className="bg-[#0D9488] text-white px-8 py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#0f766e] shadow-sm">
+                  <Link href="/signup" className="bg-[#0D9488] text-white px-8 py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#0f766e] shadow-sm flex items-center justify-center">
                     Get Started for FREE
-                  </button>
+                  </Link>
                   <button className="bg-transparent border border-[#1A365D] text-[#1A365D] px-8 py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#1A365D]/5">
                     View Documentation
                   </button>
@@ -324,9 +324,9 @@ export default function Home() {
               critical document signing needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <button className="bg-[#0D9488] text-white px-8 py-4 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#0f766e] shadow-lg">
+              <Link href="/signup" className="bg-[#0D9488] text-white px-8 py-4 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#0f766e] shadow-lg flex items-center justify-center">
                 Get Started for FREE
-              </button>
+              </Link>
               <button className="bg-transparent border border-outline text-white px-8 py-4 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-white/5">
                 Contact Sales
               </button>
