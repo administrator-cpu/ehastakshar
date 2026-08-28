@@ -50,7 +50,7 @@ export default function LoginPage() {
         throw new Error(result.error || "Failed to log in");
       }
 
-      router.push("/about"); // Navigate to the protected page
+      router.push("/dashboard"); // Navigate to the protected page
     } catch (err: any) {
       setServerError(err.message);
     } finally {
@@ -82,7 +82,7 @@ export default function LoginPage() {
             <Input
               {...register("email")}
               type="email"
-              placeholder="rahul@example.com"
+              placeholder="ajay@example.com"
               error={errors.email?.message}
               disabled={isLoading}
             />

@@ -1,12 +1,41 @@
 import * as argon2 from "argon2";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { Resend } from "resend";
-import dotenv from "dotenv";
+import { env } from "../config/env.js";
+import { logger } from "../utils/logger.js";
 
-dotenv.config();
+const sendEmail = async ({ toEmail, subject, htmlContent }: { toEmail: string; subject: string; htmlContent: string; }): Promise<boolean> => {
+  const apiKey = env.EMAIL_SERVICE_API_KEY;
+  const domain = env.EMAIL_SERVICE_DOMAIN;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+  try {
+    logger.info(`[EMAIL-SERVICE] Attempting to send email to: ${toEmail}`);
+    const response = await fetch(domain, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        to: toEmail,
+        subject,
+        html: htmlContent,
+        fromName: "Ehastakshar"
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Email Service Error: ${response.status} - ${errorText}`);
+    }
+
+    logger.info(`[EMAIL-SERVICE] Email sent successfully to ${toEmail}`);
+    return true;
+  } catch (error: any) {
+    logger.error({ err: error, toEmail }, '[EMAIL-SERVICE] Failed to send email');
+    throw new Error(error.message);
+  }
+};
 
 // JWT Expiration for short-lived access
 const JWT_EXPIRES_IN = "15m";
@@ -54,10 +83,7 @@ export class AuthService {
    * Generates a JWT token for the user.
    */
   static generateToken(userId: string): string {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error("JWT_SECRET environment variable is missing.");
-    }
+    const secret = env.JWT_SECRET;
     return jwt.sign({ userId }, secret, { expiresIn: JWT_EXPIRES_IN });
   }
 
@@ -65,29 +91,31 @@ export class AuthService {
    * Sends the OTP via Resend.
    */
   static async sendOtpEmail(email: string, otp: string): Promise<void> {
-    // In local development if dummy API key is used, log it to console to avoid crashing.
-    if (process.env.RESEND_API_KEY === "re_dummy_resend_api_key_replace_me") {
-      console.log(`[MOCK EMAIL] To: ${email} | OTP: ${otp}`);
-      return;
-    }
+    const html = `
+      <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #0D9488;">Verify your email</h2>
+        <p>Your verification code is:</p>
+        <h1 style="letter-spacing: 4px; font-size: 32px; color: #111;">${otp}</h1>
+        <p>This code expires in 10 minutes.</p>
+      </div>
+    `;
+    await sendEmail({ toEmail: email, subject: "Your Ehastakshar Verification Code", htmlContent: html });
+  }
 
-    try {
-      await resend.emails.send({
-        from: "Ehastakshar <onboarding@resend.dev>",
-        to: email,
-        subject: "Your Ehastakshar Verification Code",
-        html: `
-          <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #0D9488;">Verify your email</h2>
-            <p>Your verification code is:</p>
-            <h1 style="letter-spacing: 4px; font-size: 32px; color: #111;">${otp}</h1>
-            <p>This code expires in 10 minutes.</p>
-          </div>
-        `,
-      });
-    } catch (error) {
-      console.error("Failed to send email via Resend:", error);
-      throw new Error("Failed to send OTP email.");
-    }
+  /**
+   * Sends the document signing invite via Resend.
+   */
+  static async sendInviteEmail(email: string, link: string): Promise<void> {
+    const html = `
+      <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #0D9488;">Signature Requested</h2>
+        <p>You have been requested to sign a document.</p>
+        <div style="margin: 30px 0;">
+          <a href="${link}" style="background-color: #0D9488; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Review & Sign Document</a>
+        </div>
+        <p style="font-size: 12px; color: #666;">If the button doesn't work, copy and paste this link into your browser: <br/> ${link}</p>
+      </div>
+    `;
+    await sendEmail({ toEmail: email, subject: "Action Required: Sign Document", htmlContent: html });
   }
 }

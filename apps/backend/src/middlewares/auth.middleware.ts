@@ -1,8 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { env } from "../config/env.js";
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -17,7 +15,7 @@ export function verifyToken(req: AuthRequest, res: Response, next: NextFunction)
   }
 
   try {
-    const secret = process.env.JWT_SECRET;
+    const secret = env.JWT_SECRET;
     if (!secret) {
       throw new Error("JWT_SECRET is missing");
     }

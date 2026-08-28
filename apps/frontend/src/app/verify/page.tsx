@@ -68,7 +68,7 @@ function VerifyContent() {
 
       setSuccessMsg("Email verified successfully! Redirecting...");
       setTimeout(() => {
-        router.push("/about"); // Go to protected dummy page
+        router.push("/dashboard"); // Go to protected dummy page
       }, 1500);
     } catch (err: any) {
       setServerError(err.message);

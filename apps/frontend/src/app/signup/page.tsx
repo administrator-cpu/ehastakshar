@@ -85,7 +85,7 @@ export default function SignupPage() {
               </label>
               <Input
                 {...register("firstName")}
-                placeholder="Rahul"
+                placeholder="Ajay"
                 error={errors.firstName?.message}
                 disabled={isLoading}
               />
@@ -96,7 +96,7 @@ export default function SignupPage() {
               </label>
               <Input
                 {...register("lastName")}
-                placeholder="Kumar"
+                placeholder="Negi"
                 error={errors.lastName?.message}
                 disabled={isLoading}
               />
@@ -110,7 +110,7 @@ export default function SignupPage() {
             <Input
               {...register("email")}
               type="email"
-              placeholder="rahul@example.com"
+              placeholder="ajay@example.com"
               error={errors.email?.message}
               disabled={isLoading}
             />

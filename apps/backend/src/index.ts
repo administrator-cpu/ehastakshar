@@ -2,26 +2,38 @@ import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
+import esignRoutes from "./routes/esign.routes.js";
 import { verifyToken } from "./middlewares/auth.middleware.js";
-
-dotenv.config();
+import { otpLimiter } from "./middlewares/rateLimiter.middleware.js";
+import pinoHttp from "pino-http";
+import { logger } from "./utils/logger.js";
+import { env } from "./config/env.js";
 
 const app = express();
 
 // Global Middlewares
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: env.FRONTEND_URL,
   credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
+// Global Request Logger
+// @ts-expect-error - Type definition mismatch for pino-http in ESM
+app.use(pinoHttp({ logger }));
+
 // Authentication Routes
 app.use("/api/auth", authRoutes);
+
+// Apply rate limiter specifically to eSign OTP sending and verification
+app.use("/api/esign/otp", otpLimiter);
+
+// eSign Routes
+app.use("/api/esign", esignRoutes);
 
 // Protected Dummy Route
 app.get("/api/user/me", verifyToken, (req: Request, res: Response) => {
@@ -37,8 +49,8 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = env.PORT;
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  logger.info(`Server is running on port ${PORT}`);
 });

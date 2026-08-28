@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { UserRepository } from "../repositories/UserRepository.js";
 import { OtpRepository } from "../repositories/OtpRepository.js";
+import { logger } from "../utils/logger.js";
 import { AuthService } from "../services/AuthService.js";
 
 const signupSchema = z.object({
@@ -72,7 +73,7 @@ export class AuthController {
 
       res.status(201).json({ message: "User created, OTP sent to email" });
     } catch (error) {
-      console.error("Signup error:", error);
+      logger.error({ err: error, path: req.originalUrl }, "Signup error");
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -123,7 +124,7 @@ export class AuthController {
 
       res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
-      console.error("Verify OTP error:", error);
+      logger.error({ err: error, path: req.originalUrl }, "Verify OTP error");
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -181,7 +182,7 @@ export class AuthController {
 
       res.status(200).json({ message: "OTP resent successfully", retryAfter: 120 });
     } catch (error) {
-      console.error("Resend OTP error:", error);
+      logger.error({ err: error, path: req.originalUrl }, "Resend OTP error");
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -223,7 +224,7 @@ export class AuthController {
 
       res.status(200).json({ message: "Login successful" });
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error({ err: error, path: req.originalUrl }, "Login error");
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -237,7 +238,7 @@ export class AuthController {
       });
       res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
-      console.error("Logout error:", error);
+      logger.error({ err: error, path: req.originalUrl }, "Logout error");
       res.status(500).json({ error: "Internal server error" });
     }
   }

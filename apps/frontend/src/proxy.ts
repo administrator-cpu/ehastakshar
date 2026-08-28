@@ -4,7 +4,9 @@ import type { NextRequest } from 'next/server';
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
 
-  if (request.nextUrl.pathname.startsWith('/about')) {
+  const isProtectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/esign');
+
+  if (isProtectedPath) {
     if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
@@ -13,7 +15,7 @@ export function proxy(request: NextRequest) {
   // Prevent logged in users from seeing auth pages
   if (['/login', '/signup', '/verify'].some(path => request.nextUrl.pathname.startsWith(path))) {
     if (token) {
-      return NextResponse.redirect(new URL('/about', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
@@ -21,5 +23,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/about', '/login', '/signup', '/verify'],
+  matcher: ['/dashboard/:path*', '/esign/:path*', '/login', '/signup', '/verify'],
 };
