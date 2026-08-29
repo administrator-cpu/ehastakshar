@@ -735,10 +735,15 @@ export class ESignController {
       }
 
       // Add branded footer strip to the last page
+      const oldBottom = doc.page.margins.bottom;
+      doc.page.margins.bottom = 0; // Suspend bottom margin to prevent auto page-break
+
       const stripHeight = 35;
       const stripY = doc.page.height - stripHeight;
       doc.rect(0, stripY, doc.page.width, stripHeight).fill("#6b46c1");
-      doc.fillColor("#ffffff").fontSize(11).font("Helvetica-Bold").text("Signed Securely with Ehastakshar", 0, stripY + 11, { align: "center" });
+      doc.fillColor("#ffffff").fontSize(11).font("Helvetica-Bold").text("Signed Securely with Ehastakshar", 0, stripY + 11, { align: "center", lineBreak: false });
+
+      doc.page.margins.bottom = oldBottom;
 
 
       doc.end();
