@@ -34,7 +34,7 @@ export default function SignerPortalPage() {
   const [pdfFile, setPdfFile] = useState<Blob | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [countdown, setCountdown] = useState(0);
-  
+
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -119,7 +119,7 @@ export default function SignerPortalPage() {
     if (isSendingOtp) return;
     setIsSendingOtp(true);
     setStep("OTP");
-    
+
     toast.promise(
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/otp/send`, {
         method: 'POST',
@@ -127,8 +127,8 @@ export default function SignerPortalPage() {
         body: JSON.stringify({ token })
       }).then(async (res) => {
         if (!res.ok) {
-           const err = await res.json();
-           throw new Error(err.error || "Failed to send OTP");
+          const err = await res.json();
+          throw new Error(err.error || "Failed to send OTP");
         }
         return res.json();
       }),
@@ -158,10 +158,10 @@ export default function SignerPortalPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Invalid OTP");
-      
+
       setSignToken(data.signToken);
       setSignatureText(docInfo?.recipientName || "");
-      
+
       if (docInfo?.requireGps || docInfo?.requirePhoto) {
         setStep("GATHER");
       } else {
@@ -185,7 +185,7 @@ export default function SignerPortalPage() {
             const fetchRes = await fetch(imageSrc);
             const blob = await fetchRes.blob();
             const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
-            
+
             // Compress Image
             const options = {
               maxSizeMB: 0.5,
@@ -211,7 +211,7 @@ export default function SignerPortalPage() {
       formData.append("token", token);
       formData.append("signToken", signToken);
       formData.append("signatureText", signatureText);
-      
+
       if (latitude && longitude) {
         formData.append("latitude", latitude.toString());
         formData.append("longitude", longitude.toString());
@@ -225,10 +225,10 @@ export default function SignerPortalPage() {
         method: 'POST',
         body: formData
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to sign document");
-      
+
       setStep("SUCCESS");
       toast.success("Document signed successfully!");
     } catch (err) {
@@ -282,7 +282,7 @@ export default function SignerPortalPage() {
 
   return (
     <div className="h-[100dvh] w-full overflow-hidden bg-slate-100 font-sans flex flex-col relative">
-      
+
       {/* Access Denied Overlay */}
       {accessDenied && (
         <div className="fixed inset-0 z-[100] bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
@@ -303,7 +303,7 @@ export default function SignerPortalPage() {
             </div>
             <p className="text-lg font-medium text-slate-200 pt-4 border-t border-slate-700">3. Please refresh this page to continue</p>
           </div>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-10 bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-black/20 transition-all text-lg"
           >
@@ -319,7 +319,7 @@ export default function SignerPortalPage() {
           <span className="font-semibold tracking-wide">Ehastakshar Sign Secure Portal</span>
         </div>
         <div className="text-xs text-slate-400 flex items-center">
-          Transaction ID: 
+          Transaction ID:
           {loading ? (
             <span className="inline-block w-32 h-4 bg-slate-700/50 rounded ml-2 animate-pulse"></span>
           ) : (
@@ -341,11 +341,11 @@ export default function SignerPortalPage() {
               )}
             </h2>
           </div>
-          
+
           <div className="flex-1 bg-slate-100 p-0 overflow-hidden flex flex-col relative">
             {/* Scrollable PDF Area */}
             <div className="flex-1 overflow-y-auto w-full bg-slate-200/50 shadow-inner custom-scrollbar relative flex flex-col items-center justify-start p-4 md:p-8 scroll-smooth">
-              
+
               {step === "SUCCESS" ? (
                 <div className="w-full h-full min-h-[60vh] flex flex-col items-center justify-center animate-in fade-in duration-500">
                   <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center border border-slate-200 relative overflow-hidden">
@@ -355,7 +355,7 @@ export default function SignerPortalPage() {
                       <div className="absolute inset-0 bg-teal-200 rounded-full animate-ping opacity-20"></div>
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-2">Document Signed</h3>
-                    
+
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 my-6 text-left space-y-2">
                       <p className="text-sm text-slate-500">Transaction ID:</p>
                       <p className="text-xs font-mono text-slate-800 break-all">{docInfo?.transactionId}</p>
@@ -365,7 +365,7 @@ export default function SignerPortalPage() {
                       </div>
                     </div>
 
-                    <button 
+                    <button
                       onClick={handleDownload}
                       disabled={isDownloading}
                       className="w-full cursor-pointer bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center space-x-2"
@@ -389,7 +389,7 @@ export default function SignerPortalPage() {
                 </div>
               ) : (
                 <div className="w-full max-w-3xl relative z-0 animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out flex justify-center pb-32">
-                  <PDFViewer 
+                  <PDFViewer
                     file={memoizedPdfFile as File}
                     numPages={numPages}
                     onDocumentLoadSuccess={({ numPages }: { numPages: number }) => setNumPages(numPages)}
@@ -397,12 +397,12 @@ export default function SignerPortalPage() {
                 </div>
               )}
             </div>
-            
+
             {/* Proceed to Sign Floating Button */}
             {step === "VIEW" && (
               <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-50 animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out">
                 <div className="relative group">
-                  <button 
+                  <button
                     onClick={requestOtp}
                     disabled={isSendingOtp}
                     className="relative cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold shadow-lg shadow-black/10 flex items-center space-x-3 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
@@ -420,15 +420,15 @@ export default function SignerPortalPage() {
       {/* Modals Container */}
       {(step === "OTP" || step === "GATHER" || step === "SIGN") && !accessDenied && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
-          
+
           {/* OTP Modal */}
           {step === "OTP" && (
             <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-in zoom-in-95 duration-300 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-teal-500"></div>
-              
+
               <h3 className="text-2xl font-bold text-slate-900 mb-1">eSign Authentication</h3>
               <p className="text-xs text-slate-500 font-mono mb-6">Transaction ID: {docInfo?.transactionId}</p>
-              
+
               <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-6">
                 <p className="text-sm text-slate-700">
                   OTP has been sent to <strong className="text-slate-900">{maskEmail(docInfo?.recipientEmail || "")}</strong>
@@ -438,8 +438,8 @@ export default function SignerPortalPage() {
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Enter OTP</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/[^0-9a-zA-Z]/g, ''))}
@@ -448,7 +448,7 @@ export default function SignerPortalPage() {
                     placeholder="••••••"
                   />
                 </div>
-                
+
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-500">Did not receive OTP?</span>
                   {countdown > 0 ? (
@@ -465,7 +465,7 @@ export default function SignerPortalPage() {
                 <p className="text-[11px] text-slate-500 text-center leading-relaxed">
                   By proceeding, I agree to the <a href="#" className="text-teal-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-teal-600 hover:underline">Privacy Policy</a>
                 </p>
-                <button 
+                <button
                   onClick={verifyOtp}
                   disabled={otp.length !== 6 || isVerifying || isSendingOtp}
                   className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
@@ -480,7 +480,7 @@ export default function SignerPortalPage() {
           {step === "GATHER" && (
             <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-in zoom-in-95 duration-300 text-center">
               <h3 className="text-2xl font-bold text-slate-900 mb-6">Security Check</h3>
-              
+
               <div className="space-y-6">
                 {docInfo?.requireGps && (
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
@@ -521,7 +521,7 @@ export default function SignerPortalPage() {
               </div>
 
               <div className="mt-8">
-                <button 
+                <button
                   onClick={capturePhotoAndProceed}
                   disabled={docInfo?.requireGps && !latitude}
                   className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
@@ -536,18 +536,18 @@ export default function SignerPortalPage() {
           {step === "SIGN" && (
             <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-in zoom-in-95 duration-300">
               <h3 className="text-2xl font-bold text-slate-900 mb-6">Create your signature</h3>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={signatureText}
                     onChange={(e) => setSignatureText(e.target.value)}
                     className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-900 font-medium"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Signature Preview</label>
                   <div className="w-full h-32 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden">
@@ -555,8 +555,8 @@ export default function SignerPortalPage() {
                     <style>{`
                       @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
                     `}</style>
-                    <span 
-                      style={{ fontFamily: "'Dancing Script', cursive" }} 
+                    <span
+                      style={{ fontFamily: "'Dancing Script', cursive" }}
                       className="text-4xl text-blue-900 px-4 whitespace-nowrap"
                     >
                       {signatureText || "Your Signature"}
@@ -566,14 +566,14 @@ export default function SignerPortalPage() {
               </div>
 
               <div className="mt-8 flex space-x-3">
-                <button 
+                <button
                   onClick={() => setStep("VIEW")}
                   disabled={isSigning}
                   className="flex-1 cursor-pointer py-3 rounded-xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={submitSignature}
                   disabled={!signatureText || isSigning}
                   className="flex-[2] cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"

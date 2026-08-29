@@ -22,16 +22,16 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess }: PDF
 
   return (
     <div className="pdf-container w-full max-w-3xl flex flex-col items-center">
-      <Document 
-        file={file} 
+      <Document
+        file={file}
         onLoadSuccess={onDocumentLoadSuccess}
         loading={<div className="p-8 text-slate-500 font-medium animate-pulse">Loading document...</div>}
         className="flex flex-col items-center w-full"
       >
         {Array.from(new Array(numPages), (el, index) => (
           <div key={`page_${index + 1}`} className="mb-10 shadow-2xl ring-1 ring-slate-900/5 overflow-hidden bg-white w-max mx-auto transition-all min-h-[848px] min-w-[600px] flex items-center justify-center">
-            <Page 
-              pageNumber={index + 1} 
+            <Page
+              pageNumber={index + 1}
               renderTextLayer={true}
               renderAnnotationLayer={false}
               width={600}
