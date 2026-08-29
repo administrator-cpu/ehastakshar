@@ -184,6 +184,7 @@ export default function SignerPortalPage() {
             // Convert base64 to Blob
             const fetchRes = await fetch(imageSrc);
             const blob = await fetchRes.blob();
+            const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
             
             // Compress Image
             const options = {
@@ -191,7 +192,7 @@ export default function SignerPortalPage() {
               maxWidthOrHeight: 800,
               useWebWorker: true
             };
-            const compressedBlob = await imageCompression(blob, options);
+            const compressedBlob = await imageCompression(file, options);
             setPhotoBlob(compressedBlob);
           } catch (error) {
             toast.error("Failed to capture photo");
@@ -500,6 +501,7 @@ export default function SignerPortalPage() {
                 {docInfo?.requirePhoto && (
                   <div className="flex flex-col items-center">
                     <div className="w-full bg-slate-900 rounded-xl overflow-hidden aspect-video relative flex items-center justify-center">
+                      {/* @ts-ignore - React 19 type mismatch with react-webcam */}
                       <Webcam
                         audio={false}
                         ref={webcamRef}
