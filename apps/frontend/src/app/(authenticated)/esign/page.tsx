@@ -25,11 +25,14 @@ export default function ESignDashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({ total: 0, pending: 0, completed: 0 });
   const [recentDocuments, setRecentDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/dashboard`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/dashboard?page=${currentPage}&limit=10`, {
           credentials: 'include',
         });
         
@@ -37,6 +40,7 @@ export default function ESignDashboardPage() {
           const data = await response.json();
           setStats(data.stats);
           setRecentDocuments(data.recentDocuments);
+          setTotalPages(data.totalPages || 1);
         } else {
           toast.error("Failed to fetch dashboard metrics");
         }
@@ -48,7 +52,7 @@ export default function ESignDashboardPage() {
       }
     };
     fetchDashboardData();
-  }, []);
+  }, [currentPage]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
@@ -176,6 +180,28 @@ export default function ESignDashboardPage() {
                   ))}
                 </tbody>
               </table>
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                  <button 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm font-medium text-slate-500">
+                    Page <span className="text-slate-900">{currentPage}</span> of <span className="text-slate-900">{totalPages}</span>
+                  </span>
+                  <button 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

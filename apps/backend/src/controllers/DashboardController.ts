@@ -33,7 +33,11 @@ export class DashboardController {
         completed: Number(countsResult[0]?.completed || 0),
       };
 
-      // Get recent documents (top 5)
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = (page - 1) * limit;
+
+      // Get recent documents (paginated)
       const recentDocuments = await db
         .select({
           id: documents.id,
@@ -46,9 +50,12 @@ export class DashboardController {
         .from(documents)
         .where(eq(documents.uploaderId, uploaderId))
         .orderBy(desc(documents.updatedAt))
-        .limit(5);
+        .limit(limit)
+        .offset(offset);
 
-      res.status(200).json({ stats, recentDocuments });
+      const totalPages = Math.ceil(stats.total / limit);
+
+      res.status(200).json({ stats, recentDocuments, totalPages, currentPage: page });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Error fetching dashboard stats");
       res.status(500).json({ error: "Internal server error" });

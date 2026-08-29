@@ -385,36 +385,70 @@ export class ESignController {
         hour12: false
       });
       const formattedDate = istFormatter.format(new Date());
-      const signatureString = `Signed by: ${signatureText}\nDate: ${formattedDate} IST`;
+      const signatureString = `Date: ${formattedDate} IST`;
+      
+      let embeddedSignatureImage: any = null;
+      let signatureDims = { width: 0, height: 0 };
+      
+      if (req.body.signatureUrl) {
+        try {
+          const imageRes = await fetch(req.body.signatureUrl);
+          const imageArrayBuffer = await imageRes.arrayBuffer();
+          // Extremely basic magic number check for PNG
+          const firstByte = new Uint8Array(imageArrayBuffer)[0];
+          if (firstByte === 0x89) {
+            embeddedSignatureImage = await pdfDoc.embedPng(imageArrayBuffer);
+          } else {
+            embeddedSignatureImage = await pdfDoc.embedJpg(imageArrayBuffer);
+          }
+          signatureDims = embeddedSignatureImage.scaleToFit(140, 50);
+        } catch (err) {
+          logger.error({ err }, "Failed to embed signature image in PDF");
+        }
+      }
       
       pages.forEach((page) => {
         const { width, height } = page.getSize();
         
-        // Approximate width and height of the signature block
-        const boxWidth = 140;
-        const boxHeight = 28;
-        const padding = 20; // Distance from page edges
+        const boxWidth = 150;
+        const textHeight = 12; // Height for one line of date text
+        const innerPadding = 4;
+        const imgHeight = embeddedSignatureImage ? signatureDims.height : 0;
+        const imgWidth = embeddedSignatureImage ? signatureDims.width : 0;
         
+        const totalHeight = imgHeight + textHeight + (innerPadding * 3);
+        
+        const padding = 20;
         const boxX = width - boxWidth - padding;
-        const boxY = padding; // Bottom right corner
+        const boxY = padding;
         
         // Draw the border box
         page.drawRectangle({
           x: boxX,
           y: boxY,
           width: boxWidth,
-          height: boxHeight,
+          height: totalHeight,
           borderColor: rgb(0, 0, 0),
           borderWidth: 1,
         });
 
-        // Draw the text inside the box
+        // Draw image if exists
+        if (embeddedSignatureImage) {
+          page.drawImage(embeddedSignatureImage, {
+            x: boxX + (boxWidth - imgWidth) / 2, // Center horizontally
+            y: boxY + textHeight + (innerPadding * 2), // Stack above the text
+            width: imgWidth,
+            height: imgHeight,
+          });
+        }
+
+        // Draw the text inside the box (bottom part)
         page.drawText(signatureString, {
-          x: boxX + 4, // 4px inner padding
-          y: boxY + boxHeight - 12, // Start drawing near the top of the box
+          x: boxX + innerPadding,
+          y: boxY + innerPadding + 2, // Slightly above bottom edge
           size: 8,
           font,
-          color: rgb(0, 0, 0), // Black ink
+          color: rgb(0, 0, 0),
           lineHeight: 11,
         });
       });

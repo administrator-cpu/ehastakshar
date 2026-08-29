@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import Webcam from "react-webcam";
 import imageCompression from "browser-image-compression";
+import SignatureModal from "./SignatureModal";
 
 const PDFViewer = dynamic(() => import("@/app/(authenticated)/esign/send/digital/PDFViewer"), { ssr: false });
 
@@ -218,13 +219,14 @@ export default function SignerPortalPage() {
     setStep("SIGN");
   }, [docInfo?.requirePhoto, webcamRef]);
 
-  const submitSignature = async () => {
+  const submitSignature = async (sigText: string, sigBlob: Blob) => {
     setIsSigning(true);
     try {
       const formData = new FormData();
       formData.append("token", token);
       formData.append("signToken", signToken);
-      formData.append("signatureText", signatureText);
+      formData.append("signatureText", sigText);
+      formData.append("signatureFile", sigBlob, "signature.png");
 
       if (latitude && longitude) {
         formData.append("latitude", latitude.toString());
@@ -552,54 +554,12 @@ export default function SignerPortalPage() {
 
           {/* Sign Modal */}
           {step === "SIGN" && (
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-in zoom-in-95 duration-300">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">Create your signature</h3>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    value={signatureText}
-                    onChange={(e) => setSignatureText(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-900 font-medium"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Signature Preview</label>
-                  <div className="w-full h-32 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden">
-                    {/* Inline style for external cursive font - typically you'd import this in layout.tsx */}
-                    <style>{`
-                      @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
-                    `}</style>
-                    <span
-                      style={{ fontFamily: "'Dancing Script', cursive" }}
-                      className="text-4xl text-blue-900 px-4 whitespace-nowrap"
-                    >
-                      {signatureText || "Your Signature"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 flex space-x-3">
-                <button
-                  onClick={() => setStep("VIEW")}
-                  disabled={isSigning}
-                  className="flex-1 cursor-pointer py-3 rounded-xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={submitSignature}
-                  disabled={!signatureText || isSigning}
-                  className="flex-[2] cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
-                >
-                  {isSigning ? "Signing Document..." : "Insert Signature"}
-                </button>
-              </div>
-            </div>
+            <SignatureModal 
+              onCancel={() => setStep("VIEW")}
+              onConfirm={submitSignature}
+              isSigning={isSigning}
+              initialName={docInfo?.recipientName}
+            />
           )}
         </div>
       )}
