@@ -388,14 +388,12 @@ export default function SignerPortalPage() {
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-3xl relative z-0 animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out">
-                  <div className="shadow-2xl rounded-xl overflow-hidden border border-slate-200/60 bg-white">
-                    <PDFViewer 
-                      file={memoizedPdfFile as File}
-                      numPages={numPages}
-                      onDocumentLoadSuccess={({ numPages }: { numPages: number }) => setNumPages(numPages)}
-                    />
-                  </div>
+                <div className="w-full max-w-3xl relative z-0 animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out flex justify-center pb-32">
+                  <PDFViewer 
+                    file={memoizedPdfFile as File}
+                    numPages={numPages}
+                    onDocumentLoadSuccess={({ numPages }: { numPages: number }) => setNumPages(numPages)}
+                  />
                 </div>
               )}
             </div>
