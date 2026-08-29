@@ -88,7 +88,7 @@ export default function SendDigitalESignPage() {
     formData.append("file", file);
     formData.append("title", title);
     // Send recipients as a JSON string
-    formData.append("recipients", JSON.stringify(recipients.map(r => ({ name: r.name, email: r.email, requireGps: r.requireGps }))));
+    formData.append("recipients", JSON.stringify(recipients.map(r => ({ name: r.name, email: r.email, requireGps: r.requireGps, requirePhoto: r.requirePhoto }))));
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/send`, {
@@ -311,16 +311,19 @@ export default function SendDigitalESignPage() {
                       <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Capture GPS location</span>
                     </label>
 
-                    <label className="flex items-center space-x-3 cursor-not-allowed group opacity-50">
+                    <label className="flex items-center space-x-3 cursor-pointer group">
                       <div className="relative flex items-center justify-center">
                         <input 
                           type="checkbox" 
-                          disabled
                           checked={newSigner.requirePhoto}
-                          className="appearance-none w-5 h-5 border-2 border-slate-300 rounded bg-slate-100 cursor-not-allowed" 
+                          onChange={(e) => setNewSigner({...newSigner, requirePhoto: e.target.checked})}
+                          className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:ring-2 focus:ring-teal-500/30 focus:outline-none checked:bg-teal-600 checked:border-teal-600 transition-colors cursor-pointer" 
                         />
+                        <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
                       </div>
-                      <span className="text-sm font-medium text-slate-700">Capture photo (Coming Soon)</span>
+                      <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Capture photo</span>
                     </label>
                   </div>
                 </div>

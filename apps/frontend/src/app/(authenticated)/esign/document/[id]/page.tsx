@@ -82,6 +82,28 @@ export default function DocumentDetailsPage() {
     }
   };
 
+  const handleDownloadAuditReport = async () => {
+    try {
+      toast.info("Generating Audit Report...");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/document/${documentId}/audit-report`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error("Failed to download Audit Report");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AuditReport_${data?.document.transactionId || documentId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success("Audit Report downloaded");
+    } catch (error) {
+      toast.error("Failed to download Audit Report");
+    }
+  };
+
   const handleRemind = async (recipientId: string) => {
     try {
       setReminding(recipientId);
@@ -325,38 +347,43 @@ export default function DocumentDetailsPage() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-xl font-bold text-slate-900">Audit Trail</h2>
-          <button className="text-[#6b46c1] text-sm font-semibold hover:underline cursor-pointer">
-            Download Audit Trail
+          <button 
+            onClick={handleDownloadAuditReport}
+            className="text-[#6b46c1] text-sm font-semibold hover:underline cursor-pointer flex items-center space-x-1"
+          >
+            <Download size={14} />
+            <span>Download Audit Trail</span>
           </button>
         </div>
 
         <div className="space-y-12 pb-20 relative">
           
           {/* Main vertical line for the timeline */}
-          <div className="absolute top-10 bottom-4 left-[31px] w-px bg-slate-300 -z-10 hidden md:block"></div>
+          <div className="absolute top-10 bottom-0 left-[22px] w-[2px] bg-slate-300 z-0"></div>
 
           {Object.entries(groupedAudit).map(([dateLabel, events]) => (
             <div key={dateLabel}>
-              <h4 className="text-sm font-bold text-slate-900 mb-6 sticky top-[72px] bg-[#f4f5f7]/90 backdrop-blur-sm py-2 z-10 w-max">{dateLabel}</h4>
+              <h4 className="text-sm font-bold text-slate-900 mb-6 sticky top-[72px] bg-[#f4f5f7]/90 backdrop-blur-sm py-2 z-10 w-max pl-14">{dateLabel}</h4>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {events.map((event, i) => {
                   const details = getActionDetails(event);
                   return (
-                    <div key={event.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:items-center items-start gap-4 hover:shadow-md transition-shadow relative">
+                    <div key={event.id} className="relative flex flex-col md:flex-row items-start md:items-center gap-6 group">
                       
-                      {/* Icon placed inside the container, vertically centered */}
-                      <div className={`w-11 h-11 rounded-full flex shrink-0 items-center justify-center text-white ${details.color} shadow-sm ring-4 ring-[#f4f5f7]`}>
+                      {/* Icon placed on the timeline */}
+                      <div className={`w-11 h-11 rounded-full flex shrink-0 items-center justify-center text-white ${details.color} shadow-sm ring-4 ring-[#f4f5f7] z-10 relative`}>
                         {details.icon}
                       </div>
 
-                      <div className="flex-1 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-2">
+                      {/* Card Content */}
+                      <div className="flex-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-2 hover:shadow-md transition-shadow relative ml-[22px] md:ml-0">
                         <div>
                           <h4 className="font-bold text-slate-800 text-[15px]">{details.text}</h4>
                           <p className="text-sm text-slate-500 mt-0.5">{details.subtitle}</p>
                         </div>
-                        <div className="text-xs font-semibold text-slate-400 whitespace-nowrap bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                          {formatDateDDMMYYYY(event.timestamp)} <span className="mx-1">|</span> {formatTime12hr(event.timestamp)}
+                        <div className="text-xs font-semibold text-slate-500 whitespace-nowrap mt-2 md:mt-0">
+                          {formatDateDDMMYYYY(event.timestamp)} <span className="mx-1 text-slate-300">|</span> {formatTime12hr(event.timestamp)}
                         </div>
                       </div>
                     </div>
@@ -367,7 +394,7 @@ export default function DocumentDetailsPage() {
           ))}
           
           {Object.keys(groupedAudit).length === 0 && (
-            <p className="text-slate-500 italic">No audit events recorded yet.</p>
+            <p className="text-slate-500 italic pl-14">No audit events recorded yet.</p>
           )}
         </div>
       </div>

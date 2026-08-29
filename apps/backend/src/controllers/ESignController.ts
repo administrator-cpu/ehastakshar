@@ -6,6 +6,7 @@ import { DocumentRecipientRepository } from "../repositories/DocumentRecipientRe
 import { AuditLogRepository } from "../repositories/AuditLogRepository.js";
 import { db } from "../db/index.js";
 import { AuthService } from "../services/AuthService.js";
+import { UAParser } from "ua-parser-js";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { getStorageProvider } from "../services/storage.service.js";
 import { OtpRepository } from "../repositories/OtpRepository.js";
@@ -63,12 +64,14 @@ export class ESignController {
         });
 
         // 2. Create Recipients
-        const newRecipientsData = recipients.map((r: { name: string; email: string }) => ({
+        const newRecipientsData = recipients.map((r: { name: string; email: string; requireGps?: boolean; requirePhoto?: boolean }) => ({
           documentId: newDocument.id,
           name: r.name,
           email: r.email,
           status: "PENDING" as const,
           secureToken: crypto.randomBytes(32).toString("hex"),
+          requireGps: r.requireGps || false,
+          requirePhoto: r.requirePhoto || false,
         }));
         
         const createdRecipients = await DocumentRecipientRepository.createMany(newRecipientsData);
@@ -143,7 +146,9 @@ export class ESignController {
         transactionId: document.transactionId,
         recipientName: recipient.name,
         recipientEmail: recipient.email,
-        status: recipient.status 
+        status: recipient.status,
+        requireGps: recipient.requireGps,
+        requirePhoto: recipient.requirePhoto
       });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Error getting document by token");
@@ -428,12 +433,42 @@ export class ESignController {
         await DocumentRecipientRepository.markAsSigned(recipient.id, signatureText);
         await DocumentRepository.updateFileUrl(document.id, newFileUrl);
 
+        const userAgentStr = req.headers["user-agent"] || "";
+        const uap = new UAParser(userAgentStr);
+        const browser = uap.getBrowser().name || "Unknown";
+        const deviceType = uap.getDevice().type || "Desktop";
+        
+        let city = undefined, state = undefined, country = undefined;
+        if (req.body.latitude && req.body.longitude) {
+          try {
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${req.body.latitude}&lon=${req.body.longitude}&format=json`, {
+              headers: { 'User-Agent': 'EhastaksharApp/1.0' }
+            });
+            const geoData = await geoRes.json();
+            if (geoData && geoData.address) {
+              city = geoData.address.city || geoData.address.town || geoData.address.village;
+              state = geoData.address.state;
+              country = geoData.address.country;
+            }
+          } catch (e) {
+            logger.error({ err: e }, "Geocoding error");
+          }
+        }
+
         await AuditLogRepository.logEvent({
           documentId: document.id,
           recipientId: recipient.id,
           action: "SIGNED",
           ipAddress: req.ip || req.socket.remoteAddress || "",
-          userAgent: req.headers["user-agent"] || "",
+          userAgent: userAgentStr,
+          latitude: req.body.latitude || null,
+          longitude: req.body.longitude || null,
+          photoUrl: req.body.photoUrl || null,
+          city,
+          state,
+          country,
+          browser,
+          deviceType
         });
 
         // Check if all recipients have signed
@@ -487,6 +522,190 @@ export class ESignController {
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Error downloading document");
       res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  /**
+   * Log client events like allowing/denying location, capturing photo, etc.
+   */
+  static async logClientEvent(req: Request, res: Response): Promise<void> {
+    try {
+      const token = req.params.token as string;
+      const { action } = req.body;
+      
+      const recipient = await DocumentRecipientRepository.findBySecureToken(token);
+      if (!recipient) {
+        res.status(404).json({ error: "Invalid token" });
+        return;
+      }
+      
+      await AuditLogRepository.logEvent({
+        documentId: recipient.documentId,
+        recipientId: recipient.id,
+        action,
+        ipAddress: req.ip || req.socket.remoteAddress || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+
+      res.status(200).json({ success: true });
+    } catch (error) {
+      logger.error({ err: error }, "Error logging client event");
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  /**
+   * Generate and download the Audit Report PDF for a document.
+   */
+  static async downloadAuditReport(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const uploaderId = req.userId;
+      const documentId = req.params.id as string;
+      if (!uploaderId) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+      
+      const document = await DocumentRepository.findById(documentId);
+      if (!document || document.uploaderId !== uploaderId) {
+        res.status(404).json({ error: "Document not found" });
+        return;
+      }
+
+      const uploader = await UserRepository.findById(uploaderId);
+      const recipients = await DocumentRecipientRepository.findByDocumentId(documentId);
+      const events = await AuditLogRepository.getEventsForDocument(documentId);
+
+      // Create a new PDF document using PDFKit
+      const doc = new PDFDocumentKit({ margin: 50, size: "A4" });
+      
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="AuditReport_${document.transactionId}.pdf"`);
+      doc.pipe(res);
+
+      // Header Banner
+      doc.rect(0, 0, doc.page.width, 100).fill("#e2e4e8");
+      doc.fillColor("#6b7280").fontSize(24).font("Helvetica-Bold").text("DOCUMENT AUDIT REPORT", 50, 40);
+
+      // Metadata (below header)
+      doc.fillColor("#111827").fontSize(10).font("Helvetica-Bold");
+      doc.text(`Order ID: `, 50, 130, { continued: true }).font("Helvetica").text(document.transactionId);
+      
+      const generatedOn = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const generatedTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      
+      doc.font("Helvetica-Bold").text(`Generated On: `, doc.page.width / 2 - 50, 130, { continued: true }).font("Helvetica").text(generatedOn);
+      doc.font("Helvetica-Bold").text(`Time: `, doc.page.width - 150, 130, { continued: true }).font("Helvetica").text(generatedTime);
+
+      // ORDER DETAILS BOX
+      doc.moveDown(3);
+      doc.font("Helvetica-Bold").fontSize(14).fillColor("#9ca3af").text("ORDER DETAILS", 50, doc.y);
+      
+      const boxY = doc.y + 10;
+      doc.roundedRect(50, boxY, doc.page.width - 100, 80, 5).fillAndStroke("#f3f4f6", "#111827");
+      
+      doc.fillColor("#111827").fontSize(10).font("Helvetica");
+      doc.text("Order ID", 70, boxY + 20);
+      doc.font("Helvetica-Bold").text(`: ${document.transactionId}`, 180, boxY + 20);
+      
+      doc.font("Helvetica").text("Order Status", doc.page.width / 2, boxY + 20);
+      doc.font("Helvetica-Bold").text(`: ${document.status}`, doc.page.width / 2 + 80, boxY + 20);
+
+      const uploaderName = uploader ? `${uploader.firstName} ${uploader.lastName}` : "Unknown";
+      doc.font("Helvetica").text("Order Placed By", 70, boxY + 50);
+      doc.font("Helvetica-Bold").text(`: ${uploaderName}`, 180, boxY + 50);
+
+      const orderDate = new Date(document.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      doc.font("Helvetica").text("Order Date", doc.page.width / 2, boxY + 50);
+      doc.font("Helvetica-Bold").text(`: ${orderDate}`, doc.page.width / 2 + 80, boxY + 50);
+
+      // ESIGNATURE DETAILS
+      doc.moveDown(5);
+      doc.font("Helvetica-Bold").fontSize(14).fillColor("#9ca3af").text("ESIGNATURE DETAILS", 50, doc.y);
+      
+      for (const r of recipients) {
+        if (r.status !== "SIGNED") continue;
+        
+        const signEvent = events.find(e => e.recipientId === r.id && e.action === "SIGNED");
+        if (!signEvent) continue;
+
+        doc.moveDown(2);
+        const yStart = doc.y;
+        
+        doc.fillColor("#111827").fontSize(10).font("Helvetica");
+        doc.text("Signatory Name", 50, doc.y);
+        doc.font("Helvetica-Bold").text(`: ${r.name}`, 150, doc.y - 12);
+        
+        doc.moveDown(1);
+        doc.font("Helvetica").text("Email", 50, doc.y);
+        doc.font("Helvetica-Bold").text(`: ${r.email}`, 150, doc.y - 12);
+        
+        doc.moveDown(1);
+        doc.font("Helvetica").text("Signature Type", 50, doc.y);
+        doc.font("Helvetica-Bold").text(`: DIGITAL`, 150, doc.y - 12);
+        
+        doc.font("Helvetica").text("City", doc.page.width / 2 - 20, doc.y - 12);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.city || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
+        
+        doc.moveDown(1);
+        doc.font("Helvetica").text("Mobile", 50, doc.y);
+        doc.font("Helvetica-Bold").text(`: NA`, 150, doc.y - 12);
+        
+        doc.font("Helvetica").text("State", doc.page.width / 2 - 20, doc.y - 12);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.state || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
+        
+        doc.moveDown(1);
+        doc.font("Helvetica").text("Device Type", 50, doc.y);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.deviceType || "NA"}`, 150, doc.y - 12);
+        
+        doc.font("Helvetica").text("Country", doc.page.width / 2 - 20, doc.y - 12);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.country || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
+
+        doc.moveDown(1);
+        doc.font("Helvetica").text("Browser", 50, doc.y);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.browser || "NA"}`, 150, doc.y - 12);
+
+        const dateSigned = new Date(r.signedAt!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const timeSigned = new Date(r.signedAt!).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        
+        doc.font("Helvetica").text("Date & Time", doc.page.width / 2 - 20, doc.y - 12);
+        doc.font("Helvetica-Bold").text(`: ${dateSigned} ${timeSigned}`, doc.page.width / 2 + 50, doc.y - 12);
+
+        doc.moveDown(1);
+        doc.font("Helvetica").text("IP Address", 50, doc.y);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.ipAddress || "NA"}`, 150, doc.y - 12);
+
+        doc.font("Helvetica").text("Lat Long", doc.page.width / 2 - 20, doc.y - 12);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.latitude ? `(${signEvent.latitude},${signEvent.longitude})` : "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
+
+        // Render photo if available
+        if (signEvent.photoUrl) {
+          doc.font("Helvetica-Bold").text("Image:", doc.page.width - 150, yStart + 20);
+          try {
+            const photoRes = await fetch(signEvent.photoUrl);
+            const arrayBuffer = await photoRes.arrayBuffer();
+            const photoBuffer = Buffer.from(arrayBuffer);
+            doc.image(photoBuffer, doc.page.width - 150, yStart + 35, { fit: [100, 100], align: 'center', valign: 'center' });
+          } catch (e) {
+            logger.error({ err: e }, "Failed to fetch and embed photo into PDF");
+          }
+        }
+        
+        // Dashed divider
+        doc.moveDown(4);
+        doc.lineWidth(1);
+        doc.dash(5, { space: 5 });
+        doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+        doc.undash();
+        doc.moveDown(2);
+      }
+
+      doc.end();
+    } catch (error) {
+      logger.error({ err: error, path: req.originalUrl }, "Error downloading audit report");
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
   }
 }

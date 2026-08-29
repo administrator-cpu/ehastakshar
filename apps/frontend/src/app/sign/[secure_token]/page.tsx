@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { ShieldCheck, Download, CheckCircle, FileText, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Download, CheckCircle, FileText, ChevronRight, MapPin, Camera } from 'lucide-react';
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
+import Webcam from "react-webcam";
+import imageCompression from "browser-image-compression";
 
 const PDFViewer = dynamic(() => import("@/app/(authenticated)/esign/send/digital/PDFViewer"), { ssr: false });
 
@@ -13,6 +15,8 @@ interface DocumentInfo {
   recipientName: string;
   recipientEmail: string;
   status: "PENDING" | "SIGNED";
+  requireGps: boolean;
+  requirePhoto: boolean;
 }
 
 export default function SignerPortalPage() {
@@ -23,7 +27,7 @@ export default function SignerPortalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [step, setStep] = useState<"VIEW" | "OTP" | "SIGN" | "SUCCESS">("VIEW");
+  const [step, setStep] = useState<"VIEW" | "OTP" | "GATHER" | "SIGN" | "SUCCESS">("VIEW");
   const [otp, setOtp] = useState("");
   const [signToken, setSignToken] = useState("");
   const [signatureText, setSignatureText] = useState("");
@@ -35,6 +39,13 @@ export default function SignerPortalPage() {
   const [isSigning, setIsSigning] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Requirements Gathering States
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const webcamRef = useRef<Webcam>(null);
 
   useEffect(() => {
     const fetchDoc = async () => {
@@ -70,6 +81,39 @@ export default function SignerPortalPage() {
     }
     return () => clearInterval(timer);
   }, [step, countdown]);
+
+  // Handle GPS
+  useEffect(() => {
+    if (step === "GATHER" && docInfo?.requireGps && !latitude) {
+      if (!navigator.geolocation) {
+        setAccessDenied(true);
+        logClientEvent("DENIED_LOCATION");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+        },
+        (error) => {
+          setAccessDenied(true);
+          logClientEvent("DENIED_LOCATION");
+        }
+      );
+    }
+  }, [step, docInfo?.requireGps, latitude]);
+
+  const logClientEvent = async (action: string) => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/document/${token}/log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+    } catch (e) {
+      // Ignore errors for logging
+    }
+  };
 
   const requestOtp = async () => {
     if (isSendingOtp) return;
@@ -117,7 +161,12 @@ export default function SignerPortalPage() {
       
       setSignToken(data.signToken);
       setSignatureText(docInfo?.recipientName || "");
-      setStep("SIGN");
+      
+      if (docInfo?.requireGps || docInfo?.requirePhoto) {
+        setStep("GATHER");
+      } else {
+        setStep("SIGN");
+      }
       toast.success("Identity verified successfully");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Verification failed");
@@ -126,14 +175,56 @@ export default function SignerPortalPage() {
     }
   };
 
+  const capturePhotoAndProceed = useCallback(async () => {
+    if (docInfo?.requirePhoto) {
+      if (webcamRef.current) {
+        const imageSrc = webcamRef.current.getScreenshot();
+        if (imageSrc) {
+          try {
+            // Convert base64 to Blob
+            const fetchRes = await fetch(imageSrc);
+            const blob = await fetchRes.blob();
+            
+            // Compress Image
+            const options = {
+              maxSizeMB: 0.5,
+              maxWidthOrHeight: 800,
+              useWebWorker: true
+            };
+            const compressedBlob = await imageCompression(blob, options);
+            setPhotoBlob(compressedBlob);
+          } catch (error) {
+            toast.error("Failed to capture photo");
+            return;
+          }
+        }
+      }
+    }
+    setStep("SIGN");
+  }, [docInfo?.requirePhoto, webcamRef]);
+
   const submitSignature = async () => {
     setIsSigning(true);
     try {
+      const formData = new FormData();
+      formData.append("token", token);
+      formData.append("signToken", signToken);
+      formData.append("signatureText", signatureText);
+      
+      if (latitude && longitude) {
+        formData.append("latitude", latitude.toString());
+        formData.append("longitude", longitude.toString());
+      }
+
+      if (photoBlob) {
+        formData.append("photo", photoBlob, "photo.jpg");
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/sign`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, signToken, signatureText })
+        body: formData
       });
+      
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to sign document");
       
@@ -191,6 +282,35 @@ export default function SignerPortalPage() {
   return (
     <div className="h-[100dvh] w-full overflow-hidden bg-slate-100 font-sans flex flex-col relative">
       
+      {/* Access Denied Overlay */}
+      {accessDenied && (
+        <div className="fixed inset-0 z-[100] bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+          <ShieldCheck size={64} className="text-red-500 mb-6" />
+          <h2 className="text-3xl font-bold mb-8 text-red-400">Access Denied!</h2>
+          <div className="bg-slate-800 p-8 rounded-2xl max-w-md w-full text-left space-y-6 border border-slate-700 shadow-2xl">
+            <p className="text-lg font-medium text-slate-200">1. Click the settings icon in your browser's address bar</p>
+            <div className="space-y-4 text-slate-300 pl-6">
+              <p className="text-lg font-medium">2. Allow:</p>
+              <div className="flex items-center space-x-3 text-red-400 font-semibold pl-4">
+                <MapPin size={24} />
+                <span>Location access</span>
+              </div>
+              <div className="flex items-center space-x-3 text-red-400 font-semibold pl-4">
+                <Camera size={24} />
+                <span>Camera access</span>
+              </div>
+            </div>
+            <p className="text-lg font-medium text-slate-200 pt-4 border-t border-slate-700">3. Please refresh this page to continue</p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-10 bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-black/20 transition-all text-lg"
+          >
+            Refresh Page
+          </button>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="bg-slate-900 text-white px-6 py-3 flex items-center justify-between shadow-md z-10 relative">
         <div className="flex items-center space-x-3">
@@ -299,8 +419,8 @@ export default function SignerPortalPage() {
       </div>
 
       {/* Modals Container */}
-      {(step === "OTP" || step === "SIGN") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      {(step === "OTP" || step === "GATHER" || step === "SIGN") && !accessDenied && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
           
           {/* OTP Modal */}
           {step === "OTP" && (
@@ -352,6 +472,61 @@ export default function SignerPortalPage() {
                   className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
                 >
                   {isVerifying ? "Verifying..." : "Verify"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Gather GPS & Photo Modal */}
+          {step === "GATHER" && (
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-in zoom-in-95 duration-300 text-center">
+              <h3 className="text-2xl font-bold text-slate-900 mb-6">Security Check</h3>
+              
+              <div className="space-y-6">
+                {docInfo?.requireGps && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <MapPin className="text-teal-500" />
+                      <span className="font-semibold text-slate-700">GPS Location</span>
+                    </div>
+                    {latitude ? (
+                      <CheckCircle className="text-green-500" />
+                    ) : (
+                      <span className="text-xs font-bold text-slate-400 animate-pulse">Locating...</span>
+                    )}
+                  </div>
+                )}
+
+                {docInfo?.requirePhoto && (
+                  <div className="flex flex-col items-center">
+                    <div className="w-full bg-slate-900 rounded-xl overflow-hidden aspect-video relative flex items-center justify-center">
+                      <Webcam
+                        audio={false}
+                        ref={webcamRef}
+                        screenshotFormat="image/jpeg"
+                        videoConstraints={{ facingMode: "user" }}
+                        className="w-full h-full object-cover"
+                        onUserMediaError={() => {
+                          setAccessDenied(true);
+                          logClientEvent("DENIED_CAMERA");
+                        }}
+                      />
+                      <div className="absolute inset-0 pointer-events-none border-4 border-teal-500/30 rounded-xl"></div>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-3 flex items-center justify-center">
+                      <Camera size={14} className="mr-1" /> Look at the camera for identity verification
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-8">
+                <button 
+                  onClick={capturePhotoAndProceed}
+                  disabled={docInfo?.requireGps && !latitude}
+                  className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
+                >
+                  Proceed
                 </button>
               </div>
             </div>

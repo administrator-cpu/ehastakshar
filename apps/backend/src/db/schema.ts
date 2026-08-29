@@ -43,6 +43,8 @@ export const documentRecipients = pgTable("document_recipients", {
   email: varchar("email", { length: 255 }).notNull(),
   status: recipientStatusEnum("status").default("PENDING").notNull(),
   secureToken: varchar("secure_token", { length: 100 }).notNull().unique(),
+  requireGps: boolean("require_gps").default(false).notNull(),
+  requirePhoto: boolean("require_photo").default(false).notNull(),
   signatureText: varchar("signature_text", { length: 255 }),
   signedAt: timestamp("signed_at"),
 });
@@ -54,5 +56,13 @@ export const auditEvents = pgTable("audit_events", {
   action: varchar("action", { length: 100 }).notNull(),
   ipAddress: varchar("ip_address", { length: 45 }), // Supports IPv6
   userAgent: varchar("user_agent", { length: 500 }),
+  latitude: varchar("latitude", { length: 50 }),
+  longitude: varchar("longitude", { length: 50 }),
+  photoUrl: varchar("photo_url", { length: 1000 }),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 100 }),
+  country: varchar("country", { length: 100 }),
+  browser: varchar("browser", { length: 100 }),
+  deviceType: varchar("device_type", { length: 100 }),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
