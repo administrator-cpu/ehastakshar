@@ -22,6 +22,6 @@ router.post("/document/:token/log", ESignController.logClientEvent);
 router.post("/otp/send", ESignController.sendOtp);
 router.post("/otp/verify", ESignController.verifyOtp);
 router.post("/sign", signMultipartMiddleware, ESignController.signDocument);
-router.get("/document/:id/audit-report", ESignController.downloadAuditReport);
+router.get("/document/:id/audit-report", verifyToken, ESignController.downloadAuditReport);
 
 export default router;

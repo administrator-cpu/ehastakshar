@@ -578,7 +578,7 @@ export class ESignController {
       const events = await AuditLogRepository.getEventsForDocument(documentId);
 
       // Create a new PDF document using PDFKit
-      const doc = new PDFDocumentKit({ margin: 50, size: "A4" });
+      const doc = new PDFDocumentKit({ margin: 40, size: "A4" });
       
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="AuditReport_${document.transactionId}.pdf"`);
@@ -598,27 +598,60 @@ export class ESignController {
       doc.font("Helvetica-Bold").text(`Generated On: `, doc.page.width / 2 - 50, 130, { continued: true }).font("Helvetica").text(generatedOn);
       doc.font("Helvetica-Bold").text(`Time: `, doc.page.width - 150, 130, { continued: true }).font("Helvetica").text(generatedTime);
 
+
       // ORDER DETAILS BOX
       doc.moveDown(3);
       doc.font("Helvetica-Bold").fontSize(14).fillColor("#9ca3af").text("ORDER DETAILS", 50, doc.y);
       
       const boxY = doc.y + 10;
-      doc.roundedRect(50, boxY, doc.page.width - 100, 80, 5).fillAndStroke("#f3f4f6", "#111827");
-      
-      doc.fillColor("#111827").fontSize(10).font("Helvetica");
-      doc.text("Order ID", 70, boxY + 20);
-      doc.font("Helvetica-Bold").text(`: ${document.transactionId}`, 180, boxY + 20);
-      
-      doc.font("Helvetica").text("Order Status", doc.page.width / 2, boxY + 20);
-      doc.font("Helvetica-Bold").text(`: ${document.status}`, doc.page.width / 2 + 80, boxY + 20);
+      const boxWidth = doc.page.width - 100;
 
-      const uploaderName = uploader ? `${uploader.firstName} ${uploader.lastName}` : "Unknown";
-      doc.font("Helvetica").text("Order Placed By", 70, boxY + 50);
-      doc.font("Helvetica-Bold").text(`: ${uploaderName}`, 180, boxY + 50);
+      doc.roundedRect(50, boxY, boxWidth, 80, 5).fillAndStroke("#f3f4f6", "#111827");
 
-      const orderDate = new Date(document.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-      doc.font("Helvetica").text("Order Date", doc.page.width / 2, boxY + 50);
-      doc.font("Helvetica-Bold").text(`: ${orderDate}`, doc.page.width / 2 + 80, boxY + 50);
+      doc.fillColor("#111827").fontSize(10);
+
+      // --------------------------------------------------
+      // COLUMN POSITIONS
+      // --------------------------------------------------
+
+      const leftLabelX = 70;
+      const leftValueX = 180;
+
+      const rightLabelX = 335;
+      const rightValueX = 415;
+
+      // --------------------------------------------------
+      // ROW 1
+      // --------------------------------------------------
+
+      // Left
+      doc.font("Helvetica").text("Order ID", leftLabelX, boxY + 20);
+      doc.font("Helvetica-Bold").text(`: ${document.transactionId}`, leftValueX, boxY + 20);
+
+      // Right
+      doc.font("Helvetica").text("Order Status", rightLabelX, boxY + 20);
+      doc.font("Helvetica-Bold").text(`: ${document.status}`, rightValueX, boxY + 20);
+
+      // --------------------------------------------------
+      // ROW 2
+      // --------------------------------------------------
+
+      const uploaderName = uploader ? `${uploader.firstName} ${uploader.lastName}`: "Unknown";
+
+      doc.font("Helvetica").text("Order Placed By", leftLabelX, boxY + 50);
+      doc.font("Helvetica-Bold").text(`: ${uploaderName}`, leftValueX, boxY + 50);
+
+      const orderDate = new Date(document.createdAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+      doc.font("Helvetica").text("Order Date", rightLabelX, boxY + 50);
+      doc.font("Helvetica-Bold").text(`: ${orderDate}`, rightValueX, boxY + 50);
+
+
+
 
       // ESIGNATURE DETAILS
       doc.moveDown(5);

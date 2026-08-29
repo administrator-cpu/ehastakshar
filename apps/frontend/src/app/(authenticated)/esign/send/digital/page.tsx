@@ -34,7 +34,7 @@ export default function SendDigitalESignPage() {
   
   // Modal state
   const [showAddSigner, setShowAddSigner] = useState(false);
-  const [newSigner, setNewSigner] = useState({ name: '', email: '', requireGps: true, requirePhoto: false });
+  const [newSigner, setNewSigner] = useState({ name: '', email: '', requireGps: false, requirePhoto: false });
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,7 +69,7 @@ export default function SendDigitalESignPage() {
     }]);
     
     // Reset and close
-    setNewSigner({ name: '', email: '', requireGps: true, requirePhoto: false });
+    setNewSigner({ name: '', email: '', requireGps: false, requirePhoto: false });
     setShowAddSigner(false);
   };
 
@@ -408,7 +408,10 @@ export default function SendDigitalESignPage() {
                     <div key={i} className="flex flex-col text-sm p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
                       <div className="flex justify-between items-center mb-2">
                         <span className="font-bold text-slate-800">{r.name}</span>
-                        {r.requireGps && <span className="text-[10px] uppercase tracking-wider font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">GPS Req</span>}
+                        <div className="flex space-x-1">
+                          {r.requireGps && <span className="text-[10px] uppercase tracking-wider font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">GPS Req</span>}
+                          {r.requirePhoto && <span className="text-[10px] uppercase tracking-wider font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">Photo Req</span>}
+                        </div>
                       </div>
                       <span className="text-slate-500 text-xs">{r.email}</span>
                     </div>

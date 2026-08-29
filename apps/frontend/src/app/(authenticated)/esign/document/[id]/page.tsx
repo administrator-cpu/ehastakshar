@@ -356,28 +356,27 @@ export default function DocumentDetailsPage() {
           </button>
         </div>
 
-        <div className="space-y-12 pb-20 relative">
+        <div className="space-y-12 pb-20 relative z-0">
           
           {/* Main vertical line for the timeline */}
-          <div className="absolute top-10 bottom-0 left-[22px] w-[2px] bg-slate-300 z-0"></div>
+          <div className="absolute top-24 bottom-32 left-[41px] w-[2px] bg-slate-300 -z-10 hidden md:block"></div>
 
           {Object.entries(groupedAudit).map(([dateLabel, events]) => (
             <div key={dateLabel}>
-              <h4 className="text-sm font-bold text-slate-900 mb-6 sticky top-[72px] bg-[#f4f5f7]/90 backdrop-blur-sm py-2 z-10 w-max pl-14">{dateLabel}</h4>
+              <h4 className="text-sm font-bold text-slate-900 mb-6 sticky top-[72px] bg-[#f4f5f7]/90 backdrop-blur-sm py-2 z-10 w-max">{dateLabel}</h4>
               
               <div className="space-y-6">
                 {events.map((event, i) => {
                   const details = getActionDetails(event);
                   return (
-                    <div key={event.id} className="relative flex flex-col md:flex-row items-start md:items-center gap-6 group">
+                    <div key={event.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:items-center items-start gap-4 hover:shadow-md transition-shadow relative">
                       
-                      {/* Icon placed on the timeline */}
-                      <div className={`w-11 h-11 rounded-full flex shrink-0 items-center justify-center text-white ${details.color} shadow-sm ring-4 ring-[#f4f5f7] z-10 relative`}>
+                      {/* Icon placed inside the container, vertically centered */}
+                      <div className={`w-11 h-11 rounded-full flex shrink-0 items-center justify-center text-white ${details.color} shadow-sm ring-4 ring-[#f4f5f7]`}>
                         {details.icon}
                       </div>
 
-                      {/* Card Content */}
-                      <div className="flex-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-2 hover:shadow-md transition-shadow relative ml-[22px] md:ml-0">
+                      <div className="flex-1 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-2">
                         <div>
                           <h4 className="font-bold text-slate-800 text-[15px]">{details.text}</h4>
                           <p className="text-sm text-slate-500 mt-0.5">{details.subtitle}</p>
@@ -394,7 +393,7 @@ export default function DocumentDetailsPage() {
           ))}
           
           {Object.keys(groupedAudit).length === 0 && (
-            <p className="text-slate-500 italic pl-14">No audit events recorded yet.</p>
+            <p className="text-slate-500 italic">No audit events recorded yet.</p>
           )}
         </div>
       </div>
