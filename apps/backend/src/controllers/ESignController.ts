@@ -678,69 +678,77 @@ export class ESignController {
         if (!signEvent) continue;
 
         doc.moveDown(2);
-        const yStart = doc.y;
-        
+        let currentY = doc.y;
+
+        const leftLabelX = 50;
+        const leftValueX = 160;
+        const rightLabelX = 330;
+        const rightValueX = 410;
+
         doc.fillColor("#111827").fontSize(10).font("Helvetica");
-        doc.text("Signatory Name", 50, doc.y);
-        doc.font("Helvetica-Bold").text(`: ${r.name}`, 150, doc.y - 12);
-        
-        doc.moveDown(1);
-        doc.font("Helvetica").text("Email", 50, doc.y);
-        doc.font("Helvetica-Bold").text(`: ${r.email}`, 150, doc.y - 12);
-        
-        doc.moveDown(1);
-        doc.font("Helvetica").text("Signature Type", 50, doc.y);
-        doc.font("Helvetica-Bold").text(`: DIGITAL`, 150, doc.y - 12);
-        
-        doc.font("Helvetica").text("City", doc.page.width / 2 - 20, doc.y - 12);
-        doc.font("Helvetica-Bold").text(`: ${signEvent.city || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
-        
-        // doc.moveDown(1);
-        // doc.font("Helvetica").text("Mobile", 50, doc.y);
-        // doc.font("Helvetica-Bold").text(`: NA`, 150, doc.y - 12);
-        
-        doc.font("Helvetica").text("State", doc.page.width / 2 - 20, doc.y - 12);
-        doc.font("Helvetica-Bold").text(`: ${signEvent.state || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
-        
-        doc.moveDown(1);
-        doc.font("Helvetica").text("Device Type", 50, doc.y);
-        doc.font("Helvetica-Bold").text(`: ${signEvent.deviceType || "NA"}`, 150, doc.y - 12);
-        
-        doc.font("Helvetica").text("Country", doc.page.width / 2 - 20, doc.y - 12);
-        doc.font("Helvetica-Bold").text(`: ${signEvent.country || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
 
-        doc.moveDown(1);
-        doc.font("Helvetica").text("Browser", 50, doc.y);
-        doc.font("Helvetica-Bold").text(`: ${signEvent.browser || "NA"}`, 150, doc.y - 12);
+        // Row 1
+        doc.font("Helvetica").text("Signatory Name", leftLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${r.name}`, leftValueX, currentY);
+        doc.font("Helvetica").text("City", rightLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.city || "NA"}`, rightValueX, currentY);
 
+        currentY += 25;
+        // Row 2
+        doc.font("Helvetica").text("Email", leftLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${r.email}`, leftValueX, currentY);
+        doc.font("Helvetica").text("State", rightLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.state || "NA"}`, rightValueX, currentY);
+
+        currentY += 25;
+        // Row 3
+        doc.font("Helvetica").text("Signature Type", leftLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: DIGITAL`, leftValueX, currentY);
+        doc.font("Helvetica").text("Country", rightLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.country || "NA"}`, rightValueX, currentY);
+
+        currentY += 25;
+        // Row 4
+        doc.font("Helvetica").text("Browser", leftLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.browser || "NA"}`, leftValueX, currentY);
         const dateSigned = new Date(r.signedAt!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         const timeSigned = new Date(r.signedAt!).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        doc.font("Helvetica").text("Date & Time", rightLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${dateSigned} ${timeSigned}`, rightValueX, currentY);
+
+        currentY += 25;
+        // Row 5
+        doc.font("Helvetica").text("Device Type", leftLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.deviceType || "NA"}`, leftValueX, currentY);
+        doc.font("Helvetica").text("Lat Long", rightLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.latitude ? `(${signEvent.latitude},${signEvent.longitude})` : "NA"}`, rightValueX, currentY);
+
+        currentY += 25;
+        // Row 6
+        doc.font("Helvetica").text("IP Address", leftLabelX, currentY);
+        doc.font("Helvetica-Bold").text(`: ${signEvent.ipAddress || "NA"}`, leftValueX, currentY);
         
-        doc.font("Helvetica").text("Date & Time", doc.page.width / 2 - 20, doc.y - 12);
-        doc.font("Helvetica-Bold").text(`: ${dateSigned} ${timeSigned}`, doc.page.width / 2 + 50, doc.y - 12);
+        // Update global cursor doc.y safely
+        doc.y = currentY + 30;
 
-        doc.moveDown(1);
-        doc.font("Helvetica").text("IP Address", 50, doc.y);
-        doc.font("Helvetica-Bold").text(`: ${signEvent.ipAddress || "NA"}`, 150, doc.y - 12);
-
-        doc.font("Helvetica").text("Lat Long", doc.page.width / 2 - 20, doc.y - 12);
-        doc.font("Helvetica-Bold").text(`: ${signEvent.latitude ? `(${signEvent.latitude},${signEvent.longitude})` : "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
-
-        // Render photo if available
+        // Render photo if available below the grid
         if (signEvent.photoUrl) {
-          doc.font("Helvetica-Bold").text("Image:", doc.page.width - 150, yStart + 20);
+          doc.font("Helvetica").text("Image", leftLabelX, doc.y);
+          doc.font("Helvetica-Bold").text(":", leftValueX - 5, doc.y);
           try {
             const photoRes = await fetch(signEvent.photoUrl);
             const arrayBuffer = await photoRes.arrayBuffer();
             const photoBuffer = Buffer.from(arrayBuffer);
-            doc.image(photoBuffer, doc.page.width - 150, yStart + 35, { fit: [100, 100], align: 'center', valign: 'center' });
+            doc.image(photoBuffer, leftValueX + 5, doc.y, { fit: [100, 100] });
+            doc.y += 115; // Explicitly advance past image height
           } catch (e) {
             logger.error({ err: e }, "Failed to fetch and embed photo into PDF");
+            doc.y += 20;
           }
         }
         
         // Dashed divider
-        doc.moveDown(4);
+        doc.moveDown(1);
         doc.lineWidth(1);
         doc.dash(5, { space: 5 });
         doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
