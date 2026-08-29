@@ -91,10 +91,10 @@ export default function DocumentDetailsPage() {
       if (!res.ok) throw new Error("Failed to download Audit Report");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = window.document.createElement('a');
       a.href = url;
       a.download = `AuditReport_${data?.document.transactionId || documentId}.pdf`;
-      document.body.appendChild(a);
+      window.document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();

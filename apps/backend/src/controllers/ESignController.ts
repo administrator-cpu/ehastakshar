@@ -12,6 +12,7 @@ import { getStorageProvider } from "../services/storage.service.js";
 import { OtpRepository } from "../repositories/OtpRepository.js";
 import { logger } from "../utils/logger.js";
 import { env } from "../config/env.js";
+import PDFDocumentKit from "pdfkit";
 import { UserRepository } from "../repositories/UserRepository.js";
 
 // Assume user is attached to req by auth middleware
