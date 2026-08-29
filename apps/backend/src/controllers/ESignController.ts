@@ -385,15 +385,15 @@ export class ESignController {
         hour12: false
       });
       const formattedDate = istFormatter.format(new Date());
-      const signatureString = `Signed by: ${signatureText}\nDate: ${formattedDate} IST\nTxn ID: ${document.transactionId}`;
+      const signatureString = `Signed by: ${signatureText}\nDate: ${formattedDate} IST`;
       
       pages.forEach((page) => {
         const { width, height } = page.getSize();
         
         // Approximate width and height of the signature block
-        const boxWidth = 200;
-        const boxHeight = 60;
-        const padding = 10;
+        const boxWidth = 140;
+        const boxHeight = 28;
+        const padding = 20; // Distance from page edges
         
         const boxX = width - boxWidth - padding;
         const boxY = padding; // Bottom right corner
@@ -410,12 +410,12 @@ export class ESignController {
 
         // Draw the text inside the box
         page.drawText(signatureString, {
-          x: boxX + 10,
-          y: boxY + boxHeight - 20, // Start drawing near the top of the box
-          size: 10,
+          x: boxX + 4, // 4px inner padding
+          y: boxY + boxHeight - 12, // Start drawing near the top of the box
+          size: 8,
           font,
           color: rgb(0, 0, 0), // Black ink
-          lineHeight: 14,
+          lineHeight: 11,
         });
       });
 
