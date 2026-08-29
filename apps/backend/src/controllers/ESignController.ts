@@ -734,6 +734,13 @@ export class ESignController {
         doc.moveDown(2);
       }
 
+      // Add branded footer strip to the last page
+      const stripHeight = 35;
+      const stripY = doc.page.height - stripHeight;
+      doc.rect(0, stripY, doc.page.width, stripHeight).fill("#6b46c1");
+      doc.fillColor("#ffffff").fontSize(11).font("Helvetica-Bold").text("Signed Securely with Ehastakshar", 0, stripY + 11, { align: "center" });
+
+
       doc.end();
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Error downloading audit report");
