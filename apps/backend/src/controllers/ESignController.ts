@@ -11,6 +11,7 @@ import { getStorageProvider } from "../services/storage.service.js";
 import { OtpRepository } from "../repositories/OtpRepository.js";
 import { logger } from "../utils/logger.js";
 import { env } from "../config/env.js";
+import { UserRepository } from "../repositories/UserRepository.js";
 
 // Assume user is attached to req by auth middleware
 interface AuthenticatedRequest extends Request {
@@ -30,6 +31,9 @@ export class ESignController {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
+
+      const sender = await UserRepository.findById(uploaderId);
+      const senderName = sender ? `${sender.firstName} ${sender.lastName}` : "Ehastakshar User";
 
       const { title, fileUrl, originalHash, recipients } = req.body;
 
@@ -81,7 +85,13 @@ export class ESignController {
         for (const recipient of createdRecipients) {
           const signingLink = `http://localhost:3000/sign/${recipient.secureToken}`;
           // Send email using Resend
-          await AuthService.sendInviteEmail(recipient.email, signingLink);
+          await AuthService.sendInviteEmail({
+            email: recipient.email,
+            link: signingLink,
+            recipientName: recipient.name,
+            senderName,
+            documentName: newDocument.title,
+          });
 
           await AuditLogRepository.logEvent({
             documentId: newDocument.id,
@@ -159,6 +169,9 @@ export class ESignController {
         res.status(404).json({ error: "Recipient not found" });
         return;
       }
+
+      const sender = await UserRepository.findById(uploaderId);
+      const senderName = sender ? `${sender.firstName} ${sender.lastName}` : "Ehastakshar User";
       
       const document = await DocumentRepository.findById(recipient.documentId);
       if (!document || document.uploaderId !== uploaderId) {
@@ -172,7 +185,13 @@ export class ESignController {
       }
 
       const signingLink = `${env.FRONTEND_URL}/sign/${recipient.secureToken}`;
-      await AuthService.sendInviteEmail(recipient.email, signingLink);
+      await AuthService.sendInviteEmail({
+        email: recipient.email,
+        link: signingLink,
+        recipientName: recipient.name,
+        senderName,
+        documentName: document.title,
+      });
 
       await AuditLogRepository.logEvent({
         documentId: document.id,

@@ -6,6 +6,11 @@ export type NewUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
 export class UserRepository {
+  static async findById(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
   static async findByEmail(email: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
     return result[0];

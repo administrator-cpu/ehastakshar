@@ -3,6 +3,7 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
+import { generateInviteEmailHtml } from "../utils/emailTemplates.js";
 
 const sendEmail = async ({ toEmail, subject, htmlContent }: { toEmail: string; subject: string; htmlContent: string; }): Promise<boolean> => {
   const apiKey = env.EMAIL_SERVICE_API_KEY;
@@ -105,17 +106,20 @@ export class AuthService {
   /**
    * Sends the document signing invite via Resend.
    */
-  static async sendInviteEmail(email: string, link: string): Promise<void> {
-    const html = `
-      <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #0D9488;">Signature Requested</h2>
-        <p>You have been requested to sign a document.</p>
-        <div style="margin: 30px 0;">
-          <a href="${link}" style="background-color: #0D9488; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Review & Sign Document</a>
-        </div>
-        <p style="font-size: 12px; color: #666;">If the button doesn't work, copy and paste this link into your browser: <br/> ${link}</p>
-      </div>
-    `;
+  static async sendInviteEmail({
+    email,
+    link,
+    recipientName,
+    senderName,
+    documentName,
+  }: {
+    email: string;
+    link: string;
+    recipientName: string;
+    senderName: string;
+    documentName: string;
+  }): Promise<void> {
+    const html = generateInviteEmailHtml({ recipientName, senderName, documentName, link });
     await sendEmail({ toEmail: email, subject: "Action Required: Sign Document", htmlContent: html });
   }
 }

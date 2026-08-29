@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, UploadCloud, Users, X, AlertTriangle, Send, Eye, UserPlus, MapPin, Camera } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { InviteEmailTemplate } from '@/components/emails/InviteEmailTemplate';
+import { generateInviteEmailHtml } from '@/utils/emailTemplates';
+
 import { toast } from 'sonner';
 
 const PDFViewer = dynamic(() => import('./PDFViewer'), {
@@ -380,10 +381,15 @@ export default function SendDigitalESignPage() {
                   <div className="bg-slate-100 px-4 py-3 border-b border-slate-200">
                     <p className="text-sm text-slate-500">Subject: <span className="font-medium text-slate-900">Action Required: Sign {title}</span></p>
                   </div>
-                  <InviteEmailTemplate 
-                    recipientName={recipients.length === 1 ? recipients[0].name.split(' ')[0] : 'Ajay Negi'} 
-                    senderName="Ajay Negi" 
-                    documentName={title || "Document"} 
+                  <div 
+                    dangerouslySetInnerHTML={{ 
+                      __html: generateInviteEmailHtml({
+                        recipientName: recipients.length === 1 ? recipients[0].name.split(' ')[0] : 'Signer',
+                        senderName: "Ehastakshar User",
+                        documentName: title || "Document",
+                        link: "#"
+                      })
+                    }} 
                   />
                 </div>
               </div>
