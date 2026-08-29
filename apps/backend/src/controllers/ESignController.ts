@@ -740,8 +740,8 @@ export class ESignController {
 
       const stripHeight = 35;
       const stripY = doc.page.height - stripHeight;
-      doc.rect(0, stripY, doc.page.width, stripHeight).fill("#6b46c1");
-      doc.fillColor("#ffffff").fontSize(11).font("Helvetica-Bold").text("Signed Securely with Ehastakshar", 0, stripY + 11, { align: "center", lineBreak: false });
+      doc.rect(0, stripY, doc.page.width, stripHeight).fill("#002045");
+      doc.fillColor("#ffffff").fontSize(11).font("Helvetica-Bold").text("Signed Securely with Ehastakshar", 0, stripY + 11, { width: doc.page.width, align: "center", lineBreak: false });
 
       doc.page.margins.bottom = oldBottom;
 
