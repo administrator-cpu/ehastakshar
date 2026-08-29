@@ -41,7 +41,8 @@ export default function SignerPortalPage() {
   const [isDownloading, setIsDownloading] = useState(false);
 
   // Requirements Gathering States
-  const [accessDenied, setAccessDenied] = useState(false);
+  const [locationDenied, setLocationDenied] = useState(false);
+  const [cameraDenied, setCameraDenied] = useState(false);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -58,6 +59,18 @@ export default function SignerPortalPage() {
         }
         const data = await res.json();
         setDocInfo(data);
+
+        // Check for existing sign session to survive browser permission refreshes
+        const existingSignToken = sessionStorage.getItem(`ehastakshar_signToken_${token}`);
+        if (existingSignToken && data.status !== "SIGNED" && data.status !== "COMPLETED") {
+          setSignToken(existingSignToken);
+          setSignatureText(data.recipientName || "");
+          if (data.requireGps || data.requirePhoto) {
+            setStep("GATHER");
+          } else {
+            setStep("SIGN");
+          }
+        }
 
         // Fetch PDF blob
         const pdfRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/document/${token}/download`);
@@ -86,7 +99,7 @@ export default function SignerPortalPage() {
   useEffect(() => {
     if (step === "GATHER" && docInfo?.requireGps && !latitude) {
       if (!navigator.geolocation) {
-        setAccessDenied(true);
+        setLocationDenied(true);
         logClientEvent("DENIED_LOCATION");
         return;
       }
@@ -96,7 +109,7 @@ export default function SignerPortalPage() {
           setLongitude(position.coords.longitude);
         },
         (error) => {
-          setAccessDenied(true);
+          setLocationDenied(true);
           logClientEvent("DENIED_LOCATION");
         }
       );
@@ -160,6 +173,7 @@ export default function SignerPortalPage() {
       if (!res.ok) throw new Error(data.error || "Invalid OTP");
 
       setSignToken(data.signToken);
+      sessionStorage.setItem(`ehastakshar_signToken_${token}`, data.signToken);
       setSignatureText(docInfo?.recipientName || "");
 
       if (docInfo?.requireGps || docInfo?.requirePhoto) {
@@ -284,7 +298,7 @@ export default function SignerPortalPage() {
     <div className="h-[100dvh] w-full overflow-hidden bg-slate-100 font-sans flex flex-col relative">
 
       {/* Access Denied Overlay */}
-      {accessDenied && (
+      {(locationDenied || cameraDenied) && (
         <div className="fixed inset-0 z-[100] bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
           <ShieldCheck size={64} className="text-red-500 mb-6" />
           <h2 className="text-3xl font-bold mb-8 text-red-400">Access Denied!</h2>
@@ -292,14 +306,18 @@ export default function SignerPortalPage() {
             <p className="text-lg font-medium text-slate-200">1. Click the settings icon in your browser's address bar</p>
             <div className="space-y-4 text-slate-300 pl-6">
               <p className="text-lg font-medium">2. Allow:</p>
-              <div className="flex items-center space-x-3 text-red-400 font-semibold pl-4">
-                <MapPin size={24} />
-                <span>Location access</span>
-              </div>
-              <div className="flex items-center space-x-3 text-red-400 font-semibold pl-4">
-                <Camera size={24} />
-                <span>Camera access</span>
-              </div>
+              {locationDenied && (
+                <div className="flex items-center space-x-3 text-red-400 font-semibold pl-4">
+                  <MapPin size={24} />
+                  <span>Location access</span>
+                </div>
+              )}
+              {cameraDenied && (
+                <div className="flex items-center space-x-3 text-red-400 font-semibold pl-4">
+                  <Camera size={24} />
+                  <span>Camera access</span>
+                </div>
+              )}
             </div>
             <p className="text-lg font-medium text-slate-200 pt-4 border-t border-slate-700">3. Please refresh this page to continue</p>
           </div>
@@ -418,7 +436,7 @@ export default function SignerPortalPage() {
       </div>
 
       {/* Modals Container */}
-      {(step === "OTP" || step === "GATHER" || step === "SIGN") && !accessDenied && (
+      {(step === "OTP" || step === "GATHER" || step === "SIGN") && !(locationDenied || cameraDenied) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
 
           {/* OTP Modal */}
@@ -507,7 +525,7 @@ export default function SignerPortalPage() {
                         videoConstraints={{ facingMode: "user" }}
                         className="w-full h-full object-cover"
                         onUserMediaError={() => {
-                          setAccessDenied(true);
+                          setCameraDenied(true);
                           logClientEvent("DENIED_CAMERA");
                         }}
                       />

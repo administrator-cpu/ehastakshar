@@ -383,6 +383,11 @@ export default function DocumentDetailsPage() {
                         <div>
                           <h4 className="font-bold text-slate-800 text-[15px]">{details.text}</h4>
                           <p className="text-sm text-slate-500 mt-0.5">{details.subtitle}</p>
+                          {event.ipAddress && event.ipAddress !== "System" && (
+                            <div className="flex items-center text-xs text-slate-400 mt-1.5 font-mono bg-slate-50 w-fit px-2 py-0.5 rounded border border-slate-100">
+                              <span className="mr-1.5 opacity-70">IP:</span> {event.ipAddress}
+                            </div>
+                          )}
                         </div>
                         <div className="text-xs font-semibold text-slate-500 whitespace-nowrap mt-2 md:mt-0">
                           {formatDateDDMMYYYY(event.timestamp)} <span className="mx-0.5 text-sm text-slate-300">|</span> {formatTime12hr(event.timestamp)}
