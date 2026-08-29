@@ -238,7 +238,8 @@ export default function DocumentDetailsPage() {
   const pendingRecipient = recipients.find(r => r.status === 'PENDING');
 
   return (
-    <div className="min-h-screen bg-[#f4f5f7] text-slate-900 font-sans pb-12">
+    <div className=" bg-[#f4f5f7] text-slate-900 font-sans pb-12">
+
       {/* Top Nav */}
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center space-x-4 text-sm text-slate-500 font-medium">
@@ -260,13 +261,13 @@ export default function DocumentDetailsPage() {
                 <FileText size={32} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 flex items-center">
+                <h1 className="text-2xl font-bold text-slate-900 flex items-center">
                   {document.title}
                 </h1>
                 <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm text-slate-500 font-medium">
-                  <span>Transaction ID: <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700">{document.transactionId}</span></span>
-                  <span>•</span>
-                  <span>Last updated {formatDateDDMMYYYY(document.updatedAt || document.createdAt)} {formatTime12hr(document.updatedAt || document.createdAt)}</span>
+                  <span>Transaction ID: <span className="font-mono px-2 py-0.5 rounded text-slate-700">{document.transactionId}</span></span>
+                
+                  <span>Last updated: <span className="font-mono px-2 py-0.5 rounded text-slate-700">{formatDateDDMMYYYY(document.updatedAt || document.createdAt)} {formatTime12hr(document.updatedAt || document.createdAt)}</span></span>
                 </div>
               </div>
             </div>
@@ -314,7 +315,6 @@ export default function DocumentDetailsPage() {
                   <div key={rec.id} className={`p-5 rounded-2xl border ${rec.status === 'SIGNED' ? 'border-teal-200 bg-teal-50/30' : 'border-[#d4a373]/30 bg-[#fffdf0]'} min-w-[280px] shadow-sm`}>
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Signer</span>
-                      <ExternalLink size={14} className="text-slate-400 cursor-pointer hover:text-slate-600" />
                     </div>
                     <h3 className="font-bold text-slate-900 text-lg">{rec.name}</h3>
                     <p className="text-sm text-slate-500 mb-5">{rec.email}</p>
@@ -359,12 +359,15 @@ export default function DocumentDetailsPage() {
         <div className="space-y-12 pb-20 relative z-0">
           
           {/* Main vertical line for the timeline */}
-          <div className="absolute top-24 bottom-32 left-[41px] w-[2px] bg-slate-300 -z-10 hidden md:block"></div>
+          <div className="absolute top-24 bottom-24 left-[41px] w-[2px] bg-slate-300 -z-10 hidden md:block"></div>
 
           {Object.entries(groupedAudit).map(([dateLabel, events]) => (
             <div key={dateLabel}>
-              <h4 className="text-sm font-bold text-slate-900 mb-6 sticky top-[72px] bg-[#f4f5f7]/90 backdrop-blur-sm py-2 z-10 w-max">{dateLabel}</h4>
-              
+
+              <div className="sticky top-[72px] bg-[#f4f5f7]/90 backdrop-blur-sm py-2 z-10 w-full mb-6">
+                <h4 className="text-sm font-bold text-slate-900 ">{dateLabel}</h4>
+              </div>
+
               <div className="space-y-6">
                 {events.map((event, i) => {
                   const details = getActionDetails(event);
@@ -372,7 +375,7 @@ export default function DocumentDetailsPage() {
                     <div key={event.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:items-center items-start gap-4 hover:shadow-md transition-shadow relative">
                       
                       {/* Icon placed inside the container, vertically centered */}
-                      <div className={`w-11 h-11 rounded-full flex shrink-0 items-center justify-center text-white ${details.color} shadow-sm ring-4 ring-[#f4f5f7]`}>
+                      <div className={`w-11 h-11 rounded-full flex shrink-0 items-center justify-center text-white ${details.color} shadow-sm `}>
                         {details.icon}
                       </div>
 
@@ -382,7 +385,7 @@ export default function DocumentDetailsPage() {
                           <p className="text-sm text-slate-500 mt-0.5">{details.subtitle}</p>
                         </div>
                         <div className="text-xs font-semibold text-slate-500 whitespace-nowrap mt-2 md:mt-0">
-                          {formatDateDDMMYYYY(event.timestamp)} <span className="mx-1 text-slate-300">|</span> {formatTime12hr(event.timestamp)}
+                          {formatDateDDMMYYYY(event.timestamp)} <span className="mx-0.5 text-sm text-slate-300">|</span> {formatTime12hr(event.timestamp)}
                         </div>
                       </div>
                     </div>

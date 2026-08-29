@@ -681,9 +681,9 @@ export class ESignController {
         doc.font("Helvetica").text("City", doc.page.width / 2 - 20, doc.y - 12);
         doc.font("Helvetica-Bold").text(`: ${signEvent.city || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
         
-        doc.moveDown(1);
-        doc.font("Helvetica").text("Mobile", 50, doc.y);
-        doc.font("Helvetica-Bold").text(`: NA`, 150, doc.y - 12);
+        // doc.moveDown(1);
+        // doc.font("Helvetica").text("Mobile", 50, doc.y);
+        // doc.font("Helvetica-Bold").text(`: NA`, 150, doc.y - 12);
         
         doc.font("Helvetica").text("State", doc.page.width / 2 - 20, doc.y - 12);
         doc.font("Helvetica-Bold").text(`: ${signEvent.state || "NA"}`, doc.page.width / 2 + 50, doc.y - 12);
