@@ -484,6 +484,20 @@ export class ESignController {
             ipAddress: "System",
             userAgent: "Backend Worker",
           });
+
+          // Send completion email
+          const sender = await UserRepository.findById(document.uploaderId);
+          if (sender && sender.email) {
+            const ccEmails = allRecipients.map(r => r.email).filter(Boolean);
+            
+            // Fire and forget email notification
+            AuthService.sendCompletionEmail({
+              toEmail: sender.email,
+              ccEmails,
+              documentName: document.title,
+              downloadLink: document.fileUrl,
+            }).catch(err => logger.error({ err }, "Failed to send completion email"));
+          }
         }
       });
 

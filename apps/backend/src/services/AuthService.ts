@@ -3,9 +3,9 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
-import { generateInviteEmailHtml } from "../utils/emailTemplates.js";
+import { generateInviteEmailHtml, generateCompletionEmailHtml } from "../utils/emailTemplates.js";
 
-const sendEmail = async ({ toEmail, subject, htmlContent }: { toEmail: string; subject: string; htmlContent: string; }): Promise<boolean> => {
+const sendEmail = async ({ toEmail, ccEmail, subject, htmlContent }: { toEmail: string; ccEmail?: string[]; subject: string; htmlContent: string; }): Promise<boolean> => {
   const apiKey = env.EMAIL_SERVICE_API_KEY;
   const domain = env.EMAIL_SERVICE_DOMAIN;
 
@@ -19,6 +19,7 @@ const sendEmail = async ({ toEmail, subject, htmlContent }: { toEmail: string; s
       },
       body: JSON.stringify({
         to: toEmail,
+        ...(ccEmail && ccEmail.length > 0 && { cc: ccEmail }),
         subject,
         html: htmlContent,
         fromName: "Ehastakshar"
@@ -121,5 +122,23 @@ export class AuthService {
   }): Promise<void> {
     const html = generateInviteEmailHtml({ recipientName, senderName, documentName, link });
     await sendEmail({ toEmail: email, subject: "Action Required: Sign Document", htmlContent: html });
+  }
+
+  /**
+   * Sends the document completion notification via Resend.
+   */
+  static async sendCompletionEmail({
+    toEmail,
+    ccEmails,
+    documentName,
+    downloadLink,
+  }: {
+    toEmail: string;
+    ccEmails: string[];
+    documentName: string;
+    downloadLink: string;
+  }): Promise<void> {
+    const html = generateCompletionEmailHtml({ documentName, link: downloadLink });
+    await sendEmail({ toEmail, ccEmail: ccEmails, subject: "Document Completely Signed", htmlContent: html });
   }
 }
