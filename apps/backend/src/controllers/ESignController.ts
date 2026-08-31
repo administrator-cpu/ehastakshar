@@ -818,8 +818,14 @@ export class ESignController {
           // Digital Badge
           const statusWidth = doc.widthOfString(r.status);
           const badgeX = 74 + statusWidth + 10;
-          doc.roundedRect(badgeX, currentRY + 58, 38, 12, 2).fill("#1e3a8a");
-          doc.fillColor("#ffffff").fontSize(7).font("Helvetica").text("Digital", badgeX + 6, currentRY + 61.5);
+          
+          doc.fontSize(7).font("Helvetica");
+          const badgeText = "Digital";
+          const badgeTextWidth = doc.widthOfString(badgeText);
+          const badgeWidth = badgeTextWidth + 12; // 6px padding on each side
+          
+          doc.roundedRect(badgeX, currentRY + 58, badgeWidth, 12, 2).fill("#1e3a8a");
+          doc.fillColor("#ffffff").text(badgeText, badgeX + 6, currentRY + 61.5);
 
           currentRY += 85;
         }
@@ -872,16 +878,29 @@ export class ESignController {
           
           doc.circle(iconX, iconY, 12).fill(circleColor);
 
-          // Center the icon text exactly using PDFKit's align option
-          let iconText = "ACT";
-          if (event.action === 'UPLOADED') iconText = "DOC";
-          else if (event.action === 'INVITE_SENT' || event.action === 'REMINDER_SENT') iconText = "ENV";
-          else if (event.action === 'LINK_CLICKED') iconText = "EYE";
-          else if (event.action === 'OTP_REQUESTED') iconText = "KEY";
-          else if (event.action === 'OTP_VERIFIED' || event.action === 'COMPLETED') iconText = "CHK";
-          else if (event.action === 'SIGNED') iconText = "PEN";
+          // Render exact Lucide SVG paths perfectly centered
+          const SVG_PATHS: Record<string, string> = {
+            'UPLOADED': "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z M14 2v4a2 2 0 0 0 2 2h4 M10 9H8 M16 13H8 M16 17H8",
+            'INVITE_SENT': "M4 4 h16 a2 2 0 0 1 2 2 v12 a2 2 0 0 1 -2 2 h-16 a2 2 0 0 1 -2 -2 v-12 a2 2 0 0 1 2 -2 z M22 7 l-8.97 5.7 a1.94 1.94 0 0 1 -2.06 0 L2 7",
+            'REMINDER_SENT': "M4 4 h16 a2 2 0 0 1 2 2 v12 a2 2 0 0 1 -2 2 h-16 a2 2 0 0 1 -2 -2 v-12 a2 2 0 0 1 2 -2 z M22 7 l-8.97 5.7 a1.94 1.94 0 0 1 -2.06 0 L2 7",
+            'LINK_CLICKED': "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z M12 9a3 3 0 1 1 0 6 3 3 0 1 1 0-6",
+            'OTP_REQUESTED': "m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4 m21 2-9.6 9.6 M7.5 10a5.5 5.5 0 1 1 0 11 5.5 5.5 0 1 1 0-11",
+            'OTP_VERIFIED': "M20 6 9 17l-5-5",
+            'SIGNED': "m12 19 7-7 3 3-7 7-3-3z m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z m2 2 7.586 7.586 M11 9a2 2 0 1 1 0 4 2 2 0 1 1 0-4",
+            'COMPLETED': "M22 11.08V12a10 10 0 1 1-5.93-9.14 M9 11l3 3L22 4"
+          };
           
-          doc.fillColor("#ffffff").fontSize(8).font("Helvetica-Bold").text(iconText, iconX - 12, iconY - 4.5, { width: 24, align: 'center' });
+          let svgPath = SVG_PATHS[event.action];
+          if (!svgPath) {
+            // Default Activity icon if action doesn't match
+            svgPath = "M22 12h-4l-3 9L9 3l-3 9H2";
+          }
+          
+          doc.save();
+          // Scale down the 24x24 SVG to 13x13 and translate to center
+          doc.translate(iconX - 6.5, iconY - 6.5).scale(13 / 24);
+          doc.path(svgPath).lineWidth(2.5).strokeColor("#ffffff").lineCap('round').lineJoin('round').stroke();
+          doc.restore();
 
           // Lookup real recipient details from the recipients array since AuditLogRepository doesn't join it
           let actualName = "System";
