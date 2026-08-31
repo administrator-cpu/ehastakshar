@@ -2,10 +2,10 @@ import { z } from "zod";
 import { logger } from "../utils/logger.js";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.url(),
   JWT_SECRET: z.string().min(10),
   PORT: z.string().optional().default("3001"),
-  FRONTEND_URL: z.string().url().optional().default("http://localhost:3000"),
+  FRONTEND_URL: z.url().optional().default("http://localhost:3000"),
   
   // Storage (R2)
   STORAGE_PROVIDER: z.enum(["LOCAL", "R2"]).default("LOCAL"),
@@ -13,11 +13,11 @@ const envSchema = z.object({
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET_NAME: z.string().optional(),
-  R2_PUBLIC_URL: z.string().url().optional(),
+  R2_PUBLIC_URL: z.url().optional(),
 
   // Email API
   EMAIL_SERVICE_API_KEY: z.string().min(1, "EMAIL_SERVICE_API_KEY is required"),
-  EMAIL_SERVICE_DOMAIN: z.string().url("EMAIL_SERVICE_DOMAIN must be a valid URL"),
+  EMAIL_SERVICE_DOMAIN: z.url("EMAIL_SERVICE_DOMAIN must be a valid URL"),
 });
 
 const parseEnv = () => {
