@@ -17,6 +17,20 @@ interface PDFViewerProps {
   onDocumentLoadSuccess: (data: { numPages: number }) => void;
 }
 
+const PdfSkeleton = () => (
+  <div className="w-full max-w-[600px] h-[848px] bg-white shadow-xl mx-auto flex flex-col border border-slate-200 animate-in fade-in duration-500 p-8">
+    <div className="animate-pulse space-y-6 mt-8 w-full">
+      <div className="h-5 bg-slate-100 rounded-md w-3/4 mb-3"></div>
+      <div className="h-3 bg-slate-100 rounded-md w-full mb-3"></div>
+      <div className="h-3 bg-slate-100 rounded-md w-full mb-3"></div>
+      <div className="h-3 bg-slate-100 rounded-md w-5/6 mb-3"></div>
+      <div className="h-3 bg-slate-100 rounded-md w-full mb-3 mt-10"></div>
+      <div className="h-3 bg-slate-100 rounded-md w-2/3 mb-3"></div>
+      <div className="h-24 bg-slate-100 rounded-md w-full mt-16"></div>
+    </div>
+  </div>
+);
+
 export default function PDFViewer({ file, numPages, onDocumentLoadSuccess }: PDFViewerProps) {
   if (!file) return null;
 
@@ -25,7 +39,7 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess }: PDF
       <Document
         file={file}
         onLoadSuccess={onDocumentLoadSuccess}
-        loading={<div className="p-8 text-slate-500 font-medium animate-pulse">Loading document...</div>}
+        loading={<PdfSkeleton />}
         className="flex flex-col items-center w-full"
       >
         {Array.from(new Array(numPages), (el, index) => (
@@ -36,7 +50,7 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess }: PDF
               renderAnnotationLayer={false}
               width={600}
               className="max-w-full"
-              loading={<div className="w-full h-full min-h-[848px] flex items-center justify-center text-slate-400 font-medium animate-pulse">Rendering page...</div>}
+              loading={<PdfSkeleton />}
             />
           </div>
         ))}
