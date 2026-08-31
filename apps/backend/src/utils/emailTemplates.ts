@@ -1,14 +1,4 @@
-export function generateInviteEmailHtml({
-  recipientName,
-  senderName,
-  documentName,
-  link,
-}: {
-  recipientName: string;
-  senderName: string;
-  documentName: string;
-  link: string;
-}): string {
+export function generateInviteEmailHtml({ recipientName, senderName, documentName, link }: { recipientName: string; senderName: string; documentName: string; link: string; }): string {
   return `
     <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; background-color: #f8fafc; padding: 24px;">
       <div style="background-color: #ffffff; padding: 32px; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid #f1f5f9; max-width: 576px; margin: 0 auto;">
@@ -75,13 +65,7 @@ export function generateInviteEmailHtml({
   `;
 }
 
-export function generateCompletionEmailHtml({
-  documentName,
-  link,
-}: {
-  documentName: string;
-  link: string;
-}): string {
+export function generateCompletionEmailHtml({ documentName, link }: { documentName: string; link: string; }): string {
   return `
     <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; background-color: #f8fafc; padding: 24px;">
       <div style="background-color: #ffffff; padding: 32px; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid #f1f5f9; max-width: 576px; margin: 0 auto;">
