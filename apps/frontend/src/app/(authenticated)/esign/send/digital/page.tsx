@@ -8,9 +8,23 @@ import { generateInviteEmailHtml } from '@/utils/emailTemplates';
 
 import { toast } from 'sonner';
 
+const PdfSkeleton = () => (
+  <div className="w-full max-w-3xl h-[800px] bg-white shadow-xl rounded-xl mx-auto my-4 p-12 flex flex-col border border-slate-200 animate-in fade-in duration-500">
+    <div className="animate-pulse space-y-8 mt-12">
+      <div className="h-6 bg-slate-100 rounded-md w-3/4 mb-4"></div>
+      <div className="h-4 bg-slate-100 rounded-md w-full mb-4"></div>
+      <div className="h-4 bg-slate-100 rounded-md w-full mb-4"></div>
+      <div className="h-4 bg-slate-100 rounded-md w-5/6 mb-4"></div>
+      <div className="h-4 bg-slate-100 rounded-md w-full mb-4 mt-12"></div>
+      <div className="h-4 bg-slate-100 rounded-md w-2/3 mb-4"></div>
+      <div className="h-32 bg-slate-100 rounded-md w-full mt-20"></div>
+    </div>
+  </div>
+);
+
 const PDFViewer = dynamic(() => import('./PDFViewer'), {
   ssr: false,
-  loading: () => <div className="p-8 text-slate-500 font-medium">Loading PDF viewer...</div>
+  loading: () => <PdfSkeleton />
 });
 
 interface Recipient {

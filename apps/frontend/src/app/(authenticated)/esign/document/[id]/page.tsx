@@ -221,7 +221,88 @@ export default function DocumentDetailsPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#f4f5f7] text-slate-500">Loading details...</div>;
+    return (
+      <div className="bg-[#f4f5f7] min-h-screen text-slate-900 font-sans pb-12 animate-pulse">
+        {/* Top Nav Skeleton */}
+        <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+          <div className="flex items-center space-x-4">
+            <div className="w-9 h-9 bg-slate-200 rounded-full"></div>
+            <div className="w-40 h-6 bg-slate-200 rounded-md"></div>
+          </div>
+        </nav>
+
+        <div className="max-w-6xl mx-auto px-6 pt-8 space-y-12">
+          {/* Unified Document Header & Recipients Card Skeleton */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
+              <div className="flex items-center space-x-4 w-full">
+                <div className="w-16 h-16 bg-slate-200 rounded-2xl shrink-0"></div>
+                <div className="space-y-3 w-full max-w-md">
+                  <div className="h-7 bg-slate-200 rounded-md w-3/4"></div>
+                  <div className="flex space-x-3">
+                    <div className="h-5 bg-slate-200 rounded-md w-32"></div>
+                    <div className="h-5 bg-slate-200 rounded-md w-40"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+                <div className="w-10 h-10 bg-slate-200 rounded-lg"></div>
+                <div className="w-10 h-10 bg-slate-200 rounded-lg"></div>
+                <div className="w-32 h-10 bg-slate-200 rounded-lg hidden lg:block"></div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-8">
+              <div className="h-6 bg-slate-200 rounded-md w-24 mb-6"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="p-5 rounded-2xl border border-slate-200 bg-white min-w-[280px] shadow-sm space-y-4">
+                    <div className="w-12 h-3 bg-slate-200 rounded-sm"></div>
+                    <div className="h-5 bg-slate-200 rounded-md w-2/3"></div>
+                    <div className="h-4 bg-slate-200 rounded-md w-1/2"></div>
+                    <div className="flex space-x-2 pt-2">
+                      <div className="h-6 bg-slate-200 rounded-md w-20"></div>
+                      <div className="h-6 bg-slate-200 rounded-md w-16"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider Skeleton */}
+        <div className="w-full h-px bg-slate-200/60 my-10"></div>
+
+        {/* Audit Trail Section Skeleton */}
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex justify-between items-center mb-8">
+            <div className="h-6 bg-slate-200 rounded-md w-32"></div>
+            <div className="h-4 bg-slate-200 rounded-md w-40"></div>
+          </div>
+          
+          <div className="space-y-12 pb-20 relative z-0">
+            <div>
+              <div className="sticky top-[72px] bg-[#f4f5f7]/90 py-2 z-10 w-full mb-6">
+                <div className="h-5 bg-slate-200 rounded-md w-24"></div>
+              </div>
+              
+              <div className="space-y-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:items-center items-start gap-4">
+                    <div className="w-11 h-11 bg-slate-200 rounded-full shrink-0"></div>
+                    <div className="space-y-2 w-full">
+                      <div className="h-5 bg-slate-200 rounded-md w-1/2"></div>
+                      <div className="h-4 bg-slate-200 rounded-md w-1/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!data) {

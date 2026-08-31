@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/Input";
+import { Loader2 } from "lucide-react";
 
 const verifySchema = z.object({
   otp: z.string().length(6, "Verification code must be exactly 6 characters"),
@@ -187,7 +188,7 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center"><Loader2 className="animate-spin text-[#0D9488]" size={32} /></div>}>
       <VerifyContent />
     </Suspense>
   );
