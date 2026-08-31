@@ -36,7 +36,7 @@ interface DocumentDetails {
 export default function DocumentDetailsPage() {
   const params = useParams();
   const documentId = params.id as string;
-  
+
   const [data, setData] = useState<DocumentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
@@ -125,10 +125,10 @@ export default function DocumentDetailsPage() {
   const getActionDetails = (event: any) => {
     const { action, recipientName, recipientEmail } = event;
     const name = recipientName || "System";
-    
+
     switch (action) {
-      case 'UPLOADED': 
-        return { 
+      case 'UPLOADED':
+        return {
           text: `Document uploaded and initialized`,
           subtitle: name,
           icon: <FileText size={18} />,
@@ -137,7 +137,7 @@ export default function DocumentDetailsPage() {
         };
       case 'INVITE_SENT':
       case 'REMINDER_SENT':
-        return { 
+        return {
           text: `Invitation sent for signing`,
           subtitle: recipientEmail ? `${name} (${recipientEmail})` : name,
           icon: <Mail size={18} />,
@@ -145,7 +145,7 @@ export default function DocumentDetailsPage() {
           textColor: "text-blue-500"
         };
       case 'LINK_CLICKED':
-        return { 
+        return {
           text: `${name} has opened the document link`,
           subtitle: recipientEmail ? `${name} (${recipientEmail})` : name,
           icon: <Eye size={18} />,
@@ -153,7 +153,7 @@ export default function DocumentDetailsPage() {
           textColor: "text-purple-500"
         };
       case 'OTP_REQUESTED':
-        return { 
+        return {
           text: `OTP requested by ${name} for verification`,
           subtitle: recipientEmail ? `${name} (${recipientEmail})` : name,
           icon: <Key size={18} />,
@@ -161,7 +161,7 @@ export default function DocumentDetailsPage() {
           textColor: "text-amber-500"
         };
       case 'OTP_VERIFIED':
-        return { 
+        return {
           text: `${name} identity verified successfully via OTP`,
           subtitle: recipientEmail ? `${name} (${recipientEmail})` : name,
           icon: <Check size={18} />,
@@ -169,7 +169,7 @@ export default function DocumentDetailsPage() {
           textColor: "text-green-500"
         };
       case 'SIGNED':
-        return { 
+        return {
           text: `${name} has successfully signed the document`,
           subtitle: recipientEmail ? `${name} (${recipientEmail})` : name,
           icon: <PenTool size={18} />,
@@ -177,7 +177,7 @@ export default function DocumentDetailsPage() {
           textColor: "text-teal-500"
         };
       case 'COMPLETED':
-        return { 
+        return {
           text: `All parties have signed the document`,
           subtitle: "System",
           icon: <CheckCircle size={18} />,
@@ -185,7 +185,7 @@ export default function DocumentDetailsPage() {
           textColor: "text-teal-600"
         };
       default:
-        return { 
+        return {
           text: action,
           subtitle: name,
           icon: <Activity size={18} />,
@@ -221,7 +221,88 @@ export default function DocumentDetailsPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#f4f5f7] text-slate-500">Loading details...</div>;
+    return (
+      <div className="bg-[#f4f5f7] min-h-screen text-slate-900 font-sans pb-12 animate-pulse">
+        {/* Top Nav Skeleton */}
+        <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+          <div className="flex items-center space-x-4">
+            <div className="w-9 h-9 bg-slate-200 rounded-full"></div>
+            <div className="w-40 h-6 bg-slate-200 rounded-md"></div>
+          </div>
+        </nav>
+
+        <div className="max-w-6xl mx-auto px-6 pt-8 space-y-12">
+          {/* Unified Document Header & Recipients Card Skeleton */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
+              <div className="flex items-center space-x-4 w-full">
+                <div className="w-16 h-16 bg-slate-200 rounded-2xl shrink-0"></div>
+                <div className="space-y-3 w-full max-w-md">
+                  <div className="h-7 bg-slate-200 rounded-md w-3/4"></div>
+                  <div className="flex space-x-3">
+                    <div className="h-5 bg-slate-200 rounded-md w-32"></div>
+                    <div className="h-5 bg-slate-200 rounded-md w-40"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+                <div className="w-10 h-10 bg-slate-200 rounded-lg"></div>
+                <div className="w-10 h-10 bg-slate-200 rounded-lg"></div>
+                <div className="w-32 h-10 bg-slate-200 rounded-lg hidden lg:block"></div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-8">
+              <div className="h-6 bg-slate-200 rounded-md w-24 mb-6"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="p-5 rounded-2xl border border-slate-200 bg-white min-w-[280px] shadow-sm space-y-4">
+                    <div className="w-12 h-3 bg-slate-200 rounded-sm"></div>
+                    <div className="h-5 bg-slate-200 rounded-md w-2/3"></div>
+                    <div className="h-4 bg-slate-200 rounded-md w-1/2"></div>
+                    <div className="flex space-x-2 pt-2">
+                      <div className="h-6 bg-slate-200 rounded-md w-20"></div>
+                      <div className="h-6 bg-slate-200 rounded-md w-16"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider Skeleton */}
+        <div className="w-full h-px bg-slate-200/60 my-10"></div>
+
+        {/* Audit Trail Section Skeleton */}
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex justify-between items-center mb-8">
+            <div className="h-6 bg-slate-200 rounded-md w-32"></div>
+            <div className="h-4 bg-slate-200 rounded-md w-40"></div>
+          </div>
+          
+          <div className="space-y-12 pb-20 relative z-0">
+            <div>
+              <div className="sticky top-[72px] bg-[#f4f5f7]/90 py-2 z-10 w-full mb-6">
+                <div className="h-5 bg-slate-200 rounded-md w-24"></div>
+              </div>
+              
+              <div className="space-y-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:items-center items-start gap-4">
+                    <div className="w-11 h-11 bg-slate-200 rounded-full shrink-0"></div>
+                    <div className="space-y-2 w-full">
+                      <div className="h-5 bg-slate-200 rounded-md w-1/2"></div>
+                      <div className="h-4 bg-slate-200 rounded-md w-1/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!data) {
@@ -251,10 +332,10 @@ export default function DocumentDetailsPage() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 pt-8 space-y-12">
-        
+
         {/* Unified Document Header & Recipients Card */}
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
-          
+
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
@@ -266,14 +347,14 @@ export default function DocumentDetailsPage() {
                 </h1>
                 <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm text-slate-500 font-medium">
                   <span>Transaction ID: <span className="font-mono px-2 py-0.5 rounded text-slate-700">{document.transactionId}</span></span>
-                
+
                   <span>Last updated: <span className="font-mono px-2 py-0.5 rounded text-slate-700">{formatDateDDMMYYYY(document.updatedAt || document.createdAt)} {formatTime12hr(document.updatedAt || document.createdAt)}</span></span>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3 w-full lg:w-auto">
-              <button 
+              <button
                 onClick={handleViewPdf}
                 disabled={downloading}
                 className="w-10 h-10 flex items-center justify-center border border-[#6b46c1]/30 text-[#6b46c1] rounded-lg hover:bg-[#6b46c1]/10 transition-colors cursor-pointer disabled:opacity-50"
@@ -281,7 +362,7 @@ export default function DocumentDetailsPage() {
               >
                 <Eye size={18} />
               </button>
-              <button 
+              <button
                 onClick={handleViewPdf}
                 disabled={downloading}
                 className="w-10 h-10 flex items-center justify-center border border-[#6b46c1]/30 text-[#6b46c1] rounded-lg hover:bg-[#6b46c1]/10 transition-colors cursor-pointer disabled:opacity-50"
@@ -289,10 +370,10 @@ export default function DocumentDetailsPage() {
               >
                 <Download size={18} />
               </button>
-              
+
               {/* Remind Signers button */}
               {pendingRecipient && (
-                <button 
+                <button
                   onClick={() => handleRemind(pendingRecipient.id)}
                   disabled={reminding !== null}
                   className="flex-1 lg:flex-none px-6 py-2.5 bg-[#6b46c1] hover:bg-[#553c9a] text-white rounded-lg font-semibold transition-colors shadow-sm cursor-pointer disabled:opacity-70 flex items-center justify-center"
@@ -304,42 +385,42 @@ export default function DocumentDetailsPage() {
           </div>
 
           <div className="border-t border-slate-100 pt-8">
-             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-slate-800 flex items-center">
-                  Recipients
-                </h3>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recipients.map(rec => (
-                  <div key={rec.id} className={`p-5 rounded-2xl border ${rec.status === 'SIGNED' ? 'border-teal-200 bg-teal-50/30' : 'border-[#d4a373]/30 bg-[#fffdf0]'} min-w-[280px] shadow-sm`}>
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Signer</span>
-                    </div>
-                    <h3 className="font-bold text-slate-900 text-lg">{rec.name}</h3>
-                    <p className="text-sm text-slate-500 mb-5">{rec.email}</p>
-                    <div className="flex items-center space-x-2">
-                      {rec.status === 'SIGNED' ? (
-                        <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-teal-100 text-teal-700 flex items-center uppercase tracking-wider">
-                          <CheckCircle size={12} className="mr-1" />
-                          {rec.status}
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-amber-100/50 text-amber-700 flex items-center uppercase tracking-wider">
-                          <Clock size={12} className="mr-1" />
-                          {rec.status}
-                        </span>
-                      )}
-                      <span className="text-[11px] font-bold bg-[#1e3a8a] text-white px-2 py-1 rounded-md uppercase tracking-wider">Digital</span>
-                    </div>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                Recipients
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recipients.map(rec => (
+                <div key={rec.id} className={`p-5 rounded-2xl border ${rec.status === 'SIGNED' ? 'border-teal-200 bg-teal-50/30' : 'border-[#d4a373]/30 bg-[#fffdf0]'} min-w-[280px] shadow-sm`}>
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Signer</span>
                   </div>
-                ))}
-             </div>
+                  <h3 className="font-bold text-slate-900 text-lg">{rec.name}</h3>
+                  <p className="text-sm text-slate-500 mb-5">{rec.email}</p>
+                  <div className="flex items-center space-x-2">
+                    {rec.status === 'SIGNED' ? (
+                      <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-teal-100 text-teal-700 flex items-center uppercase tracking-wider">
+                        <CheckCircle size={12} className="mr-1" />
+                        {rec.status}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-amber-100/50 text-amber-700 flex items-center uppercase tracking-wider">
+                        <Clock size={12} className="mr-1" />
+                        {rec.status}
+                      </span>
+                    )}
+                    <span className="text-[11px] font-bold bg-[#1e3a8a] text-white px-2 py-1 rounded-md uppercase tracking-wider">Digital</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
       </div>
-      
+
       {/* Divider */}
       <div className="w-full h-px bg-slate-200/60 my-10"></div>
 
@@ -347,7 +428,7 @@ export default function DocumentDetailsPage() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-xl font-bold text-slate-900">Audit Trail</h2>
-          <button 
+          <button
             onClick={handleDownloadAuditReport}
             className="text-[#6b46c1] text-sm font-semibold hover:underline cursor-pointer flex items-center space-x-1"
           >
@@ -357,7 +438,7 @@ export default function DocumentDetailsPage() {
         </div>
 
         <div className="space-y-12 pb-20 relative z-0">
-          
+
           {/* Main vertical line for the timeline */}
           <div className="absolute top-24 bottom-24 left-[41px] w-[2px] bg-slate-300 -z-10 hidden md:block"></div>
 
@@ -373,7 +454,7 @@ export default function DocumentDetailsPage() {
                   const details = getActionDetails(event);
                   return (
                     <div key={event.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row md:items-center items-start gap-4 hover:shadow-md transition-shadow relative">
-                      
+
                       {/* Icon placed inside the container, vertically centered */}
                       <div className={`w-11 h-11 rounded-full flex shrink-0 items-center justify-center text-white ${details.color} shadow-sm `}>
                         {details.icon}
@@ -382,12 +463,7 @@ export default function DocumentDetailsPage() {
                       <div className="flex-1 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-2">
                         <div>
                           <h4 className="font-bold text-slate-800 text-[15px]">{details.text}</h4>
-                          <p className="text-sm text-slate-500 mt-0.5">{details.subtitle}</p>
-                          {event.ipAddress && event.ipAddress !== "System" && (
-                            <div className="flex items-center text-xs text-slate-400 mt-1.5 font-mono bg-slate-50 w-fit px-2 py-0.5 rounded border border-slate-100">
-                              <span className="mr-1.5 opacity-70">IP:</span> {event.ipAddress}
-                            </div>
-                          )}
+                          <p className="text-sm text-slate-500 mt-0.5">{details.subtitle} {event.ipAddress && event.ipAddress !== "System" && details.subtitle !== "System" && (<span> | IP: {event.ipAddress}</span>)}</p>
                         </div>
                         <div className="text-xs font-semibold text-slate-500 whitespace-nowrap mt-2 md:mt-0">
                           {formatDateDDMMYYYY(event.timestamp)} <span className="mx-0.5 text-sm text-slate-300">|</span> {formatTime12hr(event.timestamp)}
@@ -399,7 +475,7 @@ export default function DocumentDetailsPage() {
               </div>
             </div>
           ))}
-          
+
           {Object.keys(groupedAudit).length === 0 && (
             <p className="text-slate-500 italic">No audit events recorded yet.</p>
           )}

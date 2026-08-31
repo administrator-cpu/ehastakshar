@@ -77,7 +77,19 @@ export default function ESignDashboardPage() {
       <div className="max-w-7xl mx-auto p-8 space-y-8">
         
         {/* Metrics Section */}
-        {!loading && (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div className="w-12 h-12 bg-slate-100 rounded-full shrink-0"></div>
+                <div className="space-y-3">
+                  <div className="h-4 bg-slate-100 rounded-md w-24"></div>
+                  <div className="h-6 bg-slate-100 rounded-md w-12"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
               <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
@@ -124,8 +136,27 @@ export default function ESignDashboardPage() {
           </div>
           
           {loading ? (
-            <div className="p-16 flex flex-col items-center justify-center text-center">
-              <p className="text-slate-500 font-medium">Loading documents...</p>
+            <div className="overflow-x-auto animate-pulse">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-200">
+                    <th className="p-4"><div className="h-4 bg-slate-200 rounded w-24"></div></th>
+                    <th className="p-4"><div className="h-4 bg-slate-200 rounded w-16"></div></th>
+                    <th className="p-4"><div className="h-4 bg-slate-200 rounded w-16"></div></th>
+                    <th className="p-4"><div className="h-4 bg-slate-200 rounded w-24"></div></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <tr key={i}>
+                      <td className="p-4"><div className="h-5 bg-slate-100 rounded-md w-3/4"></div></td>
+                      <td className="p-4"><div className="h-4 bg-slate-100 rounded-md w-20"></div></td>
+                      <td className="p-4"><div className="h-6 bg-slate-100 rounded-full w-24"></div></td>
+                      <td className="p-4"><div className="h-4 bg-slate-100 rounded-md w-28"></div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : recentDocuments.length === 0 ? (
             <div className="p-16 flex flex-col items-center justify-center text-center">
