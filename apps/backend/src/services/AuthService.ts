@@ -82,11 +82,23 @@ export class AuthService {
   }
 
   /**
-   * Generates a JWT token for the user.
+   * Generates a JWT token for the user, bound to an IP address.
    */
-  static generateToken(userId: string): string {
+  static generateToken(userId: string, ipAddress?: string): string {
     const secret = env.JWT_SECRET;
-    return jwt.sign({ userId }, secret, { expiresIn: JWT_EXPIRES_IN });
+    return jwt.sign({ userId, ipAddress }, secret, { expiresIn: JWT_EXPIRES_IN });
+  }
+
+  /**
+   * Verifies a JWT token and returns the payload.
+   */
+  static verifyToken(token: string): any {
+    try {
+      const secret = env.JWT_SECRET;
+      return jwt.verify(token, secret);
+    } catch (err) {
+      return null;
+    }
   }
 
   /**
