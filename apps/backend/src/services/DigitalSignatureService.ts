@@ -1,10 +1,11 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import signpdf from '@signpdf/signpdf';
-import { plainAddPlaceholder } from '@signpdf/utils';
+import { SignPdf } from '@signpdf/signpdf';
+import { P12Signer } from '@signpdf/signer-p12';
+import { plainAddPlaceholder } from '@signpdf/placeholder-plain';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,7 @@ export class DigitalSignatureService {
     const pdfDoc = await PDFDocument.load(pdfBuffer);
     const pages = pdfDoc.getPages();
     const lastPage = pages[pages.length - 1];
+    if (!lastPage) throw new Error("No pages found in PDF");
 
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -114,12 +116,12 @@ export class DigitalSignatureService {
 
     // Save the PDF visually
     const visuallyModifiedPdfBytes = await pdfDoc.save();
-    let visuallyModifiedPdfBuffer = Buffer.from(visuallyModifiedPdfBytes);
+    const initialBuffer = Buffer.from(visuallyModifiedPdfBytes);
 
     // 2. Add the cryptographic placeholder using @signpdf/utils
     // This adds the /ByteRange dictionary and allocates 8192 bytes for the PKCS#7 signature
-    visuallyModifiedPdfBuffer = plainAddPlaceholder({
-      pdfBuffer: visuallyModifiedPdfBuffer,
+    const pdfWithPlaceholder = plainAddPlaceholder({
+      pdfBuffer: initialBuffer as Buffer<ArrayBuffer>,
       reason: 'Document e-Signature',
       contactInfo: details.ipAddress || '0.0.0.0',
       name: details.recipientName,
@@ -127,7 +129,7 @@ export class DigitalSignatureService {
       signatureLength: 8192,
     });
 
-    return visuallyModifiedPdfBuffer;
+    return Buffer.from(pdfWithPlaceholder);
   }
 
   /**
@@ -145,11 +147,10 @@ export class DigitalSignatureService {
       const p12Buffer = fs.readFileSync(p12Path);
       
       // Sign the PDF
-      // @signpdf/signpdf requires a default export or named export depending on version. 
-      // It handles extracting the private key from the P12 and signing the ByteRange.
-      const signedPdf = signpdf.sign(pdfWithPlaceholderBuffer, p12Buffer, {
-        passphrase: 'password'
-      });
+      const signer = new P12Signer(p12Buffer, { passphrase: 'password' });
+      const signpdf = new SignPdf();
+      
+      const signedPdf = await signpdf.sign(pdfWithPlaceholderBuffer, signer);
       
       return signedPdf;
     } catch (error) {
