@@ -343,8 +343,13 @@ export class ESignController {
    */
   static async signDocument(req: Request, res: Response): Promise<void> {
     try {
-      const { token, signatureText, signToken } = req.body;
+      const { token, signatureText, signToken, consentGranted, consentTimestamp } = req.body;
       const recipient = await DocumentRecipientRepository.findBySecureToken(token);
+      
+      if (consentGranted !== "true") {
+        res.status(400).json({ error: "Explicit consent is required to sign the document." });
+        return;
+      }
       
       if (!recipient || recipient.status === "SIGNED") {
         res.status(400).json({ error: "Invalid token or already signed" });
@@ -432,6 +437,16 @@ export class ESignController {
             logger.error({ err: e }, "Geocoding error");
           }
         }
+
+        // Log explicit consent
+        await AuditLogRepository.logEvent({
+          documentId: document.id,
+          recipientId: recipient.id,
+          action: "CONSENT_GRANTED",
+          ipAddress: req.ip || req.socket.remoteAddress || "",
+          userAgent: userAgentStr,
+          timestamp: consentTimestamp ? new Date(consentTimestamp) : new Date(),
+        });
 
         await AuditLogRepository.logEvent({
           documentId: document.id,
