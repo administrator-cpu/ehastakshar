@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { db } from "../db/index.js";
 import { documents, documentRecipients, auditEvents } from "../db/schema.js";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql, ilike, and } from "drizzle-orm";
 import { logger } from "../utils/logger.js";
 
 interface AuthenticatedRequest extends Request {
@@ -36,8 +36,20 @@ export class DashboardController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
+      const search = req.query.search as string | undefined;
 
-      // Get recent documents (paginated)
+      const baseCondition = search 
+        ? and(eq(documents.uploaderId, uploaderId), ilike(documents.title, `%${search}%`))
+        : eq(documents.uploaderId, uploaderId);
+
+      // We need to count the filtered total to paginate correctly when searching
+      const filteredCountResult = search 
+        ? await db.select({ total: sql<number>`count(*)` }).from(documents).where(baseCondition)
+        : countsResult;
+
+      const filteredTotal = Number(filteredCountResult[0]?.total || 0);
+
+      // Get recent documents (paginated and optionally filtered)
       const recentDocuments = await db
         .select({
           id: documents.id,
@@ -48,12 +60,12 @@ export class DashboardController {
           transactionId: documents.transactionId,
         })
         .from(documents)
-        .where(eq(documents.uploaderId, uploaderId))
+        .where(baseCondition)
         .orderBy(desc(documents.updatedAt))
         .limit(limit)
         .offset(offset);
 
-      const totalPages = Math.ceil(stats.total / limit);
+      const totalPages = Math.max(1, Math.ceil(filteredTotal / limit));
 
       res.status(200).json({ stats, recentDocuments, totalPages, currentPage: page });
     } catch (error) {
