@@ -153,10 +153,10 @@ export default function SignerPortalPage() {
           setIsSendingOtp(false);
           return "OTP sent successfully!";
         },
-        error: (err: any) => {
+        error: (err: unknown) => {
           setIsSendingOtp(false);
           setStep("VIEW"); // Return to view if failed
-          return err.message || "Failed to send OTP";
+          return err instanceof Error ? err.message : String(err) || "Failed to send OTP";
         }
       }
     );
@@ -184,7 +184,7 @@ export default function SignerPortalPage() {
       }
       toast.success("Identity verified successfully");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Verification failed");
+      toast.error(err instanceof Error ? err instanceof Error ? err.message : String(err) : "Verification failed");
     } finally {
       setIsVerifying(false);
     }
@@ -248,7 +248,7 @@ export default function SignerPortalPage() {
       setStep("SUCCESS");
       toast.success("Document signed successfully!");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Signing failed");
+      toast.error(err instanceof Error ? err instanceof Error ? err.message : String(err) : "Signing failed");
     } finally {
       setIsSigning(false);
     }

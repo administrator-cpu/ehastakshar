@@ -71,8 +71,8 @@ function VerifyContent() {
       setTimeout(() => {
         router.push("/dashboard"); // Go to protected dummy page
       }, 1500);
-    } catch (err: any) {
-      setServerError(err.message);
+    } catch (err: unknown) {
+      setServerError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
@@ -103,8 +103,8 @@ function VerifyContent() {
         setSuccessMsg("A new verification code has been sent.");
         setRemainingSeconds(result.retryAfter || 120);
       }
-    } catch (err: any) {
-      setServerError(err.message);
+    } catch (err: unknown) {
+      setServerError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }

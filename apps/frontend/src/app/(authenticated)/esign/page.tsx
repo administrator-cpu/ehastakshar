@@ -28,11 +28,20 @@ export default function ESignDashboardPage() {
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/dashboard?page=${currentPage}&limit=10`, {
+        const url = new URL(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/dashboard`);
+        url.searchParams.append("page", currentPage.toString());
+        url.searchParams.append("limit", "10");
+        if (searchQuery) {
+          url.searchParams.append("search", searchQuery);
+        }
+
+        const response = await fetch(url.toString(), {
           credentials: 'include',
         });
         
@@ -52,7 +61,7 @@ export default function ESignDashboardPage() {
       }
     };
     fetchDashboardData();
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
@@ -91,7 +100,7 @@ export default function ESignDashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
               <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
                 <FileText size={24} />
               </div>
@@ -100,7 +109,7 @@ export default function ESignDashboardPage() {
                 <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
               <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
                 <Clock size={24} />
               </div>
@@ -109,7 +118,7 @@ export default function ESignDashboardPage() {
                 <p className="text-2xl font-bold text-slate-900">{stats.pending}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
               <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center">
                 <CheckCircle size={24} />
               </div>
@@ -122,13 +131,21 @@ export default function ESignDashboardPage() {
         )}
 
         {/* Table Section */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
             <h2 className="text-xl font-bold">Recent Documents</h2>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchQuery(inputValue);
+                    setCurrentPage(1); // Reset to first page on new search
+                  }
+                }}
                 placeholder="Search documents..." 
                 className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all w-64"
               />

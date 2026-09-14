@@ -68,7 +68,7 @@ export default function DashboardPage() {
           </Link>
 
           {/* Profile Card */}
-          <Link href="#" className="group block">
+          <Link href="/profile" className="group block">
             <div className="h-full relative overflow-hidden rounded-3xl bg-white border border-slate-200 p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-amber-500/30">
               <div className="absolute top-0 right-0 p-8 opacity-5 transition-opacity duration-300 group-hover:opacity-10">
                 <User size={120} />
