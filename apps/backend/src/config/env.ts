@@ -6,6 +6,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10),
   PORT: z.string().optional().default("3001"),
   FRONTEND_URL: z.url().optional().default("http://localhost:3000"),
+  COOKIE_DOMAIN: z.string().optional(),
   
   // Storage (R2)
   STORAGE_PROVIDER: z.enum(["LOCAL", "R2"]).default("LOCAL"),

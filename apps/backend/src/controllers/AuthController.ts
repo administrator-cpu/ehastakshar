@@ -4,6 +4,7 @@ import { UserRepository } from "../repositories/UserRepository.js";
 import { OtpRepository } from "../repositories/OtpRepository.js";
 import { logger } from "../utils/logger.js";
 import { AuthService } from "../services/AuthService.js";
+import { env } from "../config/env.js";
 
 const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50),
@@ -118,7 +119,8 @@ export class AuthController {
       res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
+        domain: env.COOKIE_DOMAIN,
         maxAge: 15 * 60 * 1000, // 15 mins
       });
 
@@ -218,7 +220,8 @@ export class AuthController {
       res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
+        domain: env.COOKIE_DOMAIN,
         maxAge: 15 * 60 * 1000,
       });
 
@@ -234,7 +237,8 @@ export class AuthController {
       res.clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
+        domain: env.COOKIE_DOMAIN,
       });
       res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
