@@ -54,8 +54,8 @@ export default function SignupPage() {
 
       // Pass email via URL to the verify page
       router.push(`/verify?email=${encodeURIComponent(data.email)}`);
-    } catch (err: any) {
-      setServerError(err.message);
+    } catch (err: unknown) {
+      setServerError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }

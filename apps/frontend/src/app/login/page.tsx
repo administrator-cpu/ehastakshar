@@ -51,8 +51,8 @@ export default function LoginPage() {
       }
 
       router.push("/dashboard"); // Navigate to the protected page
-    } catch (err: any) {
-      setServerError(err.message);
+    } catch (err: unknown) {
+      setServerError(err instanceof Error ? err.message : "Failed to log in");
     } finally {
       setIsLoading(false);
     }
