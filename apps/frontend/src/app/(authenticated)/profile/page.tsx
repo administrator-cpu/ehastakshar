@@ -73,10 +73,10 @@ export default function ProfilePage() {
           {/* Profile Card Skeleton */}
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <div className="h-32 bg-slate-200 animate-pulse"></div>
-            
+
             <div className="px-8 pb-8 relative">
               <div className="absolute -top-12 border-4 border-white bg-slate-200 animate-pulse w-24 h-24 rounded-full shadow-md"></div>
-              
+
               <div className="pt-16 pb-6 border-b border-slate-100 flex flex-col gap-2">
                 <div className="h-8 bg-slate-200 rounded animate-pulse w-48 mb-2"></div>
                 <div className="h-4 bg-slate-200 rounded animate-pulse w-64"></div>
@@ -84,7 +84,7 @@ export default function ProfilePage() {
 
               <div className="py-6 space-y-6">
                 <div className="h-6 bg-slate-200 rounded animate-pulse w-40 mb-2"></div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 h-24 animate-pulse"></div>
                   <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 h-24 animate-pulse"></div>
@@ -108,7 +108,7 @@ export default function ProfilePage() {
         <div className="bg-red-50 text-red-600 p-8 rounded-3xl border border-red-200 text-center max-w-md w-full">
           <p className="font-semibold text-lg mb-2">Unable to load profile</p>
           <p className="text-sm opacity-80 mb-6">{error}</p>
-          <Link 
+          <Link
             href="/dashboard"
             className="inline-flex items-center text-red-700 hover:underline font-medium"
           >
@@ -139,7 +139,7 @@ export default function ProfilePage() {
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           {/* Cover Header */}
           <div className="h-32 bg-gradient-to-r from-teal-500 to-indigo-600"></div>
-          
+
           <div className="px-8 pb-8 relative">
             {/* Avatar */}
             <div className="absolute -top-12 border-4 border-white bg-slate-100 w-24 h-24 rounded-full flex items-center justify-center text-slate-400 shadow-md">
@@ -161,7 +161,7 @@ export default function ProfilePage() {
 
             <div className="py-6 space-y-6">
               <h3 className="text-lg font-semibold text-slate-900">Account Details</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 transition-colors hover:border-slate-300">
                   <div className="flex items-center text-slate-400 mb-2">
