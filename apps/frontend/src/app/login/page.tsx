@@ -50,7 +50,7 @@ export default function LoginPage() {
         throw new Error(result.error || "Failed to log in");
       }
 
-      router.push("/dashboard"); // Navigate to the protected page
+      window.location.href = "/dashboard"; // Navigate to the protected page using hard navigation to clear Next.js client cache
     } catch (err: unknown) {
       setServerError(err instanceof Error ? err.message : "Failed to log in");
     } finally {
