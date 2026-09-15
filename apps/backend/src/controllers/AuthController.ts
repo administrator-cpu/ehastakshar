@@ -118,9 +118,10 @@ export class AuthController {
 
       res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
         sameSite: "lax",
-        domain: env.COOKIE_DOMAIN,
+        domain: ".ehastakshar.in",
+        path: "/",
         maxAge: 15 * 60 * 1000, // 15 mins
       });
 
@@ -219,9 +220,10 @@ export class AuthController {
 
       res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
         sameSite: "lax",
-        domain: env.COOKIE_DOMAIN,
+        domain: env.COOKIE_DOMAIN || ".ehastakshar.in",
+        path: "/",
         maxAge: 15 * 60 * 1000,
       });
 
@@ -236,9 +238,10 @@ export class AuthController {
     try {
       res.clearCookie("token", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
         sameSite: "lax",
-        domain: env.COOKIE_DOMAIN,
+        domain: env.COOKIE_DOMAIN || ".ehastakshar.in",
+        path: "/",
       });
       res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
