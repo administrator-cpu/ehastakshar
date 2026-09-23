@@ -88,7 +88,7 @@ export class ESignController {
 
         // 4. Send Emails & Log Invite Sent
         for (const recipient of createdRecipients) {
-          const signingLink = `http://localhost:3000/sign/${recipient.secureToken}`;
+          const signingLink = `${env.FRONTEND_URL}/sign/${recipient.secureToken}`;
           // Send email using Resend
           await AuthService.sendInviteEmail({
             email: recipient.email,
