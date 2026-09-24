@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 import Webcam from "react-webcam";
 import imageCompression from "browser-image-compression";
 import SignatureModal from "./SignatureModal";
-import ConsentModal from "./ConsentModal";
 
 const PDFViewer = dynamic(() => import("@/app/(authenticated)/esign/send/digital/PDFViewer"), { ssr: false });
 
@@ -29,7 +28,7 @@ export default function SignerPortalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [step, setStep] = useState<"VIEW" | "OTP" | "GATHER" | "CONSENT" | "SIGN" | "SUCCESS">("VIEW");
+  const [step, setStep] = useState<"VIEW" | "OTP" | "GATHER" | "SIGN" | "SUCCESS">("VIEW");
   const [otp, setOtp] = useState("");
   const [signToken, setSignToken] = useState("");
   const [signatureText, setSignatureText] = useState("");
@@ -41,8 +40,6 @@ export default function SignerPortalPage() {
   const [isSigning, setIsSigning] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  
-  const [consentTimestamp, setConsentTimestamp] = useState<string>("");
 
   // Requirements Gathering States
   const [locationDenied, setLocationDenied] = useState(false);
@@ -72,7 +69,7 @@ export default function SignerPortalPage() {
           if (data.requireGps || data.requirePhoto) {
             setStep("GATHER");
           } else {
-            setStep("CONSENT");
+            setStep("SIGN");
           }
         }
 
@@ -183,7 +180,7 @@ export default function SignerPortalPage() {
       if (docInfo?.requireGps || docInfo?.requirePhoto) {
         setStep("GATHER");
       } else {
-        setStep("CONSENT");
+        setStep("SIGN");
       }
       toast.success("Identity verified successfully");
     } catch (err) {
@@ -219,7 +216,7 @@ export default function SignerPortalPage() {
         }
       }
     }
-    setStep("CONSENT");
+    setStep("SIGN");
   }, [docInfo?.requirePhoto, webcamRef]);
 
   const submitSignature = async (sigText: string, sigBlob: Blob) => {
@@ -230,8 +227,6 @@ export default function SignerPortalPage() {
       formData.append("signToken", signToken);
       formData.append("signatureText", sigText);
       formData.append("signatureFile", sigBlob, "signature.png");
-      formData.append("consentGranted", "true");
-      formData.append("consentTimestamp", consentTimestamp);
 
       if (latitude && longitude) {
         formData.append("latitude", latitude.toString());
@@ -443,7 +438,7 @@ export default function SignerPortalPage() {
       </div>
 
       {/* Modals Container */}
-      {(step === "OTP" || step === "GATHER" || step === "CONSENT" || step === "SIGN") && !(locationDenied || cameraDenied) && (
+      {(step === "OTP" || step === "GATHER" || step === "SIGN") && !(locationDenied || cameraDenied) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
 
           {/* OTP Modal */}
@@ -555,17 +550,6 @@ export default function SignerPortalPage() {
                 </button>
               </div>
             </div>
-          )}
-
-          {/* Consent Modal */}
-          {step === "CONSENT" && (
-            <ConsentModal
-              recipientEmail={docInfo?.recipientEmail || ""}
-              onProceed={(timestamp) => {
-                setConsentTimestamp(timestamp);
-                setStep("SIGN");
-              }}
-            />
           )}
 
           {/* Sign Modal */}
