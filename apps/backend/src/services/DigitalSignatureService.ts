@@ -25,7 +25,15 @@ export class DigitalSignatureService {
     // 1. First, manipulate the PDF visually using pdf-lib
     // We ignore encryption to allow modifying PDFs that have owner passwords or prior signatures.
     const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
-    const pages = pdfDoc.getPages();
+    let pages;
+    try {
+      pages = pdfDoc.getPages();
+    } catch (err: any) {
+      if (err.message && err.message.includes('PDFDict')) {
+        throw new Error("The uploaded PDF has a corrupted or unsupported internal structure. Please open the PDF, select 'Print to PDF' or 'Save As', and try uploading the new flattened file.");
+      }
+      throw err;
+    }
     if (pages.length === 0) throw new Error("No pages found in PDF");
 
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
