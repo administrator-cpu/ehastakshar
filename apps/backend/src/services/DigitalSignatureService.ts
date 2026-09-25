@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { Worker } from 'worker_threads';
 
 import fs from 'fs';
 import path from 'path';
@@ -139,7 +140,6 @@ export class DigitalSignatureService {
         const p12Buffer = fs.readFileSync(p12Path);
         
         // Spawn Worker to handle the risky @signpdf parsing
-        const { Worker } = await import('worker_threads');
         // Resolving the worker path. In compiled dist/, it's pdfWorker.js. In ts-node, it's pdfWorker.ts.
         const workerPath = path.join(__dirname, __filename.endsWith('.ts') ? 'pdfWorker.ts' : 'pdfWorker.js');
         
