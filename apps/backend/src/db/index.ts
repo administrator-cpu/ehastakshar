@@ -7,4 +7,9 @@ const pool = new pg.Pool({
   connectionString: env.DATABASE_URL,
 });
 
+// Prevent unhandled errors from crashing the Node.js process if the DB disconnects
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});
+
 export const db = drizzle(pool, { schema });
