@@ -119,48 +119,85 @@ export class DigitalSignatureService {
     });
 
     // Save the PDF visually
-    // We strictly disable Object Streams because @signpdf/placeholder-plain cannot parse compressed xref tables.
     const visuallyModifiedPdfBytes = await pdfDoc.save({ useObjectStreams: false });
     const initialBuffer = Buffer.from(visuallyModifiedPdfBytes);
-
-    // 2. Add the cryptographic placeholder using @signpdf/utils
-    // This adds the /ByteRange dictionary and allocates 8192 bytes for the PKCS#7 signature
-    const pdfWithPlaceholder = plainAddPlaceholder({
-      pdfBuffer: initialBuffer as Buffer<ArrayBuffer>,
-      reason: 'Document e-Signature',
-      contactInfo: details.ipAddress || '0.0.0.0',
-      name: details.recipientName,
-      location: 'India',
-      signatureLength: 8192,
-    });
-
-    return Buffer.from(pdfWithPlaceholder);
+    
+    return initialBuffer;
   }
 
   /**
-   * Reads the P12 certificate and applies a cryptographic PKCS#7 signature
-   * to the allocated placeholder in the PDF.
+   * Spawns a worker thread to safely add the PKCS#7 placeholder and seal the document.
+   * This prevents malformed PDFs from causing infinite loops in the main event loop.
    */
-  static async sealDocument(pdfWithPlaceholderBuffer: Buffer): Promise<Buffer> {
-    try {
-      const p12Path = path.join(__dirname, '../assets/dev-cert.p12');
-      
-      if (!fs.existsSync(p12Path)) {
-        throw new Error('Development certificate (dev-cert.p12) not found in assets folder.');
+  static async sealDocument(pdfBuffer: Buffer, details: VisualSignatureDetails): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      try {
+        const p12Path = path.join(__dirname, '../assets/dev-cert.p12');
+        
+        if (!fs.existsSync(p12Path)) {
+          throw new Error('Development certificate (dev-cert.p12) not found in assets folder.');
+        }
+        
+        const p12Buffer = fs.readFileSync(p12Path);
+        
+        // Spawn Worker to handle the risky @signpdf parsing
+        const { Worker } = require('worker_threads');
+        // Resolving the worker path. In compiled dist/, it's pdfWorker.js. In ts-node, it's pdfWorker.ts.
+        const workerPath = path.join(__dirname, __filename.endsWith('.ts') ? 'pdfWorker.ts' : 'pdfWorker.js');
+        
+        let worker: any;
+        if (workerPath.endsWith('.ts')) {
+          // If running via tsx or ts-node during dev, we might need a workaround for worker_threads
+          // But usually we just compile to .js first. For now, we'll try to run the .ts directly if tsx is active
+          worker = new Worker(workerPath, {
+            workerData: {
+              pdfBuffer: Array.from(pdfBuffer),
+              details,
+              p12Buffer: Array.from(p12Buffer),
+              passphrase: 'password'
+            },
+            execArgv: process.execArgv.includes('--loader') || process.execArgv.some(a => a.includes('tsx')) ? process.execArgv : []
+          });
+        } else {
+          worker = new Worker(workerPath, {
+            workerData: {
+              pdfBuffer: Array.from(pdfBuffer),
+              details,
+              p12Buffer: Array.from(p12Buffer),
+              passphrase: 'password'
+            }
+          });
+        }
+
+        const timeout = setTimeout(() => {
+          worker.terminate();
+          reject(new Error("PDF signing timed out. The uploaded PDF may be malformed or corrupted. Please flatten the PDF or print to PDF and try again."));
+        }, 15000); // 15 seconds timeout
+
+        worker.on('message', (message: any) => {
+          clearTimeout(timeout);
+          if (message.success) {
+            resolve(Buffer.from(message.signedPdf));
+          } else {
+            reject(new Error(message.error || "Unknown worker error"));
+          }
+        });
+
+        worker.on('error', (error: any) => {
+          clearTimeout(timeout);
+          reject(error);
+        });
+
+        worker.on('exit', (code: number) => {
+          clearTimeout(timeout);
+          if (code !== 0) {
+            reject(new Error(`Worker stopped with exit code ${code}`));
+          }
+        });
+      } catch (error) {
+        logger.error({ err: error }, 'Cryptographic PDF sealing failed before worker');
+        reject(error);
       }
-      
-      const p12Buffer = fs.readFileSync(p12Path);
-      
-      // Sign the PDF
-      const signer = new P12Signer(p12Buffer, { passphrase: 'password' });
-      const signpdf = new SignPdf();
-      
-      const signedPdf = await signpdf.sign(pdfWithPlaceholderBuffer, signer);
-      
-      return signedPdf;
-    } catch (error) {
-      logger.error({ err: error }, 'Cryptographic PDF sealing failed');
-      throw error;
-    }
+    });
   }
 }

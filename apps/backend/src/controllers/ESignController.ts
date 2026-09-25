@@ -387,16 +387,17 @@ export class ESignController {
       }
       const fileBuffer = Buffer.concat(chunks);
 
-      // 2. Manipulate PDF - Cryptographic Sealing
+      // 2. Manipulate PDF - Visuals and Cryptographic Sealing
       const ipAddress = (req.ip || req.socket.remoteAddress || "").toString();
-      const pdfWithPlaceholder = await DigitalSignatureService.addSignaturePlaceholder(fileBuffer, {
+      const details = {
         transactionId: document.transactionId,
         recipientName: recipient.name,
         signatureUrl: req.body.signatureUrl,
         ipAddress: ipAddress
-      });
-
-      const signedPdfBuffer = await DigitalSignatureService.sealDocument(pdfWithPlaceholder);
+      };
+      
+      const visuallyModifiedPdf = await DigitalSignatureService.addSignaturePlaceholder(fileBuffer, details);
+      const signedPdfBuffer = await DigitalSignatureService.sealDocument(visuallyModifiedPdf, details);
 
       // 3. Upload signed document back
       // Using a temporary stream to upload the Buffer
