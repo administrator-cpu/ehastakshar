@@ -1,5 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import { Worker } from 'worker_threads';
+import { fork } from 'child_process';
 
 import fs from 'fs';
 import path from 'path';
@@ -139,40 +139,32 @@ export class DigitalSignatureService {
         
         const p12Buffer = fs.readFileSync(p12Path);
         
-        // Spawn Worker to handle the risky @signpdf parsing
-        // Resolving the worker path. In compiled dist/, it's pdfWorker.js. In ts-node, it's pdfWorker.ts.
+        // Spawn child process to handle the risky @signpdf parsing safely
         const workerPath = path.join(__dirname, __filename.endsWith('.ts') ? 'pdfWorker.ts' : 'pdfWorker.js');
         
-        let worker: any;
+        let child: any;
         if (workerPath.endsWith('.ts')) {
-          // If running via tsx or ts-node during dev, we might need a workaround for worker_threads
-          // But usually we just compile to .js first. For now, we'll try to run the .ts directly if tsx is active
-          worker = new Worker(workerPath, {
-            workerData: {
-              pdfBuffer: Array.from(pdfBuffer),
-              details,
-              p12Buffer: Array.from(p12Buffer),
-              passphrase: 'password'
-            },
-            execArgv: process.execArgv.includes('--loader') || process.execArgv.some(a => a.includes('tsx')) ? process.execArgv : []
-          });
+          // If running via tsx or ts-node during dev, pass execArgv
+          const execArgv = process.execArgv.includes('--loader') || process.execArgv.some(a => a.includes('tsx')) ? process.execArgv : [];
+          child = fork(workerPath, [], { execArgv });
         } else {
-          worker = new Worker(workerPath, {
-            workerData: {
-              pdfBuffer: Array.from(pdfBuffer),
-              details,
-              p12Buffer: Array.from(p12Buffer),
-              passphrase: 'password'
-            }
-          });
+          child = fork(workerPath);
         }
 
+        // Send the data via IPC
+        child.send({
+          pdfBuffer: Array.from(pdfBuffer),
+          details,
+          p12Buffer: Array.from(p12Buffer),
+          passphrase: 'password'
+        });
+
         const timeout = setTimeout(() => {
-          worker.terminate();
+          child.kill('SIGKILL'); // Hard kill the child process if it hangs
           reject(new Error("PDF signing timed out. The uploaded PDF may be malformed or corrupted. Please flatten the PDF or print to PDF and try again."));
         }, 15000); // 15 seconds timeout
 
-        worker.on('message', (message: any) => {
+        child.on('message', (message: any) => {
           clearTimeout(timeout);
           if (message.success) {
             resolve(Buffer.from(message.signedPdf));
@@ -181,15 +173,15 @@ export class DigitalSignatureService {
           }
         });
 
-        worker.on('error', (error: any) => {
+        child.on('error', (error: any) => {
           clearTimeout(timeout);
           reject(error);
         });
 
-        worker.on('exit', (code: number) => {
+        child.on('exit', (code: number, signal: string) => {
           clearTimeout(timeout);
-          if (code !== 0) {
-            reject(new Error(`Worker stopped with exit code ${code}`));
+          if (code !== 0 && signal !== 'SIGKILL') {
+            reject(new Error(`Worker stopped with exit code ${code} and signal ${signal}`));
           }
         });
       } catch (error) {
