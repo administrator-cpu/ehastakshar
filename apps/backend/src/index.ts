@@ -1,5 +1,14 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
+
+process.on('uncaughtException', (err) => {
+  console.error('FATAL UNCAUGHT EXCEPTION:', err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('FATAL UNHANDLED REJECTION:', reason);
+  process.exit(1);
+});
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.routes.js";
