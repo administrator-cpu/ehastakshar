@@ -6,6 +6,15 @@ import { logger } from "../utils/logger.js";
 import { AuthService } from "../services/AuthService.js";
 import { env } from "../config/env.js";
 
+const isProduction = env.NODE_ENV === "production";
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: "lax" as const,
+  domain: isProduction ? (env.COOKIE_DOMAIN || ".ehastakshar.in") : undefined,
+  path: "/",
+});
+
 const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50),
   lastName: z.string().min(1, "Last name is required").max(50),
@@ -117,11 +126,7 @@ export class AuthController {
       const token = AuthService.generateToken(user.id);
 
       res.cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        domain: ".ehastakshar.in",
-        path: "/",
+        ...getCookieOptions(),
         maxAge: 15 * 60 * 1000, // 15 mins
       });
 
@@ -219,12 +224,8 @@ export class AuthController {
       const token = AuthService.generateToken(user.id);
 
       res.cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        domain: env.COOKIE_DOMAIN || ".ehastakshar.in",
-        path: "/",
-        maxAge: 15 * 60 * 1000,
+        ...getCookieOptions(),
+        maxAge: 15 * 60 * 1000, // 15 mins
       });
 
       res.status(200).json({ message: "Login successful" });
@@ -236,13 +237,7 @@ export class AuthController {
 
   static async logout(req: Request, res: Response): Promise<void> {
     try {
-      res.clearCookie("token", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        domain: env.COOKIE_DOMAIN || ".ehastakshar.in",
-        path: "/",
-      });
+      res.clearCookie("token", getCookieOptions());
       res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Logout error");
