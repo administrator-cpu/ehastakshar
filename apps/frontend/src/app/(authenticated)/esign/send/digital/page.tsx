@@ -43,6 +43,10 @@ export default function SendDigitalESignPage() {
   const [isSending, setIsSending] = useState(false);
   const [showReview, setShowReview] = useState(false);
   
+  const [activeTab, setActiveTab] = useState<'recipient' | 'security'>('recipient');
+  const [enableWatermark, setEnableWatermark] = useState(false);
+  const [watermarkText, setWatermarkText] = useState("");
+  
   // PDF state
   const [numPages, setNumPages] = useState<number>(0);
   
@@ -103,6 +107,10 @@ export default function SendDigitalESignPage() {
     formData.append("title", title);
     // Send recipients as a JSON string
     formData.append("recipients", JSON.stringify(recipients.map(r => ({ name: r.name, email: r.email, requireGps: r.requireGps, requirePhoto: r.requirePhoto }))));
+    
+    if (enableWatermark && watermarkText.trim()) {
+      formData.append("watermark", watermarkText.trim());
+    }
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/send`, {
@@ -216,15 +224,34 @@ export default function SendDigitalESignPage() {
                 file={file} 
                 numPages={numPages} 
                 onDocumentLoadSuccess={onDocumentLoadSuccess} 
+                watermarkText={enableWatermark ? watermarkText : undefined}
               />
             </div>
           )}
         </div>
 
-        {/* Right Panel: Recipients Setup (Scrolls independently) */}
-        <div className="w-full lg:w-2/5 bg-white p-6 overflow-y-auto">
-          <div className="flex items-center space-x-3 mb-8 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
+        {/* Right Panel: Setup (Tabs: Recipients & Security) */}
+        <div className="w-full lg:w-2/5 bg-white flex flex-col border-l border-slate-200">
+          <div className="flex border-b border-slate-200">
+            <button 
+              onClick={() => setActiveTab('recipient')}
+              className={`flex-1 py-4 text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'recipient' ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50' : 'text-slate-500 hover:text-slate-700 bg-white'}`}
+            >
+              Recipient
+            </button>
+            <button 
+              onClick={() => setActiveTab('security')}
+              className={`flex-1 py-4 text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'security' ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50' : 'text-slate-500 hover:text-slate-700 bg-white'}`}
+            >
+              Security
+            </button>
+          </div>
+
+          <div className="p-6 overflow-y-auto flex-1">
+            {activeTab === 'recipient' && (
+              <>
+                <div className="flex items-center space-x-3 mb-8 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
               <Users size={20} />
             </div>
             <div>
@@ -272,6 +299,49 @@ export default function SendDigitalESignPage() {
             <UserPlus size={18} className="mr-2" />
             {recipients.length === 0 ? "Add Signer" : "Add Another Signer"}
           </button>
+              </>
+            )}
+
+            {activeTab === 'security' && (
+              <div className="animate-in fade-in duration-300">
+                <div className="flex items-center space-x-3 mb-8 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
+                    <Eye size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">Security Settings</h2>
+                    <p className="text-sm text-slate-500">Configure document protection.</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-slate-800 text-sm">Add Watermark</h3>
+                      <p className="text-xs text-slate-500 mt-1">Stamp text across all pages</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={enableWatermark} onChange={(e) => setEnableWatermark(e.target.checked)} />
+                      <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
+                    </label>
+                  </div>
+
+                  {enableWatermark && (
+                    <div className="mt-5 pt-5 border-t border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Watermark Text</label>
+                      <input 
+                        type="text" 
+                        value={watermarkText}
+                        onChange={(e) => setWatermarkText(e.target.value)}
+                        placeholder="e.g., CONFIDENTIAL"
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

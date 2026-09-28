@@ -25,6 +25,7 @@ interface PDFViewerProps {
   signatureImage?: string | null;
   signaturePositions?: SignaturePosition[];
   onSignaturePositionsChange?: (positions: SignaturePosition[]) => void;
+  watermarkText?: string;
 }
 
 const PdfSkeleton = () => (
@@ -127,7 +128,7 @@ const DraggableSignatureBox = ({
   );
 };
 
-export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signatureImage, signaturePositions, onSignaturePositionsChange }: PDFViewerProps) {
+export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signatureImage, signaturePositions, onSignaturePositionsChange, watermarkText }: PDFViewerProps) {
   if (!file) return null;
 
   return (
@@ -174,6 +175,24 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signa
                     }
                   }}
                 />
+              )}
+
+              {/* Watermark Preview Overlay */}
+              {watermarkText && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden select-none">
+                  <div 
+                    className="text-slate-900/10 font-bold text-center break-words"
+                    style={{
+                      fontSize: '80px',
+                      transform: 'rotate(-45deg)',
+                      textTransform: 'uppercase',
+                      maxWidth: '120%',
+                      lineHeight: '1.1'
+                    }}
+                  >
+                    {watermarkText}
+                  </div>
+                </div>
               )}
             </div>
           );
