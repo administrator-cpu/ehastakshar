@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UploadCloud, Users, X, AlertTriangle, Send, Eye, UserPlus, MapPin, Camera } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Users, X, AlertTriangle, Send, Eye, UserPlus, MapPin, Camera, Trash2, Pencil } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { generateInviteEmailHtml } from '@/utils/emailTemplates';
 
@@ -53,6 +53,7 @@ export default function SendDigitalESignPage() {
   // Modal state
   const [showAddSigner, setShowAddSigner] = useState(false);
   const [newSigner, setNewSigner] = useState({ name: '', email: '', requireGps: false, requirePhoto: false });
+  const [editSignerId, setEditSignerId] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,14 +82,32 @@ export default function SendDigitalESignPage() {
     e.preventDefault();
     if (!newSigner.name || !newSigner.email) return;
     
-    setRecipients([...recipients, { 
-      id: Math.random().toString(), 
-      ...newSigner 
-    }]);
+    if (editSignerId) {
+      setRecipients(recipients.map(r => 
+        r.id === editSignerId ? { ...r, ...newSigner } : r
+      ));
+    } else {
+      setRecipients([...recipients, { 
+        id: Math.random().toString(), 
+        ...newSigner 
+      }]);
+    }
     
     // Reset and close
     setNewSigner({ name: '', email: '', requireGps: false, requirePhoto: false });
+    setEditSignerId(null);
     setShowAddSigner(false);
+  };
+
+  const handleEditSigner = (recipient: Recipient) => {
+    setEditSignerId(recipient.id);
+    setNewSigner({
+      name: recipient.name,
+      email: recipient.email,
+      requireGps: recipient.requireGps,
+      requirePhoto: recipient.requirePhoto
+    });
+    setShowAddSigner(true);
   };
 
   const removeRecipient = (id: string) => {
@@ -211,21 +230,23 @@ export default function SendDigitalESignPage() {
               />
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center bg-slate-200/50 rounded-2xl overflow-y-auto shadow-inner relative p-4 pb-20">
+            <div className="flex-1 flex flex-col relative min-h-0 bg-slate-200/50 rounded-2xl shadow-inner overflow-hidden">
               <button 
                 onClick={() => { setFile(null); setTitle(""); setNumPages(0); }}
-                className="fixed lg:absolute top-8 right-8 lg:top-4 lg:right-4 z-10 bg-slate-900/60 hover:bg-slate-900 text-white p-2 rounded-full backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                className="absolute top-4 right-4 z-20 bg-rose-500/90 hover:bg-rose-600 text-white p-2 rounded-full backdrop-blur-md shadow-sm transition-all active:scale-95 cursor-pointer"
                 title="Remove Document"
               >
-                <X size={20} />
+                <Trash2 size={18} />
               </button>
               
-              <PDFViewer 
-                file={file} 
-                numPages={numPages} 
-                onDocumentLoadSuccess={onDocumentLoadSuccess} 
-                watermarkText={enableWatermark ? watermarkText : undefined}
-              />
+              <div className="flex-1 overflow-y-auto p-4 pb-20 flex flex-col items-center">
+                <PDFViewer 
+                  file={file} 
+                  numPages={numPages} 
+                  onDocumentLoadSuccess={onDocumentLoadSuccess} 
+                  watermarkText={enableWatermark ? watermarkText : undefined}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -276,12 +297,22 @@ export default function SendDigitalESignPage() {
                     </div>
                   </div>
                 </div>
-                <button 
-                  onClick={() => removeRecipient(recipient.id)}
-                  className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-slate-200 cursor-pointer"
-                >
-                  <X size={16} />
-                </button>
+                <div className="flex space-x-1">
+                  <button 
+                    onClick={() => handleEditSigner(recipient)}
+                    className="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-50 active:scale-95 cursor-pointer"
+                    title="Edit Signer"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button 
+                    onClick={() => removeRecipient(recipient.id)}
+                    className="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-lg hover:bg-rose-50 active:scale-95 cursor-pointer"
+                    title="Remove Signer"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             ))}
             
@@ -350,8 +381,8 @@ export default function SendDigitalESignPage() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-xl font-bold text-slate-900">Add Signer</h3>
-              <button onClick={() => setShowAddSigner(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 rounded-md hover:bg-slate-200 transition-colors">
+              <h3 className="text-xl font-bold text-slate-900">{editSignerId ? "Edit Signer" : "Add Signer"}</h3>
+              <button onClick={() => { setShowAddSigner(false); setEditSignerId(null); setNewSigner({ name: '', email: '', requireGps: false, requirePhoto: false }); }} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 rounded-md hover:bg-slate-200 transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -422,7 +453,7 @@ export default function SendDigitalESignPage() {
               <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end space-x-3">
                 <button 
                   type="button"
-                  onClick={() => setShowAddSigner(false)}
+                  onClick={() => { setShowAddSigner(false); setEditSignerId(null); setNewSigner({ name: '', email: '', requireGps: false, requirePhoto: false }); }}
                   className="px-6 py-2.5 rounded-full font-medium text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
                 >
                   Cancel
@@ -432,7 +463,7 @@ export default function SendDigitalESignPage() {
                   disabled={!newSigner.name || !newSigner.email}
                   className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-full font-medium transition-all shadow-sm active:scale-[0.97] cursor-pointer"
                 >
-                  Add
+                  {editSignerId ? "Save" : "Add"}
                 </button>
               </div>
             </form>

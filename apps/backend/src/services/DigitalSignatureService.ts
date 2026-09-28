@@ -65,7 +65,7 @@ export class DigitalSignatureService {
         } else {
           embeddedSignatureImage = await pdfDoc.embedJpg(imageArrayBuffer);
         }
-        signatureDims = embeddedSignatureImage.scaleToFit(targetImgWidth, 100);
+        signatureDims = embeddedSignatureImage.scaleToFit(targetImgWidth, 45);
       } catch (err) {
         logger.error({ err }, "Failed to embed signature image in PDF for digital signing");
       }

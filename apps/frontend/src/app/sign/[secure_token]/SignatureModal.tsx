@@ -47,24 +47,40 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
       const ctx = canvas.getContext("2d");
       if (!ctx) return reject("Canvas ctx not found");
 
+      // Use a massive scale for crisp resolution (e.g. 160px font)
+      const scale = 8;
+      const fontSize = 20 * scale; 
       const fontFamily = selectedFont.family.split(',')[0];
-      ctx.font = `20px ${fontFamily}`;
       
+      // Set font to measure exactly
+      ctx.font = `${fontSize}px ${fontFamily}`;
       const metrics = ctx.measureText(typedName);
-      const width = metrics.width;
       
-      canvas.width = Math.max(width + 10, 20); // Exact width + 5px buffer on each side
-      canvas.height = 30; // Enough for a 20px cursive font
+      // Calculate precise physical bounding box
+      const fontHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      const fontWidth = metrics.actualBoundingBoxRight + metrics.actualBoundingBoxLeft;
+      
+      // Add a small 5% buffer so tails/loops don't get clipped
+      const padY = Math.max(fontHeight * 0.05, 5 * scale);
+      const padX = Math.max(fontWidth * 0.05, 5 * scale);
+      
+      // Fallback width/height if metrics are 0 (e.g., empty string)
+      canvas.width = Math.max(fontWidth + padX * 2, 20 * scale);
+      canvas.height = Math.max(fontHeight + padY * 2, 20 * scale);
 
-      // Re-set context properties after canvas resize
-      ctx.font = `20px ${fontFamily}`;
+      // Re-set context properties (resizing canvas wipes them)
+      ctx.font = `${fontSize}px ${fontFamily}`;
       ctx.fillStyle = "transparent";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#000000";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
       
-      ctx.fillText(typedName, canvas.width / 2, canvas.height / 2);
+      ctx.fillStyle = "#000000";
+      ctx.textBaseline = "alphabetic";
+      
+      // Draw text exactly at the measured offsets
+      const x = padX + metrics.actualBoundingBoxLeft;
+      const y = padY + metrics.actualBoundingBoxAscent;
+      
+      ctx.fillText(typedName, x, y);
 
       canvas.toBlob((blob) => {
         if (blob) resolve(blob);
