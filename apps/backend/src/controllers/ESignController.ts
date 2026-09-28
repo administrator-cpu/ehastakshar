@@ -405,11 +405,22 @@ export class ESignController {
 
       // 2. Manipulate PDF - Visuals and Cryptographic Sealing
       const ipAddress = (req.ip || req.socket.remoteAddress || "").toString();
+      
+      let positions = undefined;
+      if (req.body.positions) {
+        try {
+          positions = JSON.parse(req.body.positions);
+        } catch (e) {
+          logger.error({ err: e }, "Failed to parse signature positions");
+        }
+      }
+
       const details = {
         transactionId: document.transactionId,
         recipientName: recipient.name,
         signatureUrl: req.body.signatureUrl,
-        ipAddress: ipAddress
+        ipAddress: ipAddress,
+        positions: positions
       };
       
       const visuallyModifiedPdf = await DigitalSignatureService.addSignaturePlaceholder(fileBuffer, details);

@@ -6,8 +6,8 @@ import { logger } from "../utils/logger.js";
 import { generateInviteEmailHtml, generateCompletionEmailHtml } from "../utils/emailTemplates.js";
 
 import { sendEmail } from "./EmailService.js";
-// JWT Expiration for short-lived access
-const JWT_EXPIRES_IN = "15m";
+// JWT Expiration for access token
+const JWT_EXPIRES_IN = "7d";
 
 export class AuthService {
   /**

@@ -14,6 +14,7 @@ export interface VisualSignatureDetails {
   recipientName: string;
   signatureUrl?: string;
   ipAddress?: string;
+  positions?: { pageNumber: number; pctX: number; pctY: number }[];
 }
 
 export class DigitalSignatureService {
@@ -84,16 +85,12 @@ export class DigitalSignatureService {
     const totalHeight = imgHeight + textHeight + (innerPadding * 3);
     
     const padding = 20;
-    
-    pages.forEach(page => {
-      const { width } = page.getSize();
-      const boxX = width - boxWidth - padding;
-      const boxY = padding; // Bottom right corner
-      
+
+    const drawSignatureOnPage = (page: any, x: number, y: number) => {
       // Draw the visual border box
       page.drawRectangle({
-        x: boxX,
-        y: boxY,
+        x: x,
+        y: y,
         width: boxWidth,
         height: totalHeight,
         borderColor: rgb(0.2, 0.2, 0.2),
@@ -104,18 +101,18 @@ export class DigitalSignatureService {
       // Draw image if exists
       if (embeddedSignatureImage) {
         page.drawImage(embeddedSignatureImage, {
-          x: boxX + (boxWidth - imgWidth) / 2,
-          y: boxY + textHeight + (innerPadding * 2),
+          x: x + (boxWidth - imgWidth) / 2,
+          y: y + textHeight + (innerPadding * 2),
           width: imgWidth,
           height: imgHeight,
         });
       }
 
       // Draw the text lines
-      let currentTextY = boxY + textHeight + innerPadding - 12;
+      let currentTextY = y + textHeight + innerPadding - 12;
       textLines.forEach((line, index) => {
         page.drawText(line, {
-          x: boxX + innerPadding,
+          x: x + innerPadding,
           y: currentTextY,
           size: 8,
           font: index === 0 ? boldFont : font,
@@ -123,7 +120,34 @@ export class DigitalSignatureService {
         });
         currentTextY -= 12;
       });
-    });
+    };
+    
+    if (details.positions && details.positions.length > 0) {
+      details.positions.forEach(pos => {
+        if (pos.pageNumber >= 1 && pos.pageNumber <= pages.length) {
+          const page = pages[pos.pageNumber - 1];
+          if (!page) return;
+          const { width, height } = page.getSize();
+          
+          const boxX = pos.pctX * width;
+          // Calculate Y starting from bottom-left origin: 
+          // pctY is distance from top. (1 - pctY) is distance from bottom.
+          // boxY should be the bottom edge of the box.
+          const boxY = height - (pos.pctY * height) - totalHeight;
+          
+          drawSignatureOnPage(page, boxX, boxY);
+        }
+      });
+    } else if (!details.positions) {
+      // Fallback: draw on bottom-right of every page if positions is undefined
+      pages.forEach(page => {
+        const { width } = page.getSize();
+        const boxX = width - boxWidth - padding;
+        const boxY = padding; // Bottom right corner
+        drawSignatureOnPage(page, boxX, boxY);
+      });
+    }
+    // If details.positions is [], we intentionally draw NO visual signature.
 
     // Save the PDF visually
     const visuallyModifiedPdfBytes = await pdfDoc.save({ useObjectStreams: false });

@@ -112,15 +112,21 @@ export default function SendDigitalESignPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send document");
+        let errData = { error: "Unknown backend error" };
+        try {
+          errData = await response.json();
+        } catch (e) {
+          errData = { error: `Status: ${response.status} ${response.statusText}` };
+        }
+        throw new Error(`Backend Error: ${errData.error || JSON.stringify(errData)}`);
       }
 
       const data = await response.json();
       toast.success("Document sent successfully!");
       router.push('/esign');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Error sending document. Please try again.");
+      toast.error(error.message || "Error sending document. Please try again.");
     } finally {
       setIsSending(false);
       setShowReview(false);

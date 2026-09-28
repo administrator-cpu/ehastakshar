@@ -11,10 +11,19 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
+export interface SignaturePosition {
+  pageNumber: number;
+  pctX: number;
+  pctY: number;
+}
+
 interface PDFViewerProps {
   file: File | null;
   numPages: number;
   onDocumentLoadSuccess: (data: { numPages: number }) => void;
+  signatureImage?: string | null;
+  signaturePositions?: SignaturePosition[];
+  onSignaturePositionsChange?: (positions: SignaturePosition[]) => void;
 }
 
 const PdfSkeleton = () => (
@@ -31,7 +40,85 @@ const PdfSkeleton = () => (
   </div>
 );
 
-export default function PDFViewer({ file, numPages, onDocumentLoadSuccess }: PDFViewerProps) {
+const DraggableSignatureBox = ({ 
+  initialPctX, 
+  initialPctY, 
+  signatureImage, 
+  onUpdate, 
+  onRemove 
+}: { 
+  initialPctX: number, 
+  initialPctY: number, 
+  signatureImage: string, 
+  onUpdate: (pctX: number, pctY: number) => void,
+  onRemove: () => void 
+}) => {
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [pos, setPos] = React.useState({ pctX: initialPctX, pctY: initialPctY });
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !containerRef.current?.parentElement) return;
+      const parentRect = containerRef.current.parentElement.getBoundingClientRect();
+      let newX = e.clientX - parentRect.left - (containerRef.current.offsetWidth / 2);
+      let newY = e.clientY - parentRect.top - (containerRef.current.offsetHeight / 2);
+      
+      newX = Math.max(0, Math.min(newX, parentRect.width - containerRef.current.offsetWidth));
+      newY = Math.max(0, Math.min(newY, parentRect.height - containerRef.current.offsetHeight));
+      
+      const newPctX = newX / parentRect.width;
+      const newPctY = newY / parentRect.height;
+      setPos({ pctX: newPctX, pctY: newPctY });
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        onUpdate(pos.pctX, pos.pctY);
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, pos, onUpdate]);
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseDown={(e) => {
+        if ((e.target as HTMLElement).closest('.delete-btn')) return;
+        setIsDragging(true);
+      }}
+      style={{
+        position: 'absolute',
+        left: `${pos.pctX * 100}%`,
+        top: `${pos.pctY * 100}%`,
+        width: 140,
+        cursor: isDragging ? 'grabbing' : 'grab',
+        touchAction: 'none'
+      }}
+      className="bg-white/90 border-2 border-dashed border-teal-500 shadow-xl p-2 z-50 group hover:border-solid transition-all"
+    >
+      <button 
+        onClick={onRemove}
+        className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10 text-sm font-bold"
+      >
+        ×
+      </button>
+      <div className="text-[10px] font-bold text-teal-700 mb-1 border-b border-teal-200 pb-1 text-center">Your Signature</div>
+      <img src={signatureImage} alt="Signature" className="w-full h-auto pointer-events-none" />
+    </div>
+  );
+};
+
+export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signatureImage, signaturePositions, onSignaturePositionsChange }: PDFViewerProps) {
   if (!file) return null;
 
   return (
@@ -42,18 +129,46 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess }: PDF
         loading={<PdfSkeleton />}
         className="flex flex-col items-center w-full"
       >
-        {Array.from(new Array(numPages), (el, index) => (
-          <div key={`page_${index + 1}`} className="mb-10 shadow-2xl ring-1 ring-slate-900/5 overflow-hidden bg-white w-max mx-auto transition-all min-h-[848px] min-w-[600px] flex items-center justify-center">
-            <Page
-              pageNumber={index + 1}
-              renderTextLayer={true}
-              renderAnnotationLayer={false}
-              width={600}
-              className="max-w-full"
-              loading={<PdfSkeleton />}
-            />
-          </div>
-        ))}
+        {Array.from(new Array(numPages), (el, index) => {
+          const pageNumber = index + 1;
+          const pos = signaturePositions?.find(p => p.pageNumber === pageNumber);
+
+          return (
+            <div key={`page_${pageNumber}`} className="mb-10 shadow-2xl ring-1 ring-slate-900/5 overflow-hidden bg-white w-max mx-auto transition-all min-h-[848px] min-w-[600px] flex items-center justify-center relative">
+              <Page
+                pageNumber={pageNumber}
+                renderTextLayer={true}
+                renderAnnotationLayer={false}
+                width={600}
+                className="max-w-full relative pointer-events-none select-none"
+                loading={<PdfSkeleton />}
+              />
+              
+              {/* Signature Overlay */}
+              {signatureImage && pos && onSignaturePositionsChange && (
+                <DraggableSignatureBox
+                  initialPctX={pos.pctX}
+                  initialPctY={pos.pctY}
+                  signatureImage={signatureImage}
+                  onUpdate={(pctX, pctY) => {
+                    if (signaturePositions) {
+                      const newPositions = signaturePositions.map(p => 
+                        p.pageNumber === pageNumber ? { ...p, pctX, pctY } : p
+                      );
+                      onSignaturePositionsChange(newPositions);
+                    }
+                  }}
+                  onRemove={() => {
+                    if (signaturePositions) {
+                      const newPositions = signaturePositions.filter(p => p.pageNumber !== pageNumber);
+                      onSignaturePositionsChange(newPositions);
+                    }
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
       </Document>
     </div>
   );
