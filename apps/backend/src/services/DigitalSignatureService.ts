@@ -52,7 +52,7 @@ export class DigitalSignatureService {
     let signatureDims = { width: 0, height: 0 };
     
     const boxWidth = 140;
-    const innerPadding = 2;
+    const innerPadding = 1;
     const targetImgWidth = boxWidth - (innerPadding * 2);
     
     if (details.signatureUrl) {
@@ -85,9 +85,6 @@ export class DigitalSignatureService {
     const padding = 20;
 
     const drawSignatureOnPage = (page: any, x: number, y: number) => {
-      // Background box removed for transparent signature
-
-
       // Draw image if exists
       if (embeddedSignatureImage) {
         page.drawImage(embeddedSignatureImage, {

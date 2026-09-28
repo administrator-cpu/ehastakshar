@@ -44,20 +44,26 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
   const generateTypedSignature = async (): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement("canvas");
-      canvas.width = 600;
-      canvas.height = 200;
       const ctx = canvas.getContext("2d");
       if (!ctx) return reject("Canvas ctx not found");
 
-      // Draw text
+      const fontFamily = selectedFont.family.split(',')[0];
+      ctx.font = `20px ${fontFamily}`;
+      
+      const metrics = ctx.measureText(typedName);
+      const width = metrics.width;
+      
+      canvas.width = Math.max(width + 10, 20); // Exact width + 5px buffer on each side
+      canvas.height = 30; // Enough for a 20px cursive font
+
+      // Re-set context properties after canvas resize
+      ctx.font = `20px ${fontFamily}`;
       ctx.fillStyle = "transparent";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#000000";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       
-      // Load font trick by rendering it to DOM first (handled by style tag below)
-      ctx.font = `60px ${selectedFont.family.split(',')[0]}`;
       ctx.fillText(typedName, canvas.width / 2, canvas.height / 2);
 
       canvas.toBlob((blob) => {
