@@ -114,15 +114,14 @@ const DraggableSignatureBox = ({
         width: 140,
         touchAction: 'none'
       }}
-      className="bg-white/90 border-2 border-dashed border-teal-500 shadow-xl p-2 z-50 group hover:border-solid transition-all select-none cursor-grab active:cursor-grabbing"
+      className=" border-2 border-dashed border-teal-500  p-2 z-50 group hover:border-solid transition-all select-none cursor-grab active:cursor-grabbing"
     >
       <button
         onClick={onRemove}
-        className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10"
+        className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10 cursor-pointer"
       >
         <Trash2 size={14} />
       </button>
-      <div className="text-[10px] font-bold text-teal-700 mb-1 border-b border-teal-200 pb-1 text-center select-none pointer-events-none">Your Signature</div>
       <img src={signatureImage} alt="Signature" className="w-full h-auto pointer-events-none select-none" draggable={false} />
     </div>
   );

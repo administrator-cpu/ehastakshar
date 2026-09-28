@@ -76,9 +76,7 @@ export class DigitalSignatureService {
     
     // We calculate height based on the text lines we want to add
     const textLines = [
-      `Digitally signed by: ${details.recipientName}`,
-      `Date: ${formattedDate} IST`,
-      `Txn ID: ${details.transactionId}`,
+      `Date: ${formattedDate} IST`
     ];
     
     const textHeight = textLines.length * 12;
