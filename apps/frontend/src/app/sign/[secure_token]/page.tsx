@@ -40,6 +40,7 @@ export default function SignerPortalPage() {
   const [isSigning, setIsSigning] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [hasConsented, setHasConsented] = useState(false);
 
   // Requirements Gathering States
   const [locationDenied, setLocationDenied] = useState(false);
@@ -168,7 +169,7 @@ export default function SignerPortalPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, otp })
+        body: JSON.stringify({ token, otp, consentGiven: true })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Invalid OTP");
@@ -482,12 +483,28 @@ export default function SignerPortalPage() {
               </div>
 
               <div className="bg-slate-50 p-4 -mx-8 -mb-8 mt-8 border-t border-slate-100 flex flex-col space-y-4">
-                <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+                <div className="flex items-start space-x-3 text-left">
+                  <div className="pt-0.5">
+                    <input 
+                      type="checkbox"
+                      id="consent-checkbox"
+                      checked={hasConsented}
+                      onChange={(e) => setHasConsented(e.target.checked)}
+                      disabled={isSendingOtp || isVerifying}
+                      className="w-4 h-4 text-teal-600 bg-white border-slate-300 rounded focus:ring-teal-500 cursor-pointer disabled:opacity-50"
+                    />
+                  </div>
+                  <label htmlFor="consent-checkbox" className="text-[11px] text-slate-500 leading-relaxed cursor-pointer select-none">
+                    I confirm that I have reviewed the document and agree to its contents. I voluntarily authorize the electronic execution of this document through OTP-based authentication and confirm that the OTP entered by me represents my intent to sign.
+                  </label>
+                </div>
+
+                <p className="text-[11px] text-slate-500 text-center leading-relaxed mt-2">
                   By proceeding, I agree to the <a href="#" className="text-teal-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-teal-600 hover:underline">Privacy Policy</a>
                 </p>
                 <button
                   onClick={verifyOtp}
-                  disabled={otp.length !== 6 || isVerifying || isSendingOtp}
+                  disabled={otp.length !== 6 || isVerifying || isSendingOtp || !hasConsented}
                   className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
                 >
                   {isVerifying ? "Verifying..." : "Verify"}

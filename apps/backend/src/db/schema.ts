@@ -45,6 +45,8 @@ export const documentRecipients = pgTable("document_recipients", {
   secureToken: varchar("secure_token", { length: 100 }).notNull().unique(),
   requireGps: boolean("require_gps").default(false).notNull(),
   requirePhoto: boolean("require_photo").default(false).notNull(),
+  consentGiven: boolean("consent_given").default(false).notNull(),
+  consentGivenAt: timestamp("consent_given_at"),
   signatureText: varchar("signature_text", { length: 255 }),
   signedAt: timestamp("signed_at"),
 });
