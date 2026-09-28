@@ -4,6 +4,7 @@ import React from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { Trash2 } from 'lucide-react';
 
 // Set up the PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -53,67 +54,76 @@ const DraggableSignatureBox = ({
   onUpdate: (pctX: number, pctY: number) => void,
   onRemove: () => void 
 }) => {
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [pos, setPos] = React.useState({ pctX: initialPctX, pctY: initialPctY });
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const posRef = React.useRef({ pctX: initialPctX, pctY: initialPctY });
 
   React.useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging || !containerRef.current?.parentElement) return;
+    // Keep internal ref in sync if parent changes positions
+    posRef.current = { pctX: initialPctX, pctY: initialPctY };
+    if (containerRef.current) {
+      containerRef.current.style.left = `${initialPctX * 100}%`;
+      containerRef.current.style.top = `${initialPctY * 100}%`;
+    }
+  }, [initialPctX, initialPctY]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.delete-btn')) return;
+    
+    // Prevent default text selection behavior
+    e.preventDefault();
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!containerRef.current?.parentElement) return;
       const parentRect = containerRef.current.parentElement.getBoundingClientRect();
-      let newX = e.clientX - parentRect.left - (containerRef.current.offsetWidth / 2);
-      let newY = e.clientY - parentRect.top - (containerRef.current.offsetHeight / 2);
+      
+      let newX = moveEvent.clientX - parentRect.left - (containerRef.current.offsetWidth / 2);
+      let newY = moveEvent.clientY - parentRect.top - (containerRef.current.offsetHeight / 2);
       
       newX = Math.max(0, Math.min(newX, parentRect.width - containerRef.current.offsetWidth));
       newY = Math.max(0, Math.min(newY, parentRect.height - containerRef.current.offsetHeight));
       
       const newPctX = newX / parentRect.width;
       const newPctY = newY / parentRect.height;
-      setPos({ pctX: newPctX, pctY: newPctY });
+      
+      // Update DOM directly for smooth 60fps dragging without React re-renders
+      posRef.current = { pctX: newPctX, pctY: newPctY };
+      containerRef.current.style.left = `${newPctX * 100}%`;
+      containerRef.current.style.top = `${newPctY * 100}%`;
     };
 
     const handleMouseUp = () => {
-      if (isDragging) {
-        setIsDragging(false);
-        onUpdate(pos.pctX, pos.pctY);
-      }
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-    return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      
+      // Commit the final position to parent state once dragging ends
+      onUpdate(posRef.current.pctX, posRef.current.pctY);
     };
-  }, [isDragging, pos, onUpdate]);
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   return (
     <div
       ref={containerRef}
-      onMouseDown={(e) => {
-        if ((e.target as HTMLElement).closest('.delete-btn')) return;
-        setIsDragging(true);
-      }}
+      onMouseDown={handleMouseDown}
       style={{
         position: 'absolute',
-        left: `${pos.pctX * 100}%`,
-        top: `${pos.pctY * 100}%`,
+        left: `${initialPctX * 100}%`,
+        top: `${initialPctY * 100}%`,
         width: 140,
-        cursor: isDragging ? 'grabbing' : 'grab',
         touchAction: 'none'
       }}
-      className="bg-white/90 border-2 border-dashed border-teal-500 shadow-xl p-2 z-50 group hover:border-solid transition-all"
+      className="bg-white/90 border-2 border-dashed border-teal-500 shadow-xl p-2 z-50 group hover:border-solid transition-all select-none cursor-grab active:cursor-grabbing"
     >
       <button 
         onClick={onRemove}
-        className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10 text-sm font-bold"
+        className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10"
       >
-        ×
+        <Trash2 size={14} />
       </button>
-      <div className="text-[10px] font-bold text-teal-700 mb-1 border-b border-teal-200 pb-1 text-center">Your Signature</div>
-      <img src={signatureImage} alt="Signature" className="w-full h-auto pointer-events-none" />
+      <div className="text-[10px] font-bold text-teal-700 mb-1 border-b border-teal-200 pb-1 text-center select-none pointer-events-none">Your Signature</div>
+      <img src={signatureImage} alt="Signature" className="w-full h-auto pointer-events-none select-none" draggable={false} />
     </div>
   );
 };
