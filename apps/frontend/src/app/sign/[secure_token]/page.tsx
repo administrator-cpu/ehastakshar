@@ -28,7 +28,7 @@ export default function SignerPortalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [step, setStep] = useState<"VIEW" | "OTP" | "GATHER" | "SIGN" | "SUCCESS">("VIEW");
+  const [step, setStep] = useState<"VIEW" | "OTP" | "GATHER" | "SIGN" | "PLACE_SIGNATURE" | "SUCCESS">("VIEW");
   const [otp, setOtp] = useState("");
   const [signToken, setSignToken] = useState("");
   const [signatureText, setSignatureText] = useState("");
@@ -40,6 +40,11 @@ export default function SignerPortalPage() {
   const [isSigning, setIsSigning] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [hasConsented, setHasConsented] = useState(false);
+
+  const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null);
+  const [signatureImageUrl, setSignatureImageUrl] = useState<string | null>(null);
+  const [signaturePositions, setSignaturePositions] = useState<{ pageNumber: number, pctX: number, pctY: number }[]>([]);
 
   // Requirements Gathering States
   const [locationDenied, setLocationDenied] = useState(false);
@@ -168,7 +173,7 @@ export default function SignerPortalPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, otp })
+        body: JSON.stringify({ token, otp, consentGiven: true })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Invalid OTP");
@@ -219,14 +224,33 @@ export default function SignerPortalPage() {
     setStep("SIGN");
   }, [docInfo?.requirePhoto, webcamRef]);
 
-  const submitSignature = async (sigText: string, sigBlob: Blob) => {
+  const confirmSignatureLocal = (sigText: string, sigBlob: Blob) => {
+    setSignatureText(sigText);
+    setSignatureBlob(sigBlob);
+    setSignatureImageUrl(URL.createObjectURL(sigBlob));
+
+    // Initialize positions: one on each page
+    const initialPositions = Array.from({ length: numPages }, (_, i) => ({
+      pageNumber: i + 1,
+      pctX: 0.65,
+      pctY: 0.85
+    }));
+    setSignaturePositions(initialPositions);
+
+    setStep("PLACE_SIGNATURE");
+  };
+
+  const submitFinalSignature = async () => {
+    if (!signatureBlob || !signatureText) return;
     setIsSigning(true);
     try {
       const formData = new FormData();
       formData.append("token", token);
       formData.append("signToken", signToken);
-      formData.append("signatureText", sigText);
-      formData.append("signatureFile", sigBlob, "signature.png");
+      formData.append("signatureText", signatureText);
+      formData.append("signatureFile", signatureBlob, "signature.png");
+
+      formData.append("positions", JSON.stringify(signaturePositions));
 
       if (latitude && longitude) {
         formData.append("latitude", latitude.toString());
@@ -248,7 +272,7 @@ export default function SignerPortalPage() {
       setStep("SUCCESS");
       toast.success("Document signed successfully!");
     } catch (err) {
-      toast.error(err instanceof Error ? err instanceof Error ? err.message : String(err) : "Signing failed");
+      toast.error(err instanceof Error ? err.message : String(err) || "Signing failed");
     } finally {
       setIsSigning(false);
     }
@@ -413,6 +437,9 @@ export default function SignerPortalPage() {
                     file={memoizedPdfFile as File}
                     numPages={numPages}
                     onDocumentLoadSuccess={({ numPages }: { numPages: number }) => setNumPages(numPages)}
+                    signatureImage={step === "PLACE_SIGNATURE" ? signatureImageUrl : null}
+                    signaturePositions={step === "PLACE_SIGNATURE" ? signaturePositions : undefined}
+                    onSignaturePositionsChange={step === "PLACE_SIGNATURE" ? setSignaturePositions : undefined}
                   />
                 </div>
               )}
@@ -431,6 +458,22 @@ export default function SignerPortalPage() {
                     <ChevronRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* Confirm Placement Button */}
+            {step === "PLACE_SIGNATURE" && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:bottom-8 z-50 animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out">
+                <button
+                  onClick={submitFinalSignature}
+                  disabled={isSigning}
+                  className="relative cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 rounded-full font-bold shadow-2xl shadow-teal-900/30 flex items-center space-x-3 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed border-2 border-teal-500"
+                >
+                  <span className="relative z-10 tracking-wide text-sm uppercase whitespace-nowrap">
+                    {isSigning ? "Signing Document..." : signaturePositions.length === 0 ? "Sign Without Visual Mark" : "Confirm & Sign"}
+                  </span>
+                  <CheckCircle size={20} className="relative z-10" />
+                </button>
               </div>
             )}
           </div>
@@ -482,12 +525,28 @@ export default function SignerPortalPage() {
               </div>
 
               <div className="bg-slate-50 p-4 -mx-8 -mb-8 mt-8 border-t border-slate-100 flex flex-col space-y-4">
-                <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+                <div className="flex items-start space-x-3 text-left">
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      id="consent-checkbox"
+                      checked={hasConsented}
+                      onChange={(e) => setHasConsented(e.target.checked)}
+                      disabled={isSendingOtp || isVerifying}
+                      className="w-4 h-4 text-teal-600 bg-white border-slate-300 rounded focus:ring-teal-500 cursor-pointer disabled:opacity-50"
+                    />
+                  </div>
+                  <label htmlFor="consent-checkbox" className="text-[11px] text-slate-500 leading-relaxed cursor-pointer select-none">
+                    I confirm that I have reviewed the document and agree to its contents. I voluntarily authorize the electronic execution of this document through OTP-based authentication and confirm that the OTP entered by me represents my intent to sign.
+                  </label>
+                </div>
+
+                <p className="text-[11px] text-slate-500 text-center leading-relaxed mt-2">
                   By proceeding, I agree to the <a href="#" className="text-teal-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-teal-600 hover:underline">Privacy Policy</a>
                 </p>
                 <button
                   onClick={verifyOtp}
-                  disabled={otp.length !== 6 || isVerifying || isSendingOtp}
+                  disabled={otp.length !== 6 || isVerifying || isSendingOtp || !hasConsented}
                   className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
                 >
                   {isVerifying ? "Verifying..." : "Verify"}
@@ -554,10 +613,10 @@ export default function SignerPortalPage() {
 
           {/* Sign Modal */}
           {step === "SIGN" && (
-            <SignatureModal 
+            <SignatureModal
               onCancel={() => setStep("VIEW")}
-              onConfirm={submitSignature}
-              isSigning={isSigning}
+              onConfirm={confirmSignatureLocal}
+              isSigning={false}
               initialName={docInfo?.recipientName}
             />
           )}

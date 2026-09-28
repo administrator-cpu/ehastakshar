@@ -296,11 +296,16 @@ export class ESignController {
    */
   static async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
-      const { token, otp } = req.body;
+      const { token, otp, consentGiven } = req.body;
       const recipient = await DocumentRecipientRepository.findBySecureToken(token);
       
       if (!recipient) {
         res.status(400).json({ error: "Invalid token" });
+        return;
+      }
+
+      if (!consentGiven) {
+        res.status(400).json({ error: "Consent is required to verify OTP" });
         return;
       }
 
@@ -316,8 +321,19 @@ export class ESignController {
         return;
       }
 
+      // Record consent in DB
+      await DocumentRecipientRepository.recordConsent(recipient.id);
+
       // Clear the OTP
       await OtpRepository.deleteByEmail(recipient.email);
+
+      await AuditLogRepository.logEvent({
+        documentId: recipient.documentId,
+        recipientId: recipient.id,
+        action: "CONSENT_GIVEN",
+        ipAddress: req.ip || req.socket.remoteAddress || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
 
       await AuditLogRepository.logEvent({
         documentId: recipient.documentId,
@@ -389,11 +405,22 @@ export class ESignController {
 
       // 2. Manipulate PDF - Visuals and Cryptographic Sealing
       const ipAddress = (req.ip || req.socket.remoteAddress || "").toString();
+      
+      let positions = undefined;
+      if (req.body.positions) {
+        try {
+          positions = JSON.parse(req.body.positions);
+        } catch (e) {
+          logger.error({ err: e }, "Failed to parse signature positions");
+        }
+      }
+
       const details = {
         transactionId: document.transactionId,
         recipientName: recipient.name,
         signatureUrl: req.body.signatureUrl,
-        ipAddress: ipAddress
+        ipAddress: ipAddress,
+        positions: positions
       };
       
       const visuallyModifiedPdf = await DigitalSignatureService.addSignaturePlaceholder(fileBuffer, details);

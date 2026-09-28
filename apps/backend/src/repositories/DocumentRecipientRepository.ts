@@ -40,4 +40,11 @@ export class DocumentRecipientRepository {
       signedAt: new Date() 
     }).where(eq(documentRecipients.id, id));
   }
+
+  static async recordConsent(id: string): Promise<void> {
+    await db.update(documentRecipients).set({
+      consentGiven: true,
+      consentGivenAt: new Date()
+    }).where(eq(documentRecipients.id, id));
+  }
 }
