@@ -41,18 +41,18 @@ const PdfSkeleton = () => (
   </div>
 );
 
-const DraggableSignatureBox = ({ 
-  initialPctX, 
-  initialPctY, 
-  signatureImage, 
-  onUpdate, 
-  onRemove 
-}: { 
-  initialPctX: number, 
-  initialPctY: number, 
-  signatureImage: string, 
+const DraggableSignatureBox = ({
+  initialPctX,
+  initialPctY,
+  signatureImage,
+  onUpdate,
+  onRemove
+}: {
+  initialPctX: number,
+  initialPctY: number,
+  signatureImage: string,
   onUpdate: (pctX: number, pctY: number) => void,
-  onRemove: () => void 
+  onRemove: () => void
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const posRef = React.useRef({ pctX: initialPctX, pctY: initialPctY });
@@ -68,23 +68,23 @@ const DraggableSignatureBox = ({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.delete-btn')) return;
-    
+
     // Prevent default text selection behavior
     e.preventDefault();
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       if (!containerRef.current?.parentElement) return;
       const parentRect = containerRef.current.parentElement.getBoundingClientRect();
-      
+
       let newX = moveEvent.clientX - parentRect.left - (containerRef.current.offsetWidth / 2);
       let newY = moveEvent.clientY - parentRect.top - (containerRef.current.offsetHeight / 2);
-      
+
       newX = Math.max(0, Math.min(newX, parentRect.width - containerRef.current.offsetWidth));
       newY = Math.max(0, Math.min(newY, parentRect.height - containerRef.current.offsetHeight));
-      
+
       const newPctX = newX / parentRect.width;
       const newPctY = newY / parentRect.height;
-      
+
       // Update DOM directly for smooth 60fps dragging without React re-renders
       posRef.current = { pctX: newPctX, pctY: newPctY };
       containerRef.current.style.left = `${newPctX * 100}%`;
@@ -94,7 +94,7 @@ const DraggableSignatureBox = ({
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-      
+
       // Commit the final position to parent state once dragging ends
       onUpdate(posRef.current.pctX, posRef.current.pctY);
     };
@@ -116,7 +116,7 @@ const DraggableSignatureBox = ({
       }}
       className="bg-white/90 border-2 border-dashed border-teal-500 shadow-xl p-2 z-50 group hover:border-solid transition-all select-none cursor-grab active:cursor-grabbing"
     >
-      <button 
+      <button
         onClick={onRemove}
         className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10"
       >
@@ -153,7 +153,7 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signa
                 className="max-w-full relative pointer-events-none select-none"
                 loading={<PdfSkeleton />}
               />
-              
+
               {/* Signature Overlay */}
               {signatureImage && pos && onSignaturePositionsChange && (
                 <DraggableSignatureBox
@@ -162,7 +162,7 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signa
                   signatureImage={signatureImage}
                   onUpdate={(pctX, pctY) => {
                     if (signaturePositions) {
-                      const newPositions = signaturePositions.map(p => 
+                      const newPositions = signaturePositions.map(p =>
                         p.pageNumber === pageNumber ? { ...p, pctX, pctY } : p
                       );
                       onSignaturePositionsChange(newPositions);

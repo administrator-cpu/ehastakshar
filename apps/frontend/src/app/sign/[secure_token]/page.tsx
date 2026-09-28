@@ -44,7 +44,7 @@ export default function SignerPortalPage() {
 
   const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null);
   const [signatureImageUrl, setSignatureImageUrl] = useState<string | null>(null);
-  const [signaturePositions, setSignaturePositions] = useState<{pageNumber: number, pctX: number, pctY: number}[]>([]);
+  const [signaturePositions, setSignaturePositions] = useState<{ pageNumber: number, pctX: number, pctY: number }[]>([]);
 
   // Requirements Gathering States
   const [locationDenied, setLocationDenied] = useState(false);
@@ -228,7 +228,7 @@ export default function SignerPortalPage() {
     setSignatureText(sigText);
     setSignatureBlob(sigBlob);
     setSignatureImageUrl(URL.createObjectURL(sigBlob));
-    
+
     // Initialize positions: one on each page
     const initialPositions = Array.from({ length: numPages }, (_, i) => ({
       pageNumber: i + 1,
@@ -236,7 +236,7 @@ export default function SignerPortalPage() {
       pctY: 0.85
     }));
     setSignaturePositions(initialPositions);
-    
+
     setStep("PLACE_SIGNATURE");
   };
 
@@ -249,7 +249,7 @@ export default function SignerPortalPage() {
       formData.append("signToken", signToken);
       formData.append("signatureText", signatureText);
       formData.append("signatureFile", signatureBlob, "signature.png");
-      
+
       formData.append("positions", JSON.stringify(signaturePositions));
 
       if (latitude && longitude) {
@@ -460,7 +460,7 @@ export default function SignerPortalPage() {
                 </div>
               </div>
             )}
-            
+
             {/* Confirm Placement Button */}
             {step === "PLACE_SIGNATURE" && (
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:bottom-8 z-50 animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out">
@@ -527,7 +527,7 @@ export default function SignerPortalPage() {
               <div className="bg-slate-50 p-4 -mx-8 -mb-8 mt-8 border-t border-slate-100 flex flex-col space-y-4">
                 <div className="flex items-start space-x-3 text-left">
                   <div className="pt-0.5">
-                    <input 
+                    <input
                       type="checkbox"
                       id="consent-checkbox"
                       checked={hasConsented}
@@ -613,7 +613,7 @@ export default function SignerPortalPage() {
 
           {/* Sign Modal */}
           {step === "SIGN" && (
-            <SignatureModal 
+            <SignatureModal
               onCancel={() => setStep("VIEW")}
               onConfirm={confirmSignatureLocal}
               isSigning={false}

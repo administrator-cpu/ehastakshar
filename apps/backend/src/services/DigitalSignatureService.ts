@@ -87,16 +87,8 @@ export class DigitalSignatureService {
     const padding = 20;
 
     const drawSignatureOnPage = (page: any, x: number, y: number) => {
-      // Draw the visual border box
-      page.drawRectangle({
-        x: x,
-        y: y,
-        width: boxWidth,
-        height: totalHeight,
-        borderColor: rgb(0.2, 0.2, 0.2),
-        borderWidth: 1,
-        color: rgb(0.98, 0.98, 0.98)
-      });
+      // Background box removed for transparent signature
+
 
       // Draw image if exists
       if (embeddedSignatureImage) {
@@ -110,12 +102,12 @@ export class DigitalSignatureService {
 
       // Draw the text lines
       let currentTextY = y + textHeight + innerPadding - 12;
-      textLines.forEach((line, index) => {
+      textLines.forEach((line) => {
         page.drawText(line, {
           x: x + innerPadding,
           y: currentTextY,
           size: 8,
-          font: index === 0 ? boldFont : font,
+          font: font,
           color: rgb(0, 0, 0),
         });
         currentTextY -= 12;
