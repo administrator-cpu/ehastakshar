@@ -495,7 +495,7 @@ export class ESignController {
               toEmail: sender.email,
               ccEmails,
               documentName: document.title,
-              downloadLink: document.fileUrl,
+              downloadLink: newFileUrl,
             }).catch(err => logger.error({ err }, "Failed to send completion email"));
           }
         }
