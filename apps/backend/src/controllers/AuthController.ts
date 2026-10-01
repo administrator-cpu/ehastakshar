@@ -44,6 +44,14 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+const changeTempPasswordSchema = z.object({
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+});
+
 const resendOtpSchema = z.object({
   email: z.email(),
 });
@@ -325,7 +333,10 @@ export class AuthController {
         maxAge: 15 * 60 * 1000, // 15 mins
       });
 
-      res.status(200).json({ message: "Login successful" });
+      res.status(200).json({ 
+        message: "Login successful", 
+        mustChangePassword: user.mustChangePassword 
+      });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Login error");
       res.status(500).json({ error: "Internal server error" });
@@ -338,6 +349,38 @@ export class AuthController {
       res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Logout error");
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  static async changeTempPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const parsed = changeTempPasswordSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({ error: parsed.error.format() });
+        return;
+      }
+      
+      const userId = (req as any).userId;
+      if (!userId) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+
+      const { newPassword } = parsed.data;
+
+      const user = await UserRepository.findById(userId);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const passwordHash = await AuthService.hashString(newPassword);
+      await UserRepository.updatePasswordAndClearFlag(userId, passwordHash);
+
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      logger.error({ err: error, path: req.originalUrl }, "Change temp password error");
       res.status(500).json({ error: "Internal server error" });
     }
   }

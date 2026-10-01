@@ -9,12 +9,16 @@ export default function Sidebar() {
   const [isAdmin, setIsAdmin] = React.useState(false);
 
   React.useEffect(() => {
-    // Check user role
+    // Check user role and password change requirement
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/user/me`, {
       credentials: 'include'
     })
       .then(res => res.json())
       .then(data => {
+        if (data.profile?.mustChangePassword) {
+          window.location.href = "/force-change-password";
+          return;
+        }
         if (data.profile?.role === 'ADMIN') {
           setIsAdmin(true);
         }

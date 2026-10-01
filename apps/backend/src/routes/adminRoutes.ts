@@ -8,5 +8,6 @@ const router = Router();
 router.use(verifyToken, requireAdmin as any);
 
 router.get("/customers", AdminController.getCustomers);
+router.post("/customers", AdminController.addCustomer);
 
 export default router;

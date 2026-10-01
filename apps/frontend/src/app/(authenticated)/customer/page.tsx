@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, FileText, Search } from 'lucide-react';
+import { Users, FileText, Search, Plus, X, RefreshCw, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 
@@ -22,6 +22,49 @@ export default function AdminCustomersPage() {
   const [searchInput, setSearchInput] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+  // Add Customer State
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ fullName: '', email: '', phone: '', tempPassword: '' });
+
+  const generateTempPassword = () => {
+    const charset = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz234679";
+    const randomValues = crypto.getRandomValues(new Uint32Array(12));
+
+    return Array.from(randomValues, value => charset[value % charset.length]).join("");
+  };
+
+  const handleOpenAddCustomer = () => {
+    setNewCustomer({ fullName: '', email: '', phone: '', tempPassword: generateTempPassword() });
+    setIsAddCustomerOpen(true);
+  };
+
+  const handleAddCustomerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/admin/customers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newCustomer)
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to add customer');
+      }
+      
+      toast.success("Customer added successfully. An email has been sent.");
+      setIsAddCustomerOpen(false);
+      fetchCustomers();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add customer");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -82,6 +125,15 @@ export default function AdminCustomersPage() {
             <p className="mt-2 text-sm text-slate-500">
               Manage your platform users and view their eSign document activity.
             </p>
+          </div>
+          <div>
+            <button
+              onClick={handleOpenAddCustomer}
+              className="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all"
+            >
+              <Plus size={18} className="mr-2" />
+              Add Customer
+            </button>
           </div>
         </div>
 
@@ -207,6 +259,121 @@ export default function AdminCustomersPage() {
         </div>
 
       </div>
+
+      {/* Add Customer Modal */}
+      {isAddCustomerOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-slate-900/75 backdrop-blur-sm" onClick={() => !isSubmitting && setIsAddCustomerOpen(false)}></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            <div className="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="flex justify-between items-center mb-5">
+                  <h3 className="text-xl leading-6 font-bold text-slate-900">
+                    Add New Customer
+                  </h3>
+                  <button
+                    onClick={() => !isSubmitting && setIsAddCustomerOpen(false)}
+                    className="text-slate-400 hover:text-slate-500 focus:outline-none"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                
+                <form onSubmit={handleAddCustomerSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="fullName" className="block text-sm font-semibold text-slate-700">Full Name</label>
+                    <input
+                      type="text"
+                      id="fullName"
+                      required
+                      placeholder="e.g. Ajay Negi"
+                      value={newCustomer.fullName}
+                      onChange={(e) => setNewCustomer({...newCustomer, fullName: e.target.value})}
+                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-slate-700">Email Address</label>
+                    <input
+                      type="email"
+                      id="email"
+                      required
+                      placeholder="e.g. ajay@example.com"
+                      value={newCustomer.email}
+                      onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-semibold text-slate-700">Phone Number (Optional)</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      placeholder="e.g. 1234567890"
+                      value={newCustomer.phone}
+                      onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
+                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="tempPassword" className="block text-sm font-semibold text-slate-700">Temporary Password</label>
+                    <div className="mt-1.5 flex rounded-lg shadow-sm">
+                      <div className="relative flex items-stretch flex-grow focus-within:z-10">
+                        <input
+                          type="text"
+                          id="tempPassword"
+                          required
+                          readOnly
+                          value={newCustomer.tempPassword}
+                          className="block w-full border border-slate-300 rounded-none rounded-l-lg px-4 py-2.5 bg-slate-50 text-slate-900 font-mono text-sm focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNewCustomer({...newCustomer, tempPassword: generateTempPassword()})}
+                        className="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-lg text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      >
+                        <RefreshCw size={16} className="text-slate-400" />
+                        <span>Regenerate</span>
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500">
+                      An email will be sent to the customer with these login details. They will be forced to change this password on their first login.
+                    </p>
+                  </div>
+
+                  <div className="pt-4 flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => !isSubmitting && setIsAddCustomerOpen(false)}
+                      className="px-4 py-2.5 bg-white text-slate-700 text-sm font-medium border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none transition-all"
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="inline-flex justify-center items-center px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting && <Loader2 size={16} className="animate-spin mr-2" />}
+                      Add Customer
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

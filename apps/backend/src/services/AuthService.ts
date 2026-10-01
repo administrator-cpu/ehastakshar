@@ -120,4 +120,24 @@ export class AuthService {
     const html = generateCompletionEmailHtml({ documentName, link: downloadLink });
     await sendEmail({ toEmail, ccEmail: ccEmails, subject: "Document Completely Signed", htmlContent: html });
   }
+
+  /**
+   * Sends the welcome email for an admin-created customer.
+   */
+  static async sendWelcomeEmail(email: string, tempPassword: string): Promise<void> {
+    const html = `
+      <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #0D9488;">Welcome to Ehastakshar</h2>
+        <p>An administrator has created an account for you.</p>
+        <p>Your temporary login credentials are:</p>
+        <ul>
+          <li><strong>Email:</strong> ${email}</li>
+          <li><strong>Temporary Password:</strong> <span style="letter-spacing: 2px; font-family: monospace;">${tempPassword}</span></li>
+        </ul>
+        <p>For your security, you will be required to change this password on your first login.</p>
+        <p><a href="${env.FRONTEND_URL}/login" style="background: #0D9488; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Log In Now</a></p>
+      </div>
+    `;
+    await sendEmail({ toEmail: email, subject: "Welcome to Ehastakshar - Your Login Details", htmlContent: html });
+  }
 }
