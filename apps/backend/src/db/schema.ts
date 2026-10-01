@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, boolean, timestamp, pgEnum, jsonb } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -48,6 +48,7 @@ export const documentRecipients = pgTable("document_recipients", {
   consentGiven: boolean("consent_given").default(false).notNull(),
   consentGivenAt: timestamp("consent_given_at"),
   signatureText: varchar("signature_text", { length: 255 }),
+  signaturePositions: jsonb("signature_positions"),
   signedAt: timestamp("signed_at"),
 });
 

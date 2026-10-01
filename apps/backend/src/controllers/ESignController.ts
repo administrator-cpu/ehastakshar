@@ -66,7 +66,7 @@ export class ESignController {
         });
 
         // 2. Create Recipients
-        const newRecipientsData = recipients.map((r: { name: string; email: string; requireGps?: boolean; requirePhoto?: boolean }) => ({
+        const newRecipientsData = recipients.map((r: { name: string; email: string; requireGps?: boolean; requirePhoto?: boolean; signaturePositions?: any }) => ({
           documentId: newDocument.id,
           name: r.name,
           email: r.email,
@@ -74,6 +74,7 @@ export class ESignController {
           secureToken: crypto.randomBytes(32).toString("hex"),
           requireGps: r.requireGps || false,
           requirePhoto: r.requirePhoto || false,
+          signaturePositions: r.signaturePositions || [],
         }));
         
         const createdRecipients = await DocumentRecipientRepository.createMany(newRecipientsData);
@@ -150,7 +151,8 @@ export class ESignController {
         recipientEmail: recipient.email,
         status: recipient.status,
         requireGps: recipient.requireGps,
-        requirePhoto: recipient.requirePhoto
+        requirePhoto: recipient.requirePhoto,
+        signaturePositions: recipient.signaturePositions
       });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Error getting document by token");
@@ -406,14 +408,7 @@ export class ESignController {
       // 2. Manipulate PDF - Visuals and Cryptographic Sealing
       const ipAddress = (req.ip || req.socket.remoteAddress || "").toString();
       
-      let positions = undefined;
-      if (req.body.positions) {
-        try {
-          positions = JSON.parse(req.body.positions);
-        } catch (e) {
-          logger.error({ err: e }, "Failed to parse signature positions");
-        }
-      }
+      const positions = (recipient.signaturePositions as { pageNumber: number; pctX: number; pctY: number; }[]) || [];
 
       const details = {
         transactionId: document.transactionId,

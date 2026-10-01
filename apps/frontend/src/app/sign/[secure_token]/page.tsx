@@ -18,6 +18,7 @@ interface DocumentInfo {
   status: "PENDING" | "SIGNED";
   requireGps: boolean;
   requirePhoto: boolean;
+  signaturePositions?: { pageNumber: number, pctX: number, pctY: number }[];
 }
 
 export default function SignerPortalPage() {
@@ -229,13 +230,11 @@ export default function SignerPortalPage() {
     setSignatureBlob(sigBlob);
     setSignatureImageUrl(URL.createObjectURL(sigBlob));
 
-    // Initialize positions: one on each page
-    const initialPositions = Array.from({ length: numPages }, (_, i) => ({
-      pageNumber: i + 1,
-      pctX: 0.65,
-      pctY: 0.85
-    }));
-    setSignaturePositions(initialPositions);
+    if (docInfo?.signaturePositions && docInfo.signaturePositions.length > 0) {
+      setSignaturePositions(docInfo.signaturePositions);
+    } else {
+      setSignaturePositions([]);
+    }
 
     setStep("PLACE_SIGNATURE");
   };
@@ -439,7 +438,8 @@ export default function SignerPortalPage() {
                     onDocumentLoadSuccess={({ numPages }: { numPages: number }) => setNumPages(numPages)}
                     signatureImage={step === "PLACE_SIGNATURE" ? signatureImageUrl : null}
                     signaturePositions={step === "PLACE_SIGNATURE" ? signaturePositions : undefined}
-                    onSignaturePositionsChange={step === "PLACE_SIGNATURE" ? setSignaturePositions : undefined}
+                    onSignaturePositionsChange={undefined}
+                    isDraggable={false}
                   />
                 </div>
               )}
