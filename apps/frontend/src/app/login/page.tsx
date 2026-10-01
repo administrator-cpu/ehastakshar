@@ -89,9 +89,14 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block font-inter text-label-md font-semibold text-primary mb-1">
-              Password
-            </label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block font-inter text-label-md font-semibold text-primary">
+                Password
+              </label>
+              <Link href="/forgot-password" className="text-sm text-[#0D9488] hover:underline font-inter font-medium">
+                Forgot Password?
+              </Link>
+            </div>
             <PasswordInput
               {...register("password")}
               placeholder="Enter your password"
@@ -110,12 +115,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-sm font-inter text-on-surface-variant">
-          Don't have an account?{" "}
-          <Link href="/signup" className="text-secondary font-semibold hover:underline">
-            Sign up
-          </Link>
-        </p>
       </div>
     </div>
   );
