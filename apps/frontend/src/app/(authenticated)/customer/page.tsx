@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Users, FileText, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,10 +16,12 @@ interface Customer {
 }
 
 export default function AdminCustomersPage() {
+  const router = useRouter();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
     fetchCustomers();
@@ -30,21 +33,35 @@ export default function AdminCustomersPage() {
         credentials: 'include'
       });
       if (!res.ok) {
-        if (res.status === 403 || res.status === 401) {
-           toast.error("You do not have permission to view this page");
+        if (res.status === 401) {
+           toast.error("Please log in to access this page");
+           router.push("/login");
+           setIsAuthorized(false);
+           return;
+        }
+        if (res.status === 403) {
+           toast.error("You do not have permission to view the Admin portal");
+           router.push("/dashboard");
+           setIsAuthorized(false);
            return;
         }
         throw new Error('Failed to fetch customers');
       }
       const data = await res.json();
       setCustomers(data);
+      setIsAuthorized(true);
     } catch (error) {
       toast.error("Failed to load customers data");
       console.error(error);
+      setIsAuthorized(false);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (isAuthorized === false || isAuthorized === null) {
+    return null;
+  }
 
   const filteredCustomers = customers.filter(c => 
     c.name.toLowerCase().includes(appliedSearch.toLowerCase()) || 
