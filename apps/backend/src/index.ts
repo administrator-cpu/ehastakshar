@@ -15,6 +15,7 @@ import authRoutes from "./routes/auth.routes.js";
 import esignRoutes from "./routes/esign.routes.js";
 import alertRoutes from "./routes/alert.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import { verifyToken } from "./middlewares/auth.middleware.js";
 import { globalErrorHandler } from "./middlewares/error.middleware.js";
 import { otpLimiter } from "./middlewares/rateLimiter.middleware.js";
@@ -49,6 +50,9 @@ app.use("/api/esign", esignRoutes);
 
 // User Routes (Protected)
 app.use("/api/user", verifyToken, userRoutes);
+
+// Admin Routes (Protected)
+app.use("/api/admin", adminRoutes);
 
 // Health Check Route
 app.get('/', (req: Request, res: Response) => {

@@ -1,5 +1,7 @@
 import { pgTable, uuid, varchar, boolean, timestamp, pgEnum, jsonb } from "drizzle-orm/pg-core";
 
+export const userRoleEnum = pgEnum("user_role", ["CUSTOMER", "ADMIN"]);
+
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   firstName: varchar("first_name", { length: 50 }).notNull(),
@@ -7,6 +9,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).unique().notNull(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
   isEmailVerified: boolean("is_email_verified").default(false),
+  role: userRoleEnum("role").default("CUSTOMER").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
