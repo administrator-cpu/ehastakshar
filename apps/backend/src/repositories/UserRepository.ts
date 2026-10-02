@@ -29,4 +29,15 @@ export class UserRepository {
   static async markEmailAsVerified(email: string): Promise<void> {
     await db.update(users).set({ isEmailVerified: true }).where(eq(users.email, email));
   }
+
+  static async updatePassword(id: string, passwordHash: string): Promise<void> {
+    await db.update(users).set({ passwordHash }).where(eq(users.id, id));
+  }
+
+  static async updatePasswordAndClearFlag(id: string, passwordHash: string): Promise<void> {
+    await db.update(users).set({ 
+      passwordHash,
+      mustChangePassword: false 
+    }).where(eq(users.id, id));
+  }
 }

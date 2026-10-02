@@ -2,15 +2,35 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PenTool, Stamp, User } from 'lucide-react';
+import { Home, PenTool, Stamp, User, Users } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check user role and password change requirement
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/user/me`, {
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.profile?.mustChangePassword) {
+          window.location.href = "/force-change-password";
+          return;
+        }
+        if (data.profile?.role === 'ADMIN') {
+          setIsAdmin(true);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const links = [
     { href: '/dashboard', icon: Home, label: 'Dashboard' },
     { href: '/esign', icon: PenTool, label: 'eSign' },
     { href: '/stamp', icon: Stamp, label: 'E-Stamp' },
+    ...(isAdmin ? [{ href: '/customer', icon: Users, label: 'Customers' }] : []),
     { href: '/profile', icon: User, label: 'Profile' },
   ];
 

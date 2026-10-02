@@ -1,12 +1,17 @@
-import { pgTable, uuid, varchar, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, boolean, timestamp, pgEnum, jsonb, integer } from "drizzle-orm/pg-core";
+
+export const userRoleEnum = pgEnum("user_role", ["CUSTOMER", "ADMIN"]);
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   firstName: varchar("first_name", { length: 50 }).notNull(),
   lastName: varchar("last_name", { length: 50 }).notNull(),
   email: varchar("email", { length: 255 }).unique().notNull(),
+  phone: varchar("phone", { length: 20 }),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  mustChangePassword: boolean("must_change_password").default(false).notNull(),
   isEmailVerified: boolean("is_email_verified").default(false),
+  role: userRoleEnum("role").default("CUSTOMER").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -48,7 +53,9 @@ export const documentRecipients = pgTable("document_recipients", {
   consentGiven: boolean("consent_given").default(false).notNull(),
   consentGivenAt: timestamp("consent_given_at"),
   signatureText: varchar("signature_text", { length: 255 }),
+  signaturePositions: jsonb("signature_positions"),
   signedAt: timestamp("signed_at"),
+  sequenceOrder: integer("sequence_order").default(1).notNull(),
 });
 
 export const auditEvents = pgTable("audit_events", {

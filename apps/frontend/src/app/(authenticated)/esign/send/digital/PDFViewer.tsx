@@ -26,6 +26,9 @@ interface PDFViewerProps {
   signaturePositions?: SignaturePosition[];
   onSignaturePositionsChange?: (positions: SignaturePosition[]) => void;
   watermarkText?: string;
+  isDraggable?: boolean;
+  activeSignerName?: string;
+  onAddSignatureBox?: (pageNumber: number) => void;
 }
 
 const PdfSkeleton = () => (
@@ -42,18 +45,22 @@ const PdfSkeleton = () => (
   </div>
 );
 
-const DraggableSignatureBox = ({
+const SignatureBox = ({
   initialPctX,
   initialPctY,
   signatureImage,
+  activeSignerName,
+  isDraggable = true,
   onUpdate,
   onRemove
 }: {
   initialPctX: number,
   initialPctY: number,
-  signatureImage: string,
-  onUpdate: (pctX: number, pctY: number) => void,
-  onRemove: () => void
+  signatureImage?: string | null,
+  activeSignerName?: string,
+  isDraggable?: boolean,
+  onUpdate?: (pctX: number, pctY: number) => void,
+  onRemove?: () => void
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const posRef = React.useRef({ pctX: initialPctX, pctY: initialPctY });
@@ -68,6 +75,7 @@ const DraggableSignatureBox = ({
   }, [initialPctX, initialPctY]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (!isDraggable || !onUpdate) return;
     if ((e.target as HTMLElement).closest('.delete-btn')) return;
 
     // Prevent default text selection behavior
@@ -115,20 +123,41 @@ const DraggableSignatureBox = ({
         width: 140,
         touchAction: 'none'
       }}
-      className=" border-2 border-dashed border-teal-500  p-2 z-50 group hover:border-solid transition-all select-none cursor-grab active:cursor-grabbing"
+      className={`border-2 p-2 z-50 group transition-all select-none ${isDraggable ? 'border-dashed border-teal-500 hover:border-solid cursor-grab active:cursor-grabbing' : 'border-transparent cursor-default'}`}
     >
-      <button
-        onClick={onRemove}
-        className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10 cursor-pointer"
-      >
-        <Trash2 size={14} />
-      </button>
-      <img src={signatureImage} alt="Signature" className="w-full h-auto pointer-events-none select-none" draggable={false} />
+      {isDraggable && onRemove && (
+        <button
+          onClick={onRemove}
+          className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10 cursor-pointer"
+        >
+          <Trash2 size={14} />
+        </button>
+      )}
+      
+      {signatureImage ? (
+        <img src={signatureImage} alt="Signature" className="w-full h-auto pointer-events-none select-none" draggable={false} />
+      ) : (
+        <div className="w-full h-14 bg-teal-50 border-2 border-teal-200 text-teal-800 flex items-center justify-center flex-col rounded-md shadow-sm pointer-events-none text-center p-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600">Sign Here</span>
+          <span className="text-xs font-medium truncate w-full">{activeSignerName || 'Signer'}</span>
+        </div>
+      )}
     </div>
   );
 };
 
-export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signatureImage, signaturePositions, onSignaturePositionsChange, watermarkText }: PDFViewerProps) {
+export default function PDFViewer({ 
+  file, 
+  numPages, 
+  onDocumentLoadSuccess, 
+  signatureImage, 
+  signaturePositions, 
+  onSignaturePositionsChange, 
+  watermarkText,
+  isDraggable = true,
+  activeSignerName,
+  onAddSignatureBox
+}: PDFViewerProps) {
   if (!file) return null;
 
   return (
@@ -142,6 +171,8 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signa
         {Array.from(new Array(numPages), (el, index) => {
           const pageNumber = index + 1;
           const pos = signaturePositions?.find(p => p.pageNumber === pageNumber);
+          
+          const showAddButton = isDraggable && activeSignerName && !pos && onAddSignatureBox;
 
           return (
             <div key={`page_${pageNumber}`} className="mb-10 shadow-2xl ring-1 ring-slate-900/5 overflow-hidden bg-white w-max mx-auto transition-all min-h-[848px] min-w-[600px] flex items-center justify-center relative">
@@ -153,15 +184,29 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signa
                 className="max-w-full relative pointer-events-none select-none"
                 loading={<PdfSkeleton />}
               />
+              
+              {/* Add Signature Box Button (Placement Mode) */}
+              {showAddButton && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20 bg-slate-900/5">
+                  <button 
+                    onClick={() => onAddSignatureBox(pageNumber)}
+                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg flex items-center transform transition-transform hover:scale-105"
+                  >
+                    + Add Signature for {activeSignerName} here
+                  </button>
+                </div>
+              )}
 
               {/* Signature Overlay */}
-              {signatureImage && pos && onSignaturePositionsChange && (
-                <DraggableSignatureBox
+              {pos && (
+                <SignatureBox
                   initialPctX={pos.pctX}
                   initialPctY={pos.pctY}
                   signatureImage={signatureImage}
+                  activeSignerName={activeSignerName}
+                  isDraggable={isDraggable}
                   onUpdate={(pctX, pctY) => {
-                    if (signaturePositions) {
+                    if (signaturePositions && onSignaturePositionsChange) {
                       const newPositions = signaturePositions.map(p =>
                         p.pageNumber === pageNumber ? { ...p, pctX, pctY } : p
                       );
@@ -169,7 +214,7 @@ export default function PDFViewer({ file, numPages, onDocumentLoadSuccess, signa
                     }
                   }}
                   onRemove={() => {
-                    if (signaturePositions) {
+                    if (signaturePositions && onSignaturePositionsChange) {
                       const newPositions = signaturePositions.filter(p => p.pageNumber !== pageNumber);
                       onSignaturePositionsChange(newPositions);
                     }

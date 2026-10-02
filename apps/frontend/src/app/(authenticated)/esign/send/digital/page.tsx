@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UploadCloud, Users, X, AlertTriangle, Send, Eye, UserPlus, MapPin, Camera, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Users, X, AlertTriangle, Send, Eye, UserPlus, MapPin, Camera, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { generateInviteEmailHtml } from '@/utils/emailTemplates';
 
@@ -33,6 +33,7 @@ interface Recipient {
   email: string;
   requireGps: boolean;
   requirePhoto: boolean;
+  signaturePositions: any[];
 }
 
 export default function SendDigitalESignPage() {
@@ -49,6 +50,7 @@ export default function SendDigitalESignPage() {
   
   // PDF state
   const [numPages, setNumPages] = useState<number>(0);
+  const [activeSignerId, setActiveSignerId] = useState<string | null>(null);
   
   // Modal state
   const [showAddSigner, setShowAddSigner] = useState(false);
@@ -89,6 +91,7 @@ export default function SendDigitalESignPage() {
     } else {
       setRecipients([...recipients, { 
         id: Math.random().toString(), 
+        signaturePositions: [],
         ...newSigner 
       }]);
     }
@@ -110,8 +113,19 @@ export default function SendDigitalESignPage() {
     setShowAddSigner(true);
   };
 
+  const moveRecipient = (index: number, direction: 'up' | 'down') => {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === recipients.length - 1)) return;
+    
+    const newRecipients = [...recipients];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    [newRecipients[index], newRecipients[targetIndex]] = [newRecipients[targetIndex], newRecipients[index]];
+    setRecipients(newRecipients);
+  };
+
   const removeRecipient = (id: string) => {
     setRecipients(recipients.filter(r => r.id !== id));
+    if (activeSignerId === id) setActiveSignerId(null);
   };
 
   const handleSend = async () => {
@@ -124,8 +138,13 @@ export default function SendDigitalESignPage() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
-    // Send recipients as a JSON string
-    formData.append("recipients", JSON.stringify(recipients.map(r => ({ name: r.name, email: r.email, requireGps: r.requireGps, requirePhoto: r.requirePhoto }))));
+    formData.append("recipients", JSON.stringify(recipients.map(r => ({ 
+      name: r.name, 
+      email: r.email, 
+      requireGps: r.requireGps, 
+      requirePhoto: r.requirePhoto,
+      signaturePositions: r.signaturePositions
+    }))));
     
     if (enableWatermark && watermarkText.trim()) {
       formData.append("watermark", watermarkText.trim());
@@ -180,14 +199,24 @@ export default function SendDigitalESignPage() {
           </div>
         </div>
         
-        <button 
-          onClick={() => setShowReview(true)}
-          disabled={isSendDisabled}
-          className="flex items-center space-x-2 bg-teal-600 hover:bg-teal-700 active:scale-[0.97] transition-all duration-150 ease-out disabled:bg-slate-300 disabled:cursor-not-allowed disabled:active:scale-100 text-white px-8 py-2.5 rounded-full font-medium shadow-sm cursor-pointer"
-        >
-          <span>Review & Send</span>
-          <Send size={16} className="ml-1" />
-        </button>
+        <div className="flex flex-col items-end">
+          <button 
+            type="button"
+            onClick={() => {
+              const hasMissingSignatures = recipients.some(r => !r.signaturePositions || r.signaturePositions.length === 0);
+              if (hasMissingSignatures) {
+                toast.error("Please place at least 1 signature for each signer");
+                return;
+              }
+              setShowReview(true);
+            }}
+            disabled={isSendDisabled}
+            className="flex items-center space-x-2 bg-teal-600 hover:bg-teal-700 active:scale-[0.97] transition-all duration-150 ease-out disabled:bg-slate-300 disabled:cursor-not-allowed disabled:active:scale-100 text-white px-8 py-2.5 rounded-full font-medium shadow-sm cursor-pointer"
+          >
+            <span>Review & Send</span>
+            <Send size={16} className="ml-1" />
+          </button>
+        </div>
       </nav>
 
       {/* Main Split View - Fixed height container with scrolling children */}
@@ -230,14 +259,24 @@ export default function SendDigitalESignPage() {
               />
             </div>
           ) : (
-            <div className="flex-1 flex flex-col relative min-h-0 bg-slate-200/50 rounded-2xl shadow-inner overflow-hidden">
+              <div className="flex-1 flex flex-col relative min-h-0 bg-slate-200/50 rounded-2xl shadow-inner overflow-hidden">
               <button 
-                onClick={() => { setFile(null); setTitle(""); setNumPages(0); }}
+                onClick={() => { setFile(null); setTitle(""); setNumPages(0); setActiveSignerId(null); }}
                 className="absolute top-4 right-4 z-20 bg-rose-500/90 hover:bg-rose-600 text-white p-2 rounded-full backdrop-blur-md shadow-sm transition-all active:scale-95 cursor-pointer"
                 title="Remove Document"
               >
                 <Trash2 size={18} />
               </button>
+
+              {activeSignerId && (
+                <div className="absolute top-4 left-4 right-16 z-20 bg-teal-600/90 text-white px-4 py-2 rounded-lg backdrop-blur-md shadow-sm flex items-center justify-between animate-in slide-in-from-top-2">
+                  <div className="flex items-center space-x-2">
+                    <Pencil size={16} />
+                    <span className="text-sm font-semibold tracking-wide">Placing signature for <span className="font-bold underline underline-offset-2">{recipients.find(r => r.id === activeSignerId)?.name}</span></span>
+                  </div>
+                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveSignerId(null); }} className="text-xs font-bold bg-white text-teal-700 px-3 py-1 rounded-md hover:bg-teal-50 active:scale-95 transition-all cursor-pointer">Done</button>
+                </div>
+              )}
               
               <div className="flex-1 overflow-y-auto p-4 pb-20 flex flex-col items-center">
                 <PDFViewer 
@@ -245,6 +284,18 @@ export default function SendDigitalESignPage() {
                   numPages={numPages} 
                   onDocumentLoadSuccess={onDocumentLoadSuccess} 
                   watermarkText={enableWatermark ? watermarkText : undefined}
+                  isDraggable={!!activeSignerId}
+                  activeSignerName={activeSignerId ? recipients.find(r => r.id === activeSignerId)?.name : undefined}
+                  signaturePositions={activeSignerId ? recipients.find(r => r.id === activeSignerId)?.signaturePositions : []}
+                  onSignaturePositionsChange={activeSignerId ? (newPos) => {
+                    setRecipients(recipients.map(r => r.id === activeSignerId ? { ...r, signaturePositions: newPos } : r));
+                  } : undefined}
+                  onAddSignatureBox={activeSignerId ? (pageNumber) => {
+                    setRecipients(recipients.map(r => r.id === activeSignerId ? { 
+                      ...r, 
+                      signaturePositions: [...r.signaturePositions, { pageNumber, pctX: 0.5, pctY: 0.5 }] 
+                    } : r));
+                  } : undefined}
                 />
               </div>
             </div>
@@ -283,39 +334,70 @@ export default function SendDigitalESignPage() {
 
           <div className="space-y-4 mb-6">
             {recipients.map((recipient, index) => (
-              <div key={recipient.id} className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start justify-between group">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900 text-sm">{recipient.name}</p>
-                    <p className="text-slate-500 text-xs mt-0.5">{recipient.email}</p>
-                    <div className="flex space-x-2 mt-2">
-                      {recipient.requireGps && <span className="inline-flex items-center text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium"><MapPin size={10} className="mr-1"/> GPS Required</span>}
-                      {recipient.requirePhoto && <span className="inline-flex items-center text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium"><Camera size={10} className="mr-1"/> Photo Required</span>}
+              <div key={recipient.id} className="flex flex-col mb-2">
+                <div className="p-4 rounded-t-xl relative z-10 bg-slate-50 border border-slate-100 flex items-start justify-between group">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900 text-sm">{recipient.name}</p>
+                      <p className="text-slate-500 text-xs mt-0.5">{recipient.email}</p>
+                      <div className="flex space-x-2 mt-2">
+                        {recipient.requireGps && <span className="inline-flex items-center text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium"><MapPin size={10} className="mr-1"/> GPS Required</span>}
+                        {recipient.requirePhoto && <span className="inline-flex items-center text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium"><Camera size={10} className="mr-1"/> Photo Required</span>}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex space-x-1">
+                    <button 
+                      onClick={() => moveRecipient(index, 'up')}
+                      disabled={index === 0}
+                      className="text-slate-400 hover:text-slate-700 disabled:opacity-30 transition-colors p-2 rounded-lg hover:bg-slate-200 active:scale-95 cursor-pointer"
+                      title="Move Up"
+                    >
+                      <ArrowUp size={16} />
+                    </button>
+                    <button 
+                      onClick={() => moveRecipient(index, 'down')}
+                      disabled={index === recipients.length - 1}
+                      className="text-slate-400 hover:text-slate-700 disabled:opacity-30 transition-colors p-2 rounded-lg hover:bg-slate-200 active:scale-95 cursor-pointer"
+                      title="Move Down"
+                    >
+                      <ArrowDown size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleEditSigner(recipient)}
+                      className="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-50 active:scale-95 cursor-pointer"
+                      title="Edit Signer"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button 
+                      onClick={() => removeRecipient(recipient.id)}
+                      className="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-lg hover:bg-rose-50 active:scale-95 cursor-pointer"
+                      title="Remove Signer"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex space-x-1">
+                
+                <div className="bg-slate-100/50 border-x border-b border-slate-100 rounded-b-xl px-4 py-3 -mt-3 flex items-center justify-between">
+                  <div className="text-xs text-slate-500 font-medium">
+                    {recipient.signaturePositions.length} signature box{recipient.signaturePositions.length !== 1 && 'es'} placed
+                  </div>
                   <button 
-                    onClick={() => handleEditSigner(recipient)}
-                    className="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-50 active:scale-95 cursor-pointer"
-                    title="Edit Signer"
+                    onClick={() => setActiveSignerId(activeSignerId === recipient.id ? null : recipient.id)}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-md flex items-center transition-colors cursor-pointer ${activeSignerId === recipient.id ? 'bg-teal-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
                   >
-                    <Pencil size={16} />
-                  </button>
-                  <button 
-                    onClick={() => removeRecipient(recipient.id)}
-                    className="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-lg hover:bg-rose-50 active:scale-95 cursor-pointer"
-                    title="Remove Signer"
-                  >
-                    <Trash2 size={16} />
+                    <Pencil size={12} className="mr-1.5" /> 
+                    {activeSignerId === recipient.id ? 'Done Placing' : 'Place Signature'}
                   </button>
                 </div>
               </div>
             ))}
-            
+
             {recipients.length === 0 && (
               <div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
                 <p className="text-slate-500 text-sm">No signers added yet.</p>

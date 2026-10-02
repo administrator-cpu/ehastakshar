@@ -1,63 +1,66 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+const changePasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-type LoginForm = z.infer<typeof loginSchema>;
+type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
-export default function LoginPage() {
+export default function ForceChangePasswordPage() {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Note: We don't verify if they should be here on the client-side 
+  // perfectly, but if the API call succeeds, they are good. 
+  // If they don't have a token, the API will reject.
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
+    watch
+  } = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
   });
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: ChangePasswordForm) => {
     setIsLoading(true);
     setServerError("");
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/change-temp-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(data),
+        body: JSON.stringify({ newPassword: data.newPassword }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        if (result.error === "Please verify your email before logging in") {
-          router.push(`/verify?email=${encodeURIComponent(data.email)}`);
-          return;
-        }
-        throw new Error(result.error || "Failed to log in");
+        throw new Error(result.error || "Failed to change password");
       }
 
-      if (result.mustChangePassword) {
-        router.push("/force-change-password");
-        return;
-      }
-
-      window.location.href = "/dashboard"; // Navigate to the protected page using hard navigation to clear Next.js client cache
+      window.location.href = "/dashboard"; // Hard navigation
     } catch (err: unknown) {
-      setServerError(err instanceof Error ? err.message : "Failed to log in");
+      setServerError(err instanceof Error ? err.message : "Failed to change password");
     } finally {
       setIsLoading(false);
     }
@@ -67,9 +70,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-surface flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-outline-variant/30 p-8">
         <div className="text-center mb-8">
-          <h1 className="font-jakarta text-[32px] font-bold text-primary">Ehastakshar</h1>
+          <h1 className="font-jakarta text-[28px] font-bold text-primary">Action Required</h1>
           <p className="font-inter text-body-md text-on-surface-variant mt-2">
-            Log in to your account
+            For security reasons, you must change your temporary password to continue.
           </p>
         </div>
 
@@ -82,30 +85,25 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label className="block font-inter text-label-md font-semibold text-primary mb-1">
-              Email Address
+              New Password
             </label>
-            <Input
-              {...register("email")}
-              type="email"
-              placeholder="ajay@example.com"
-              error={errors.email?.message}
+            <PasswordInput
+              {...register("newPassword")}
+              placeholder="Enter new password"
+              error={errors.newPassword?.message}
               disabled={isLoading}
+              showRules={true}
             />
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block font-inter text-label-md font-semibold text-primary">
-                Password
-              </label>
-              <Link href="/forgot-password" className="text-sm text-[#0D9488] hover:underline font-inter font-medium">
-                Forgot Password?
-              </Link>
-            </div>
+            <label className="block font-inter text-label-md font-semibold text-primary mb-1">
+              Confirm New Password
+            </label>
             <PasswordInput
-              {...register("password")}
-              placeholder="Enter your password"
-              error={errors.password?.message}
+              {...register("confirmPassword")}
+              placeholder="Confirm new password"
+              error={errors.confirmPassword?.message}
               disabled={isLoading}
               showRules={false}
             />
@@ -116,7 +114,7 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full bg-[#0D9488] text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:bg-[#0f766e] disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
           >
-            {isLoading ? "Logging in..." : "Log In"}
+            {isLoading ? "Updating..." : "Update Password"}
           </button>
         </form>
 

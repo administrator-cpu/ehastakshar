@@ -47,9 +47,9 @@ export class ESignController {
 
       const transactionId = uuidv4().replace(/-/g, "").substring(0, 24); // 24 char hex
       
-      // Calculate Expiry Date (7 days from now)
+      // Calculate Expiry Date (14 days from now for sequential flow)
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+      expiresAt.setDate(expiresAt.getDate() + 14);
 
       // We use a transaction to ensure document and recipients are created together
       await db.transaction(async (tx) => {
@@ -66,7 +66,7 @@ export class ESignController {
         });
 
         // 2. Create Recipients
-        const newRecipientsData = recipients.map((r: { name: string; email: string; requireGps?: boolean; requirePhoto?: boolean }) => ({
+        const newRecipientsData = recipients.map((r: { name: string; email: string; requireGps?: boolean; requirePhoto?: boolean; signaturePositions?: any }, index: number) => ({
           documentId: newDocument.id,
           name: r.name,
           email: r.email,
@@ -74,6 +74,8 @@ export class ESignController {
           secureToken: crypto.randomBytes(32).toString("hex"),
           requireGps: r.requireGps || false,
           requirePhoto: r.requirePhoto || false,
+          signaturePositions: r.signaturePositions || [],
+          sequenceOrder: index + 1,
         }));
         
         const createdRecipients = await DocumentRecipientRepository.createMany(newRecipientsData);
@@ -86,25 +88,27 @@ export class ESignController {
           userAgent: req.headers["user-agent"] || "",
         });
 
-        // 4. Send Emails & Log Invite Sent
+        // 4. Send Emails & Log Invite Sent ONLY to the first signer in sequence
         for (const recipient of createdRecipients) {
-          const signingLink = `${env.FRONTEND_URL}/sign/${recipient.secureToken}`;
-          // Send email using Resend
-          await AuthService.sendInviteEmail({
-            email: recipient.email,
-            link: signingLink,
-            recipientName: recipient.name,
-            senderName,
-            documentName: newDocument.title,
-          });
+          if (recipient.sequenceOrder === 1) {
+            const signingLink = `${env.FRONTEND_URL}/sign/${recipient.secureToken}`;
+            // Send email using Resend
+            await AuthService.sendInviteEmail({
+              email: recipient.email,
+              link: signingLink,
+              recipientName: recipient.name,
+              senderName,
+              documentName: newDocument.title,
+            });
 
-          await AuditLogRepository.logEvent({
-            documentId: newDocument.id,
-            recipientId: recipient.id,
-            action: "INVITE_SENT",
-            ipAddress: req.ip || req.socket.remoteAddress || "",
-            userAgent: req.headers["user-agent"] || "",
-          });
+            await AuditLogRepository.logEvent({
+              documentId: newDocument.id,
+              recipientId: recipient.id,
+              action: "INVITE_SENT",
+              ipAddress: req.ip || req.socket.remoteAddress || "",
+              userAgent: req.headers["user-agent"] || "",
+            });
+          }
         }
       });
 
@@ -134,6 +138,14 @@ export class ESignController {
         return;
       }
 
+      // Sequential Flow Validation
+      const allRecipientsCheck = await DocumentRecipientRepository.findByDocumentId(recipient.documentId);
+      const isMyTurn = !allRecipientsCheck.some(r => r.status === "PENDING" && r.sequenceOrder < recipient.sequenceOrder);
+      if (!isMyTurn) {
+        res.status(403).json({ error: "It is not your turn to sign this document yet." });
+        return;
+      }
+
       // Log action
       await AuditLogRepository.logEvent({
         documentId: document.id,
@@ -150,7 +162,8 @@ export class ESignController {
         recipientEmail: recipient.email,
         status: recipient.status,
         requireGps: recipient.requireGps,
-        requirePhoto: recipient.requirePhoto
+        requirePhoto: recipient.requirePhoto,
+        signaturePositions: recipient.signaturePositions
       });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Error getting document by token");
@@ -188,6 +201,14 @@ export class ESignController {
       
       if (recipient.status === "SIGNED") {
         res.status(400).json({ error: "Recipient has already signed" });
+        return;
+      }
+
+      // Sequential Flow Validation
+      const allRecipientsCheck = await DocumentRecipientRepository.findByDocumentId(recipient.documentId);
+      const isMyTurn = !allRecipientsCheck.some(r => r.status === "PENDING" && r.sequenceOrder < recipient.sequenceOrder);
+      if (!isMyTurn) {
+        res.status(400).json({ error: "Cannot send reminder. It is not this recipient's turn to sign yet." });
         return;
       }
 
@@ -256,6 +277,14 @@ export class ESignController {
       const recipient = await DocumentRecipientRepository.findBySecureToken(token);
       if (!recipient) {
         res.status(400).json({ error: "Invalid token" });
+        return;
+      }
+
+      // Sequential Flow Validation
+      const allRecipientsCheck = await DocumentRecipientRepository.findByDocumentId(recipient.documentId);
+      const isMyTurn = !allRecipientsCheck.some(r => r.status === "PENDING" && r.sequenceOrder < recipient.sequenceOrder);
+      if (!isMyTurn) {
+        res.status(403).json({ error: "It is not your turn to sign this document yet." });
         return;
       }
 
@@ -367,6 +396,14 @@ export class ESignController {
         return;
       }
 
+      // Sequential Flow Validation: Check if it's this recipient's turn
+      const allRecipientsCheck = await DocumentRecipientRepository.findByDocumentId(recipient.documentId);
+      const isMyTurn = !allRecipientsCheck.some(r => r.status === "PENDING" && r.sequenceOrder < recipient.sequenceOrder);
+      if (!isMyTurn) {
+        res.status(403).json({ error: "It is not your turn to sign this document yet." });
+        return;
+      }
+
       // Verify OTP signToken to prevent bypass
       if (!signToken) {
         res.status(401).json({ error: "Missing signing token. Please verify OTP first." });
@@ -406,14 +443,7 @@ export class ESignController {
       // 2. Manipulate PDF - Visuals and Cryptographic Sealing
       const ipAddress = (req.ip || req.socket.remoteAddress || "").toString();
       
-      let positions = undefined;
-      if (req.body.positions) {
-        try {
-          positions = JSON.parse(req.body.positions);
-        } catch (e) {
-          logger.error({ err: e }, "Failed to parse signature positions");
-        }
-      }
+      const positions = (recipient.signaturePositions as { pageNumber: number; pctX: number; pctY: number; }[]) || [];
 
       const details = {
         transactionId: document.transactionId,
@@ -477,8 +507,33 @@ export class ESignController {
           deviceType
         });
 
-        // Check if all recipients have signed
+        // Sequential Flow: Trigger next recipient's invite if exists
         const allRecipients = await DocumentRecipientRepository.findByDocumentId(document.id);
+        const nextRecipient = allRecipients.find(r => r.status === "PENDING" && r.sequenceOrder === recipient.sequenceOrder + 1);
+
+        if (nextRecipient) {
+          const sender = await UserRepository.findById(document.uploaderId);
+          if (sender && sender.email) {
+            const signingLink = `${env.FRONTEND_URL}/sign/${nextRecipient.secureToken}`;
+            AuthService.sendInviteEmail({
+              email: nextRecipient.email,
+              link: signingLink,
+              recipientName: nextRecipient.name,
+              senderName: sender.firstName ? `${sender.firstName} ${sender.lastName}` : "A user",
+              documentName: document.title,
+            }).catch(err => logger.error({ err }, "Failed to send next invite email"));
+
+            await AuditLogRepository.logEvent({
+              documentId: document.id,
+              recipientId: nextRecipient.id,
+              action: "INVITE_SENT",
+              ipAddress: "System",
+              userAgent: "Sequential Router",
+            });
+          }
+        }
+
+        // Check if all recipients have signed
         const allSigned = allRecipients.every(r => r.status === "SIGNED");
         
         if (allSigned) {
@@ -500,7 +555,7 @@ export class ESignController {
               toEmail: sender.email,
               ccEmails,
               documentName: document.title,
-              downloadLink: document.fileUrl,
+              downloadLink: newFileUrl,
             }).catch(err => logger.error({ err }, "Failed to send completion email"));
           }
         }
