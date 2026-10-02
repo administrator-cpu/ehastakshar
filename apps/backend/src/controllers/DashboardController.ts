@@ -110,9 +110,11 @@ export class DashboardController {
           email: documentRecipients.email,
           status: documentRecipients.status,
           signedAt: documentRecipients.signedAt,
+          sequenceOrder: documentRecipients.sequenceOrder,
         })
         .from(documentRecipients)
-        .where(eq(documentRecipients.documentId, documentId));
+        .where(eq(documentRecipients.documentId, documentId))
+        .orderBy(documentRecipients.sequenceOrder);
 
       // Fetch audit trail
       const auditTrail = await db

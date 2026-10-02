@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { ShieldCheck, Download, CheckCircle, FileText, ChevronRight, MapPin, Camera } from 'lucide-react';
+import { ShieldCheck, Download, CheckCircle, FileText, ChevronRight, MapPin, Camera, Clock } from 'lucide-react';
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import Webcam from "react-webcam";
@@ -60,7 +60,8 @@ export default function SignerPortalPage() {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/esign/document/${token}`);
         if (!res.ok) {
-          setError("Document not found or token invalid");
+          const errData = await res.json().catch(() => null);
+          setError(errData?.error || "Document not found or token invalid");
           setLoading(false);
           return;
         }
@@ -312,7 +313,17 @@ export default function SignerPortalPage() {
   }, [pdfFile, docInfo?.documentTitle]);
 
   if (!loading && (error || !docInfo)) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-red-500">{error || "Document not found"}</div>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Clock size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Please Wait</h2>
+          <p className="text-slate-500 mb-6">{error || "Document not found or token invalid."}</p>
+        </div>
+      </div>
+    );
   }
 
   if (docInfo?.status === "SIGNED" && step !== "SUCCESS") {

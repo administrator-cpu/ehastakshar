@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UploadCloud, Users, X, AlertTriangle, Send, Eye, UserPlus, MapPin, Camera, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Users, X, AlertTriangle, Send, Eye, UserPlus, MapPin, Camera, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { generateInviteEmailHtml } from '@/utils/emailTemplates';
 
@@ -111,6 +111,16 @@ export default function SendDigitalESignPage() {
       requirePhoto: recipient.requirePhoto
     });
     setShowAddSigner(true);
+  };
+
+  const moveRecipient = (index: number, direction: 'up' | 'down') => {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === recipients.length - 1)) return;
+    
+    const newRecipients = [...recipients];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    [newRecipients[index], newRecipients[targetIndex]] = [newRecipients[targetIndex], newRecipients[index]];
+    setRecipients(newRecipients);
   };
 
   const removeRecipient = (id: string) => {
@@ -340,6 +350,22 @@ export default function SendDigitalESignPage() {
                     </div>
                   </div>
                   <div className="flex space-x-1">
+                    <button 
+                      onClick={() => moveRecipient(index, 'up')}
+                      disabled={index === 0}
+                      className="text-slate-400 hover:text-slate-700 disabled:opacity-30 transition-colors p-2 rounded-lg hover:bg-slate-200 active:scale-95 cursor-pointer"
+                      title="Move Up"
+                    >
+                      <ArrowUp size={16} />
+                    </button>
+                    <button 
+                      onClick={() => moveRecipient(index, 'down')}
+                      disabled={index === recipients.length - 1}
+                      className="text-slate-400 hover:text-slate-700 disabled:opacity-30 transition-colors p-2 rounded-lg hover:bg-slate-200 active:scale-95 cursor-pointer"
+                      title="Move Down"
+                    >
+                      <ArrowDown size={16} />
+                    </button>
                     <button 
                       onClick={() => handleEditSigner(recipient)}
                       className="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-50 active:scale-95 cursor-pointer"

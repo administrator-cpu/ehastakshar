@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, boolean, timestamp, pgEnum, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, boolean, timestamp, pgEnum, jsonb, integer } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["CUSTOMER", "ADMIN"]);
 
@@ -55,6 +55,7 @@ export const documentRecipients = pgTable("document_recipients", {
   signatureText: varchar("signature_text", { length: 255 }),
   signaturePositions: jsonb("signature_positions"),
   signedAt: timestamp("signed_at"),
+  sequenceOrder: integer("sequence_order").default(1).notNull(),
 });
 
 export const auditEvents = pgTable("audit_events", {

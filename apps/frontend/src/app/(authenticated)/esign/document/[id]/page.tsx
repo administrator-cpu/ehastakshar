@@ -22,6 +22,7 @@ interface DocumentDetails {
     email: string;
     status: string;
     signedAt: string | null;
+    sequenceOrder: number;
   }[];
   auditTrail: {
     id: string;
@@ -406,9 +407,13 @@ export default function DocumentDetailsPage() {
                         {rec.status}
                       </span>
                     ) : (
-                      <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-amber-100/50 text-amber-700 flex items-center uppercase tracking-wider">
+                      <span className={`text-[11px] font-bold px-2 py-1 rounded-md flex items-center uppercase tracking-wider ${
+                        rec.id === pendingRecipient?.id 
+                          ? 'bg-amber-100 text-amber-700' 
+                          : 'bg-slate-100 text-slate-500'
+                      }`}>
                         <Clock size={12} className="mr-1" />
-                        {rec.status}
+                        {rec.id === pendingRecipient?.id ? 'Waiting' : 'Queued'}
                       </span>
                     )}
                     <span className="text-[11px] font-bold bg-[#1e3a8a] text-white px-2 py-1 rounded-md uppercase tracking-wider">Digital</span>
