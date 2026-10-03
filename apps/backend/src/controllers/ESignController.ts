@@ -573,17 +573,20 @@ export class ESignController {
    */
   static async downloadDocument(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const uploaderId = req.userId;
+      const requesterId = req.userId;
       const documentId = req.params.id as string;
 
-      if (!uploaderId) {
+      if (!requesterId) {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
 
+      const requester = await UserRepository.findById(requesterId);
+      const isAdmin = requester?.role === "ADMIN";
+
       const document = await DocumentRepository.findById(documentId);
       
-      if (!document || document.uploaderId !== uploaderId) {
+      if (!document || (!isAdmin && document.uploaderId !== requesterId)) {
         res.status(404).json({ error: "Document not found or unauthorized" });
         return;
       }
@@ -635,20 +638,23 @@ export class ESignController {
    */
   static async downloadAuditReport(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const uploaderId = req.userId;
+      const requesterId = req.userId;
       const documentId = req.params.id as string;
-      if (!uploaderId) {
+      if (!requesterId) {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
       
+      const requester = await UserRepository.findById(requesterId);
+      const isAdmin = requester?.role === "ADMIN";
+
       const document = await DocumentRepository.findById(documentId);
-      if (!document || document.uploaderId !== uploaderId) {
+      if (!document || (!isAdmin && document.uploaderId !== requesterId)) {
         res.status(404).json({ error: "Document not found" });
         return;
       }
 
-      const uploader = await UserRepository.findById(uploaderId);
+      const uploader = await UserRepository.findById(document.uploaderId);
       const recipients = await DocumentRecipientRepository.findByDocumentId(documentId);
       const events = await AuditLogRepository.getEventsForDocument(documentId);
 
@@ -729,6 +735,11 @@ export class ESignController {
           
           const signEvent = events.find(e => e.recipientId === r.id && e.action === "SIGNED");
           if (!signEvent) continue;
+
+          const blockHeight = signEvent.photoUrl ? 320 : 200;
+          if (doc.y + blockHeight > doc.page.height - doc.page.margins.bottom) {
+            doc.addPage();
+          }
 
           doc.moveDown(2);
           let currentY = doc.y;
@@ -826,6 +837,11 @@ export class ESignController {
         
         let currentRY = doc.y;
         for (const r of recipients) {
+          if (currentRY + 85 > doc.page.height - doc.page.margins.bottom) {
+            doc.addPage();
+            currentRY = doc.y;
+          }
+
           doc.roundedRect(50, currentRY, 250, 75, 5).lineWidth(1).strokeColor("#d97706").stroke();
           doc.fillColor("#fef3c7").fillOpacity(0.3).roundedRect(51, currentRY + 1, 248, 73, 5).fill().fillOpacity(1);
 
