@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { db } from "../db/index.js";
-import { documents, documentRecipients, auditEvents } from "../db/schema.js";
+import { documents, documentRecipients, auditEvents, users } from "../db/schema.js";
 import { desc, eq, sql, ilike, and } from "drizzle-orm";
 import { logger } from "../utils/logger.js";
 
@@ -17,6 +17,15 @@ export class DashboardController {
         return;
       }
 
+      // Fetch the user to check role
+      const userResult = await db.select().from(users).where(eq(users.id, uploaderId));
+      const user = userResult[0];
+      if (!user) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+      const isAdmin = user.role === "ADMIN";
+
       // Aggregate counts
       const countsResult = await db
         .select({
@@ -25,7 +34,7 @@ export class DashboardController {
           completed: sql<number>`sum(case when status = 'COMPLETED' then 1 else 0 end)`,
         })
         .from(documents)
-        .where(eq(documents.uploaderId, uploaderId));
+        .where(isAdmin ? undefined : eq(documents.uploaderId, uploaderId));
 
       const stats = {
         total: Number(countsResult[0]?.total || 0),
@@ -38,9 +47,9 @@ export class DashboardController {
       const offset = (page - 1) * limit;
       const search = req.query.search as string | undefined;
 
-      const baseCondition = search 
-        ? and(eq(documents.uploaderId, uploaderId), ilike(documents.title, `%${search}%`))
-        : eq(documents.uploaderId, uploaderId);
+      const baseCondition = isAdmin
+        ? (search ? ilike(documents.title, `%${search}%`) : undefined)
+        : (search ? and(eq(documents.uploaderId, uploaderId), ilike(documents.title, `%${search}%`)) : eq(documents.uploaderId, uploaderId));
 
       // We need to count the filtered total to paginate correctly when searching
       const filteredCountResult = search 
@@ -58,8 +67,10 @@ export class DashboardController {
           signType: documents.signType,
           updatedAt: documents.updatedAt,
           transactionId: documents.transactionId,
+          uploaderName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
         })
         .from(documents)
+        .leftJoin(users, eq(documents.uploaderId, users.id))
         .where(baseCondition)
         .orderBy(desc(documents.updatedAt))
         .limit(limit)
@@ -67,7 +78,7 @@ export class DashboardController {
 
       const totalPages = Math.max(1, Math.ceil(filteredTotal / limit));
 
-      res.status(200).json({ stats, recentDocuments, totalPages, currentPage: page });
+      res.status(200).json({ stats, recentDocuments, totalPages, currentPage: page, isAdmin });
     } catch (error) {
       logger.error({ err: error, path: req.originalUrl }, "Error fetching dashboard stats");
       res.status(500).json({ error: "Internal server error" });

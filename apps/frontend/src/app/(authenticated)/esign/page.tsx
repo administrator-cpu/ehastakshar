@@ -18,6 +18,7 @@ interface Document {
   signType: string;
   updatedAt: string;
   transactionId: string;
+  uploaderName?: string;
 }
 
 export default function ESignDashboardPage() {
@@ -25,6 +26,7 @@ export default function ESignDashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({ total: 0, pending: 0, completed: 0 });
   const [recentDocuments, setRecentDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -50,6 +52,7 @@ export default function ESignDashboardPage() {
           setStats(data.stats);
           setRecentDocuments(data.recentDocuments);
           setTotalPages(data.totalPages || 1);
+          setIsAdmin(data.isAdmin || false);
         } else {
           toast.error("Failed to fetch dashboard metrics");
         }
@@ -198,6 +201,7 @@ export default function ESignDashboardPage() {
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-200">
                     <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Document Name</th>
+                    {isAdmin && <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Created By</th>}
                     <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
                     <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                     <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated On</th>
@@ -211,6 +215,7 @@ export default function ESignDashboardPage() {
                       className="hover:bg-slate-50 transition-colors cursor-pointer"
                     >
                       <td className="p-4 font-medium text-slate-900">{doc.title}</td>
+                      {isAdmin && <td className="p-4 text-sm text-slate-600 font-medium">{doc.uploaderName || 'Unknown'}</td>}
                       <td className="p-4 text-sm text-slate-600">{doc.signType}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
