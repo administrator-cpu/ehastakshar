@@ -15,6 +15,7 @@ import { env } from "../config/env.js";
 import { DigitalSignatureService } from "../services/DigitalSignatureService.js";
 import PDFDocumentKit from "pdfkit";
 import { UserRepository } from "../repositories/UserRepository.js";
+import { getClientIp } from "../utils/ip.js";
 
 // Assume user is attached to req by auth middleware
 interface AuthenticatedRequest extends Request {
@@ -84,7 +85,7 @@ export class ESignController {
         await AuditLogRepository.logEvent({
           documentId: newDocument.id,
           action: "UPLOADED",
-          ipAddress: req.ip || req.socket.remoteAddress || "",
+          ipAddress: getClientIp(req),
           userAgent: req.headers["user-agent"] || "",
         });
 
@@ -105,7 +106,7 @@ export class ESignController {
               documentId: newDocument.id,
               recipientId: recipient.id,
               action: "INVITE_SENT",
-              ipAddress: req.ip || req.socket.remoteAddress || "",
+              ipAddress: getClientIp(req),
               userAgent: req.headers["user-agent"] || "",
             });
           }
@@ -151,7 +152,7 @@ export class ESignController {
         documentId: document.id,
         recipientId: recipient.id,
         action: "LINK_CLICKED",
-        ipAddress: req.ip || req.socket.remoteAddress || "",
+        ipAddress: getClientIp(req),
         userAgent: req.headers["user-agent"] || "",
       });
 
@@ -225,7 +226,7 @@ export class ESignController {
         documentId: document.id,
         recipientId: recipient.id,
         action: "REMINDER_SENT",
-        ipAddress: req.ip || req.socket.remoteAddress || "",
+        ipAddress: getClientIp(req),
         userAgent: req.headers["user-agent"] || "",
       });
 
@@ -309,7 +310,7 @@ export class ESignController {
         documentId: recipient.documentId,
         recipientId: recipient.id,
         action: "OTP_REQUESTED",
-        ipAddress: req.ip || req.socket.remoteAddress || "",
+        ipAddress: getClientIp(req),
         userAgent: req.headers["user-agent"] || "",
       });
 
@@ -360,7 +361,7 @@ export class ESignController {
         documentId: recipient.documentId,
         recipientId: recipient.id,
         action: "CONSENT_GIVEN",
-        ipAddress: req.ip || req.socket.remoteAddress || "",
+        ipAddress: getClientIp(req),
         userAgent: req.headers["user-agent"] || "",
       });
 
@@ -368,12 +369,12 @@ export class ESignController {
         documentId: recipient.documentId,
         recipientId: recipient.id,
         action: "OTP_VERIFIED",
-        ipAddress: req.ip || req.socket.remoteAddress || "",
+        ipAddress: getClientIp(req),
         userAgent: req.headers["user-agent"] || "",
       });
 
       // Generate a temporary JWT token specifically for the signing step to prevent replay attacks
-      const ipAddress = (req.ip || req.socket.remoteAddress || "").toString();
+      const ipAddress = (getClientIp(req)).toString();
       const signToken = AuthService.generateToken(recipient.id, ipAddress);
 
       res.status(200).json({ message: "OTP verified", signToken });
@@ -417,7 +418,7 @@ export class ESignController {
       }
       
       // Verify IP Address binding
-      const currentIp = (req.ip || req.socket.remoteAddress || "").toString();
+      const currentIp = (getClientIp(req)).toString();
       if (payload.ipAddress && payload.ipAddress !== currentIp) {
         logger.warn({ expectedIp: payload.ipAddress, actualIp: currentIp }, "IP Address mismatch during signing");
         res.status(401).json({ error: "Session hijacked. IP Address changed since OTP verification." });
@@ -441,7 +442,7 @@ export class ESignController {
       const fileBuffer = Buffer.concat(chunks);
 
       // 2. Manipulate PDF - Visuals and Cryptographic Sealing
-      const ipAddress = (req.ip || req.socket.remoteAddress || "").toString();
+      const ipAddress = (getClientIp(req)).toString();
       
       const positions = (recipient.signaturePositions as { pageNumber: number; pctX: number; pctY: number; }[]) || [];
 
@@ -495,7 +496,7 @@ export class ESignController {
           documentId: document.id,
           recipientId: recipient.id,
           action: "SIGNED",
-          ipAddress: req.ip || req.socket.remoteAddress || "",
+          ipAddress: getClientIp(req),
           userAgent: userAgentStr,
           latitude: req.body.latitude || null,
           longitude: req.body.longitude || null,
@@ -618,7 +619,7 @@ export class ESignController {
         documentId: recipient.documentId,
         recipientId: recipient.id,
         action,
-        ipAddress: req.ip || req.socket.remoteAddress || "",
+        ipAddress: getClientIp(req),
         userAgent: req.headers["user-agent"] || "",
       });
 
