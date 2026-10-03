@@ -100,11 +100,24 @@ export class DashboardController {
         return;
       }
 
+      // Fetch the user to check role
+      const userResult = await db.select().from(users).where(eq(users.id, uploaderId));
+      const user = userResult[0];
+      if (!user) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+      const isAdmin = user.role === "ADMIN";
+
       // Fetch the document
       const docResult = await db
         .select()
         .from(documents)
-        .where(sql`${documents.id} = ${documentId} AND ${documents.uploaderId} = ${uploaderId}`);
+        .where(
+          isAdmin
+            ? eq(documents.id, documentId)
+            : and(eq(documents.id, documentId), eq(documents.uploaderId, uploaderId))
+        );
 
       if (docResult.length === 0) {
         res.status(404).json({ error: "Document not found" });
