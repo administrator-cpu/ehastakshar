@@ -25,6 +25,9 @@ import { env } from "./config/env.js";
 
 const app = express();
 
+// Trust proxy to correctly parse the X-Forwarded-For header for client IPs
+app.set("trust proxy", true);
+
 // Global Middlewares
 app.use(helmet());
 app.use(cors({
