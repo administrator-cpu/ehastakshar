@@ -29,7 +29,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* eSign Card */}
           <Link href="/esign" className="group block">
-            <div className="h-full relative overflow-hidden rounded-[2rem] bg-white/70 backdrop-blur-xl border border-outline-variant/40 p-10 transition-all duration-500 ease-out-ui hover:shadow-[0_20px_40px_-15px_rgba(255,0,84,0.15)] hover:-translate-y-2">
+            <div className="h-full relative overflow-hidden rounded-[2rem] bg-white/70 backdrop-blur-xl border border-outline-variant/40 p-10 transition-all duration-500 ease-out-ui hover:shadow-[0_20px_40px_-15px_rgba(255,0,84,0.15)] hover:border-primary/30 hover:-translate-y-2">
               <div className="absolute -top-12 -right-12 p-8 opacity-[0.03] transition-all duration-500 group-hover:opacity-10 group-hover:scale-110 group-hover:rotate-12 text-primary">
                 <PenTool size={180} />
               </div>
@@ -39,13 +39,15 @@ export default function DashboardPage() {
                   <PenTool size={32} className="group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div>
-                  <h3 className="font-jakarta text-[24px] font-bold text-primary mb-3">eSign</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="font-jakarta text-[24px] font-bold text-primary">eSign</h3>
+                  </div>
                   <p className="font-inter text-body-md text-on-surface-variant leading-relaxed">
                     Upload documents, assign signers, and track the progress of your digital signatures securely.
                   </p>
                 </div>
                 <div className="pt-2 flex items-center text-primary font-bold transition-colors duration-300">
-                  <span className="bg-clip-text group-hover:text-transparent group-hover:brand-gradient-text transition-all duration-300">Go to eSign</span>
+                  <span className="transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-secondary">Go to eSign</span>
                   <svg className="w-5 h-5 ml-2 transition-transform duration-500 group-hover:translate-x-2 text-secondary opacity-0 -translate-x-2 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
