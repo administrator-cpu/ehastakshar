@@ -17,8 +17,6 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1117.0",
-    "@aws-sdk/lib-storage": "^3.1117.0",
     "argon2": "^0.44.0",
     "bullmq": "^5.77.3",
     "busboy": "^1.6.0",
