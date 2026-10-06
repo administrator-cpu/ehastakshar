@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+
 import Link from 'next/link';
 import { PenTool, Stamp, User } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
