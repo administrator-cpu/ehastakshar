@@ -1,13 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import { fork } from 'child_process';
-
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export interface VisualSignatureDetails {
   transactionId: string;
@@ -19,10 +11,9 @@ export interface VisualSignatureDetails {
 
 export class DigitalSignatureService {
   /**
-   * Adds the visual signature elements using pdf-lib and allocates a placeholder
-   * for the PKCS#7 cryptographic signature using @signpdf/utils.
+   * Adds the visual signature elements using pdf-lib.
    */
-  static async addSignaturePlaceholder(pdfBuffer: Buffer, details: VisualSignatureDetails): Promise<Buffer> {
+  static async addVisualSignature(pdfBuffer: Buffer, details: VisualSignatureDetails): Promise<Buffer> {
     // 1. First, manipulate the PDF visually using pdf-lib
     // We ignore encryption to allow modifying PDFs that have owner passwords or prior signatures.
     const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
@@ -143,70 +134,5 @@ export class DigitalSignatureService {
     return initialBuffer;
   }
 
-  /**
-   * Spawns a worker thread to safely add the PKCS#7 placeholder and seal the document.
-   * This prevents malformed PDFs from causing infinite loops in the main event loop.
-   */
-  static async sealDocument(pdfBuffer: Buffer, details: VisualSignatureDetails): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      try {
-        const p12Path = path.join(__dirname, '../assets/dev-cert.p12');
-        
-        if (!fs.existsSync(p12Path)) {
-          throw new Error('Development certificate (dev-cert.p12) not found in assets folder.');
-        }
-        
-        const p12Buffer = fs.readFileSync(p12Path);
-        
-        // Spawn child process to handle the risky @signpdf parsing safely
-        const workerPath = path.join(__dirname, __filename.endsWith('.ts') ? 'pdfWorker.ts' : 'pdfWorker.js');
-        
-        let child: any;
-        if (workerPath.endsWith('.ts')) {
-          // If running via tsx or ts-node during dev, pass execArgv
-          const execArgv = process.execArgv.includes('--loader') || process.execArgv.some(a => a.includes('tsx')) ? process.execArgv : [];
-          child = fork(workerPath, [], { execArgv });
-        } else {
-          child = fork(workerPath);
-        }
 
-        // Send the data via IPC
-        child.send({
-          pdfBuffer: Array.from(pdfBuffer),
-          details,
-          p12Buffer: Array.from(p12Buffer),
-          passphrase: 'password'
-        });
-
-        const timeout = setTimeout(() => {
-          child.kill('SIGKILL'); // Hard kill the child process if it hangs
-          reject(new Error("PDF signing timed out. The uploaded PDF may be malformed or corrupted. Please flatten the PDF or print to PDF and try again."));
-        }, 15000); // 15 seconds timeout
-
-        child.on('message', (message: any) => {
-          clearTimeout(timeout);
-          if (message.success) {
-            resolve(Buffer.from(message.signedPdf));
-          } else {
-            reject(new Error(message.error || "Unknown worker error"));
-          }
-        });
-
-        child.on('error', (error: any) => {
-          clearTimeout(timeout);
-          reject(error);
-        });
-
-        child.on('exit', (code: number, signal: string) => {
-          clearTimeout(timeout);
-          if (code !== 0 && signal !== 'SIGKILL') {
-            reject(new Error(`Worker stopped with exit code ${code} and signal ${signal}`));
-          }
-        });
-      } catch (error) {
-        logger.error({ err: error }, 'Cryptographic PDF sealing failed before worker');
-        reject(error);
-      }
-    });
-  }
 }

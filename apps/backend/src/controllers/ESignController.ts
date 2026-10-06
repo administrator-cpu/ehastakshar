@@ -441,7 +441,7 @@ export class ESignController {
       }
       const fileBuffer = Buffer.concat(chunks);
 
-      // 2. Manipulate PDF - Visuals and Cryptographic Sealing
+      // 2. Manipulate PDF - Add Visual Signature
       const ipAddress = (getClientIp(req)).toString();
       
       const positions = (recipient.signaturePositions as { pageNumber: number; pctX: number; pctY: number; }[]) || [];
@@ -454,8 +454,7 @@ export class ESignController {
         positions: positions
       };
       
-      const visuallyModifiedPdf = await DigitalSignatureService.addSignaturePlaceholder(fileBuffer, details);
-      const signedPdfBuffer = await DigitalSignatureService.sealDocument(visuallyModifiedPdf, details);
+      const signedPdfBuffer = await DigitalSignatureService.addVisualSignature(fileBuffer, details);
 
       // 3. Upload signed document back
       // Using a temporary stream to upload the Buffer
