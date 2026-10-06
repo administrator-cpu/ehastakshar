@@ -7,7 +7,6 @@ import { AuditLogRepository } from "../repositories/AuditLogRepository.js";
 import { db } from "../db/index.js";
 import { AuthService } from "../services/AuthService.js";
 import { UAParser } from "ua-parser-js";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { getStorageProvider } from "../services/storage.service.js";
 import { OtpRepository } from "../repositories/OtpRepository.js";
 import { logger } from "../utils/logger.js";
