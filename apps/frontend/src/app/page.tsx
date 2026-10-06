@@ -4,32 +4,24 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <nav className="flex justify-between items-center w-full px-6 py-4 sticky top-0 z-40 bg-surface shadow-sm">
-        <div className="flex items-center gap-8">
-          <span className="font-jakarta text-headline-md font-bold text-primary">
-            Ehastakshar
-          </span>
-          <div className="hidden md:flex gap-6 items-center">
-            <Link
-              className="text-on-surface-variant hover:text-secondary transition-colors font-inter text-label-md"
-              href="#features"
-            >
-              Features
-            </Link>
-            <Link
-              className="text-on-surface-variant hover:text-secondary transition-colors font-inter text-label-md"
-              href="#pricing"
-            >
-              Pricing
+      {/* Floating Navbar Container */}
+      <div className="sticky top-4 z-50 px-4 md:px-8 w-full max-w-7xl mx-auto">
+        <nav className="flex justify-between items-center w-full px-6 py-3 bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full">
+          <div className="flex items-center gap-8">
+            <span className="font-jakarta text-[22px] font-bold text-primary flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg brand-gradient text-white flex items-center justify-center shadow-md">
+                <span className="material-symbols-outlined text-[18px]" data-icon="draw">draw</span>
+              </div>
+              Ehastakshar
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="brand-gradient text-white px-6 py-2.5 rounded-full font-inter text-sm font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:shadow-[0_0_15px_rgba(255,0,84,0.4)] hover:-translate-y-0.5">
+              Log In
             </Link>
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="brand-gradient text-white px-4 py-2 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-secondary/90">
-            Login
-          </Link>
-        </div>
-      </nav>
+        </nav>
+      </div>
 
       <main className="flex-grow">
         {/* Hero Section */}
