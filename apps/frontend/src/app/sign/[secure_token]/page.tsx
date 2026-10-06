@@ -359,7 +359,7 @@ export default function SignerPortalPage() {
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="mt-10 bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-black/20 transition-all text-lg"
+            className="mt-10 bg-amber-400 hover:bg-amber-400 text-slate-900 px-8 py-3 rounded-full font-bold shadow-lg shadow-black/20 transition-all text-lg"
           >
             Refresh Page
           </button>
@@ -369,7 +369,7 @@ export default function SignerPortalPage() {
       {/* Top Banner */}
       <div className="bg-slate-900 text-white px-6 py-3 flex items-center justify-between shadow-md z-10 relative">
         <div className="flex items-center space-x-3">
-          <ShieldCheck className="text-teal-400" size={24} />
+          <ShieldCheck className="text-amber-400" size={24} />
           <span className="font-semibold tracking-wide">Ehastakshar Sign Secure Portal</span>
         </div>
         <div className="text-xs text-slate-400 flex items-center">
@@ -403,10 +403,10 @@ export default function SignerPortalPage() {
               {step === "SUCCESS" ? (
                 <div className="w-full h-full min-h-[60vh] flex flex-col items-center justify-center animate-in fade-in duration-500">
                   <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center border border-slate-200 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-teal-500"></div>
-                    <div className="w-20 h-20 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+                    <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 relative">
                       <CheckCircle size={40} className="relative z-10" />
-                      <div className="absolute inset-0 bg-teal-200 rounded-full animate-ping opacity-20"></div>
+                      <div className="absolute inset-0 bg-amber-200 rounded-full animate-ping opacity-20"></div>
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-2">Document Signed</h3>
 
@@ -463,7 +463,7 @@ export default function SignerPortalPage() {
                   <button
                     onClick={requestOtp}
                     disabled={isSendingOtp}
-                    className="relative cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold shadow-lg shadow-black/10 flex items-center space-x-3 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="relative cursor-pointer bg-amber-400 hover:bg-amber-400 text-slate-900 px-6 md:px-8 py-3 md:py-4 rounded-full font-bold shadow-lg shadow-black/10 flex items-center space-x-3 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     <span className="relative z-10 tracking-wide text-xs md:text-sm uppercase">Proceed to Sign</span>
                     <ChevronRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
@@ -478,7 +478,7 @@ export default function SignerPortalPage() {
                 <button
                   onClick={submitFinalSignature}
                   disabled={isSigning}
-                  className="relative cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 rounded-full font-bold shadow-2xl shadow-teal-900/30 flex items-center space-x-3 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed border-2 border-teal-500"
+                  className="relative cursor-pointer bg-amber-400 hover:bg-amber-400 text-slate-900 px-8 py-4 rounded-full font-bold shadow-2xl shadow-amber-900/30 flex items-center space-x-3 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed border-2 border-amber-500"
                 >
                   <span className="relative z-10 tracking-wide text-sm uppercase whitespace-nowrap">
                     {isSigning ? "Signing Document..." : signaturePositions.length === 0 ? "Sign Without Visual Mark" : "Confirm & Sign"}
@@ -498,7 +498,7 @@ export default function SignerPortalPage() {
           {/* OTP Modal */}
           {step === "OTP" && (
             <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-in zoom-in-95 duration-300 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-teal-500"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
 
               <h3 className="text-2xl font-bold text-slate-900 mb-1">eSign Authentication</h3>
               <p className="text-xs text-slate-500 font-mono mb-6">Transaction ID: {docInfo?.transactionId}</p>
@@ -518,7 +518,7 @@ export default function SignerPortalPage() {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/[^0-9a-zA-Z]/g, ''))}
                     disabled={isSendingOtp}
-                    className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-mono text-xl tracking-[0.5em] text-center disabled:bg-slate-50 disabled:text-slate-400"
+                    className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-mono text-xl tracking-[0.5em] text-center disabled:bg-slate-50 disabled:text-slate-400"
                     placeholder="••••••"
                   />
                 </div>
@@ -528,9 +528,9 @@ export default function SignerPortalPage() {
                   {countdown > 0 ? (
                     <span className="text-slate-400 font-medium">Resend in 00:{countdown.toString().padStart(2, '0')}</span>
                   ) : isSendingOtp ? (
-                    <span className="text-teal-400 font-medium animate-pulse">Sending...</span>
+                    <span className="text-amber-400 font-medium animate-pulse">Sending...</span>
                   ) : (
-                    <button onClick={requestOtp} className="text-teal-600 font-semibold hover:underline cursor-pointer">Resend Now</button>
+                    <button onClick={requestOtp} className="text-amber-600 font-semibold hover:underline cursor-pointer">Resend Now</button>
                   )}
                 </div>
               </div>
@@ -544,7 +544,7 @@ export default function SignerPortalPage() {
                       checked={hasConsented}
                       onChange={(e) => setHasConsented(e.target.checked)}
                       disabled={isSendingOtp || isVerifying}
-                      className="w-4 h-4 text-teal-600 bg-white border-slate-300 rounded focus:ring-teal-500 cursor-pointer disabled:opacity-50"
+                      className="w-4 h-4 text-amber-600 bg-white border-slate-300 rounded focus:ring-amber-500 cursor-pointer disabled:opacity-50"
                     />
                   </div>
                   <label htmlFor="consent-checkbox" className="text-[11px] text-slate-500 leading-relaxed cursor-pointer select-none">
@@ -553,12 +553,12 @@ export default function SignerPortalPage() {
                 </div>
 
                 <p className="text-[11px] text-slate-500 text-center leading-relaxed mt-2">
-                  By proceeding, I agree to the <a href="#" className="text-teal-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-teal-600 hover:underline">Privacy Policy</a>
+                  By proceeding, I agree to the <a href="#" className="text-amber-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-amber-600 hover:underline">Privacy Policy</a>
                 </p>
                 <button
                   onClick={verifyOtp}
                   disabled={otp.length !== 6 || isVerifying || isSendingOtp || !hasConsented}
-                  className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
+                  className="w-full cursor-pointer bg-amber-400 hover:bg-amber-400 disabled:bg-slate-300 disabled:cursor-not-allowed text-slate-900 py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
                 >
                   {isVerifying ? "Verifying..." : "Verify"}
                 </button>
@@ -575,7 +575,7 @@ export default function SignerPortalPage() {
                 {docInfo?.requireGps && (
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <MapPin className="text-teal-500" />
+                      <MapPin className="text-amber-500" />
                       <span className="font-semibold text-slate-700">GPS Location</span>
                     </div>
                     {latitude ? (
@@ -601,7 +601,7 @@ export default function SignerPortalPage() {
                           logClientEvent("DENIED_CAMERA");
                         }}
                       />
-                      <div className="absolute inset-0 pointer-events-none border-4 border-teal-500/30 rounded-xl"></div>
+                      <div className="absolute inset-0 pointer-events-none border-4 border-amber-500/30 rounded-xl"></div>
                     </div>
                     <p className="text-xs text-slate-500 mt-3 flex items-center justify-center">
                       <Camera size={14} className="mr-1" /> Look at the camera for identity verification
@@ -614,7 +614,7 @@ export default function SignerPortalPage() {
                 <button
                   onClick={capturePhotoAndProceed}
                   disabled={docInfo?.requireGps && !latitude}
-                  className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
+                  className="w-full cursor-pointer bg-amber-400 hover:bg-amber-400 disabled:bg-slate-300 disabled:cursor-not-allowed text-slate-900 py-3.5 rounded-xl font-bold transition-all shadow-sm flex justify-center items-center"
                 >
                   Proceed
                 </button>

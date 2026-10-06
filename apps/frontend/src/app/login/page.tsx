@@ -98,7 +98,7 @@ export default function LoginPage() {
               <label className="block font-inter text-label-md font-semibold text-primary">
                 Password
               </label>
-              <Link href="/forgot-password" className="text-sm text-[#0D9488] hover:underline font-inter font-medium">
+              <Link href="/forgot-password" className="text-sm text-amber-600 hover:underline font-inter font-medium">
                 Forgot Password?
               </Link>
             </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-[#0D9488] text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:bg-[#0f766e] disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
+            className="w-full brand-gradient text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:opacity-90 disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
           >
             {isLoading ? "Logging in..." : "Log In"}
           </button>

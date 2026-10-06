@@ -13,7 +13,7 @@ export default function StampPage() {
       </nav>
       
       <div className="bg-white p-12 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center max-w-2xl mx-auto mt-20">
-        <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+        <div className="w-20 h-20 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6">
           <Stamp size={40} />
         </div>
         <h2 className="text-xl font-bold text-slate-800 mb-2">Digital Stamping Features</h2>

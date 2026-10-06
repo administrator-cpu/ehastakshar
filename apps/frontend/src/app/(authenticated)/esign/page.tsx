@@ -79,7 +79,7 @@ export default function ESignDashboardPage() {
         
         <Link 
           href="/esign/send/type"
-          className="flex items-center space-x-2 bg-teal-600 hover:bg-teal-700 active:scale-[0.97] transition-all duration-150 ease-out text-white px-6 py-2.5 rounded-full font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+          className="flex items-center space-x-2 bg-amber-400 hover:bg-amber-400 active:scale-[0.97] transition-all duration-150 ease-out text-slate-900 px-6 py-2.5 rounded-full font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
         >
           <Plus size={18} />
           <span>Send for eSign</span>
@@ -122,7 +122,7 @@ export default function ESignDashboardPage() {
               </div>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
-              <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
                 <CheckCircle size={24} />
               </div>
               <div>
@@ -150,7 +150,7 @@ export default function ESignDashboardPage() {
                   }
                 }}
                 placeholder="Search documents..." 
-                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all w-64"
+                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all w-64"
               />
             </div>
           </div>
@@ -219,7 +219,7 @@ export default function ESignDashboardPage() {
                       <td className="p-4 text-sm text-slate-600">{doc.signType}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          doc.status === 'COMPLETED' ? 'bg-teal-100 text-teal-800' : 
+                          doc.status === 'COMPLETED' ? 'bg-amber-100 text-amber-800' : 
                           doc.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : 
                           'bg-slate-100 text-slate-800'
                         }`}>

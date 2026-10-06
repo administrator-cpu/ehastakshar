@@ -223,7 +223,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading || cooldown > 0}
-              className="w-full bg-[#0D9488] text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:bg-[#0f766e] disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
+              className="w-full brand-gradient text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:opacity-90 disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
             >
               {isLoading ? "Sending OTP..." : cooldown > 0 ? `Wait ${cooldown}s` : "Send OTP"}
             </button>
@@ -249,7 +249,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#0D9488] text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:bg-[#0f766e] disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
+              className="w-full brand-gradient text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:opacity-90 disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
             >
               {isLoading ? "Verifying..." : "Verify OTP"}
             </button>
@@ -260,7 +260,7 @@ export default function ForgotPasswordPage() {
                 type="button"
                 onClick={handleResend}
                 disabled={cooldown > 0 || isLoading}
-                className="text-[#0D9488] font-semibold hover:underline disabled:text-slate-400 disabled:no-underline"
+                className="text-amber-600 font-semibold hover:underline disabled:text-slate-400 disabled:no-underline"
               >
                 {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend OTP"}
               </button>
@@ -285,7 +285,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#0D9488] text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:bg-[#0f766e] disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
+              className="w-full brand-gradient text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:opacity-90 disabled:opacity-70 disabled:active:scale-100 shadow-md mt-6"
             >
               {isLoading ? "Resetting Password..." : "Set New Password"}
             </button>

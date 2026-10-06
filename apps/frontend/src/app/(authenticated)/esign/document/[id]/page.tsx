@@ -174,16 +174,16 @@ export default function DocumentDetailsPage() {
           text: `${name} has successfully signed the document`,
           subtitle: recipientEmail ? `${name} (${recipientEmail})` : name,
           icon: <PenTool size={18} />,
-          color: "bg-teal-500",
-          textColor: "text-teal-500"
+          color: "bg-amber-500",
+          textColor: "text-amber-500"
         };
       case 'COMPLETED':
         return {
           text: `All parties have signed the document`,
           subtitle: "System",
           icon: <CheckCircle size={18} />,
-          color: "bg-teal-600",
-          textColor: "text-teal-600"
+          color: "bg-amber-600",
+          textColor: "text-amber-600"
         };
       default:
         return {
@@ -339,7 +339,7 @@ export default function DocumentDetailsPage() {
 
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
+              <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
                 <FileText size={32} />
               </div>
               <div>
@@ -394,7 +394,7 @@ export default function DocumentDetailsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recipients.map(rec => (
-                <div key={rec.id} className={`p-5 rounded-2xl border ${rec.status === 'SIGNED' ? 'border-teal-200 bg-teal-50/30' : 'border-[#d4a373]/30 bg-[#fffdf0]'} min-w-[280px] shadow-sm`}>
+                <div key={rec.id} className={`p-5 rounded-2xl border ${rec.status === 'SIGNED' ? 'border-amber-200 bg-amber-50/30' : 'border-[#d4a373]/30 bg-[#fffdf0]'} min-w-[280px] shadow-sm`}>
                   <div className="flex justify-between items-start mb-4">
                     <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Signer</span>
                   </div>
@@ -402,7 +402,7 @@ export default function DocumentDetailsPage() {
                   <p className="text-sm text-slate-500 mb-5">{rec.email}</p>
                   <div className="flex items-center space-x-2">
                     {rec.status === 'SIGNED' ? (
-                      <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-teal-100 text-teal-700 flex items-center uppercase tracking-wider">
+                      <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-amber-100 text-amber-700 flex items-center uppercase tracking-wider">
                         <CheckCircle size={12} className="mr-1" />
                         {rec.status}
                       </span>

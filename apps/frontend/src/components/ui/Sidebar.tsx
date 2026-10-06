@@ -46,7 +46,7 @@ export default function Sidebar() {
               href={link.href}
               className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 mx-auto relative group ${
                 isActive 
-                  ? 'bg-indigo-50 text-indigo-600 shadow-sm' 
+                  ? 'bg-amber-50 text-amber-600 shadow-sm' 
                   : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
               }`}
             >

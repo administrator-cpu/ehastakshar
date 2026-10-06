@@ -158,7 +158,7 @@ function VerifyContent() {
           <button
             type="submit"
             disabled={isLoading || !!successMsg}
-            className="w-full bg-[#0D9488] text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:bg-[#0f766e] disabled:opacity-70 disabled:active:scale-100 shadow-md"
+            className="w-full brand-gradient text-white py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.98] hover:opacity-90 disabled:opacity-70 disabled:active:scale-100 shadow-md"
           >
             {isLoading ? "Verifying..." : "Verify Email"}
           </button>
@@ -188,7 +188,7 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center"><Loader2 className="animate-spin text-[#0D9488]" size={32} /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center"><Loader2 className="animate-spin text-amber-600" size={32} /></div>}>
       <VerifyContent />
     </Suspense>
   );

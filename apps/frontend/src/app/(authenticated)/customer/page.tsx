@@ -119,7 +119,7 @@ export default function AdminCustomersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center">
-              <Users className="mr-3 text-indigo-600" size={32} />
+              <Users className="mr-3 text-amber-600" size={32} />
               Customers
             </h1>
             <p className="mt-2 text-sm text-slate-500">
@@ -129,7 +129,7 @@ export default function AdminCustomersPage() {
           <div>
             <button
               onClick={handleOpenAddCustomer}
-              className="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all"
+              className="inline-flex items-center justify-center px-4 py-2.5 bg-amber-400 text-slate-900 text-sm font-medium rounded-xl hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 shadow-sm transition-all"
             >
               <Plus size={18} className="mr-2" />
               Add Customer
@@ -153,12 +153,12 @@ export default function AdminCustomersPage() {
                   setAppliedSearch(searchInput);
                 }
               }}
-              className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 sm:text-sm transition-all"
+              className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 sm:text-sm transition-all"
             />
           </div>
           
           <div className="text-sm font-medium text-slate-500 px-2">
-            Total Customers: <span className="text-indigo-600 font-bold">{customers.length}</span>
+            Total Customers: <span className="text-amber-600 font-bold">{customers.length}</span>
           </div>
         </div>
 
@@ -216,7 +216,7 @@ export default function AdminCustomersPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-bold uppercase">
+                          <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br bg-amber-50 flex items-center justify-center text-amber-600 font-bold uppercase">
                             {customer.name.charAt(0)}
                           </div>
                           <div className="ml-4">
@@ -235,7 +235,7 @@ export default function AdminCustomersPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col">
-                          <div className="flex items-center text-sm font-bold text-teal-600">
+                          <div className="flex items-center text-sm font-bold text-amber-600">
                             <FileText size={14} className="mr-1.5" />
                             {customer.completedDocuments} Signed
                           </div>
@@ -294,7 +294,7 @@ export default function AdminCustomersPage() {
                       placeholder="e.g. Ajay Negi"
                       value={newCustomer.fullName}
                       onChange={(e) => setNewCustomer({...newCustomer, fullName: e.target.value})}
-                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-amber-500 focus:border-amber-500 sm:text-sm transition-all"
                     />
                   </div>
                   
@@ -307,7 +307,7 @@ export default function AdminCustomersPage() {
                       placeholder="e.g. ajay@example.com"
                       value={newCustomer.email}
                       onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
-                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-amber-500 focus:border-amber-500 sm:text-sm transition-all"
                     />
                   </div>
 
@@ -319,7 +319,7 @@ export default function AdminCustomersPage() {
                       placeholder="e.g. 1234567890"
                       value={newCustomer.phone}
                       onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
-                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                      className="mt-1.5 block w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-amber-500 focus:border-amber-500 sm:text-sm transition-all"
                     />
                   </div>
 
@@ -333,13 +333,13 @@ export default function AdminCustomersPage() {
                           required
                           readOnly
                           value={newCustomer.tempPassword}
-                          className="block w-full border border-slate-300 rounded-none rounded-l-lg px-4 py-2.5 bg-slate-50 text-slate-900 font-mono text-sm focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                          className="block w-full border border-slate-300 rounded-none rounded-l-lg px-4 py-2.5 bg-slate-50 text-slate-900 font-mono text-sm focus:ring-amber-500 focus:border-amber-500 transition-all"
                         />
                       </div>
                       <button
                         type="button"
                         onClick={() => setNewCustomer({...newCustomer, tempPassword: generateTempPassword()})}
-                        className="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-lg text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        className="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-lg text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all"
                       >
                         <RefreshCw size={16} className="text-slate-400" />
                         <span>Regenerate</span>
@@ -362,7 +362,7 @@ export default function AdminCustomersPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="inline-flex justify-center items-center px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="inline-flex justify-center items-center px-4 py-2.5 bg-amber-400 text-slate-900 text-sm font-medium rounded-lg hover:bg-amber-400 focus:outline-none shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       {isSubmitting && <Loader2 size={16} className="animate-spin mr-2" />}
                       Add Customer

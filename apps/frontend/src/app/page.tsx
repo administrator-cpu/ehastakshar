@@ -25,7 +25,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="bg-[#0D9488] text-white px-4 py-2 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-secondary/90">
+          <Link href="/login" className="brand-gradient text-white px-4 py-2 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-secondary/90">
             Login
           </Link>
         </div>
@@ -46,7 +46,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col gap-3 pt-4 w-fit">
                 <div className="flex flex-wrap gap-4">
-                  <Link href="/signup" className="bg-[#0D9488] text-white px-8 py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#0f766e] shadow-sm flex items-center justify-center">
+                  <Link href="/signup" className="brand-gradient text-white px-8 py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:opacity-90 shadow-sm flex items-center justify-center">
                     Get Started for FREE
                   </Link>
                   <button className="bg-transparent border border-[#1A365D] text-[#1A365D] px-8 py-3 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#1A365D]/5">
@@ -100,7 +100,7 @@ export default function Home() {
                       <div className="h-2 w-full bg-surface-variant rounded"></div>
                       <div className="h-2 w-5/6 bg-surface-variant rounded"></div>
                       <div className="pt-12">
-                        <div className="w-48 h-24 border-2 border-dashed border-[#0D9488] bg-[#0D9488]/5 rounded flex items-center justify-center text-[#0D9488] relative group cursor-pointer hover:bg-[#0D9488]/10 transition-colors">
+                        <div className="w-48 h-24 border-2 border-dashed border-amber-500 bg-amber-50 rounded flex items-center justify-center text-amber-600 relative group cursor-pointer hover:bg-amber-100 transition-colors">
                           <span
                             className="material-symbols-outlined mb-1"
                             data-icon="draw"
@@ -180,7 +180,7 @@ export default function Home() {
               {/* Feature 2: Simple eSign */}
               <div className="bg-surface rounded-xl p-8 border border-outline-variant/40 flex flex-col justify-between group transition-transform duration-300 ease-out-ui hover:-translate-y-1 hover:shadow-md">
                 <div>
-                  <div className="w-12 h-12 bg-[#0D9488]/10 rounded-lg flex items-center justify-center text-[#0D9488] mb-6">
+                  <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 mb-6">
                     <span
                       className="material-symbols-outlined"
                       data-icon="ink_pen"
@@ -293,7 +293,7 @@ export default function Home() {
               </div>
               {/* Step 3 */}
               <div className="flex-1 bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/50 relative z-10 text-center glass-card hover:-translate-y-2 transition-transform duration-300 ease-out-ui hover:shadow-md">
-                <div className="w-16 h-16 bg-[#0D9488] rounded-full flex items-center justify-center mx-auto mb-6 shadow-md text-white">
+                <div className="w-16 h-16 brand-gradient rounded-full flex items-center justify-center mx-auto mb-6 shadow-md text-white">
                   <span
                     className="material-symbols-outlined text-2xl"
                     data-icon="task_alt"
@@ -324,7 +324,7 @@ export default function Home() {
               critical document signing needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Link href="/signup" className="bg-[#0D9488] text-white px-8 py-4 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-[#0f766e] shadow-lg flex items-center justify-center">
+              <Link href="/signup" className="brand-gradient text-white px-8 py-4 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:opacity-90 shadow-lg flex items-center justify-center">
                 Get Started for FREE
               </Link>
               <button className="bg-transparent border border-outline text-white px-8 py-4 rounded font-inter text-label-md font-bold transition-transform duration-[150ms] ease-out-ui active:scale-[0.97] hover:bg-white/5">

@@ -103,7 +103,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors"
+              className="w-full py-3 px-4 bg-amber-400 hover:bg-amber-400 text-slate-900 rounded-xl font-medium transition-colors"
             >
               Refresh Page
             </button>

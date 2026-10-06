@@ -138,7 +138,7 @@ export default function ProfilePage() {
         {/* Profile Card */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           {/* Cover Header */}
-          <div className="h-32 bg-gradient-to-r from-teal-500 to-indigo-600"></div>
+          <div className="h-32 bg-gradient-to-r bg-amber-50"></div>
 
           <div className="px-8 pb-8 relative">
             {/* Avatar */}
