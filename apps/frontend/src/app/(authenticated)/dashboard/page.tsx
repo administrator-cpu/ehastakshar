@@ -1,15 +1,40 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PenTool, Stamp, User } from 'lucide-react';
 
 export default function DashboardPage() {
+  const [firstName, setFirstName] = useState<string>("User");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/me`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data?.profile?.firstName) {
+            setFirstName(data.profile.firstName);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-8 md:p-16">
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Header */}
         <header className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-            Welcome back, Ajay!
+            Welcome back, {firstName}!
           </h1>
           <p className="text-lg text-slate-500">
             What would you like to do today?
