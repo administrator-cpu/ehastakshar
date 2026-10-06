@@ -14,7 +14,7 @@ The process begins when an authenticated user uploads a PDF and specifies the re
 
 ### Backend Execution & Security
 1. **Authentication Check:** The `AuthMiddleware` verifies the sender's JWT to ensure they are logged in.
-2. **Storage Upload:** The backend uploads the raw PDF to the storage provider (e.g., S3 or local storage) and retrieves a secure `fileUrl`.
+2. **Storage Upload:** The backend saves the raw PDF securely into the local `/pdf` directory and generates a relative `fileUrl`.
 3. **Database Transaction:**
    - A new `Document` record is created.
    - For each recipient, a `DocumentRecipient` record is created.
@@ -89,20 +89,18 @@ The recipient reviews the document, optionally draws their signature, captures a
 3. **Visual Preparation:**
    - `DigitalSignatureService.addSignaturePlaceholder` uses `pdf-lib` to visually draw the signature image, the Date (IST), and the Transaction ID onto the last page of the PDF.
    - It allocates an 8192-byte placeholder in the PDF's `/ByteRange` dictionary for the upcoming cryptography.
-4. **Cryptographic Sealing (Non-Repudiation Check):**
-   - `DigitalSignatureService.sealDocument` uses `@signpdf/signpdf`.
-   - It mathematically hashes the entire document (excluding the placeholder).
-   - It encrypts the hash using the server's private key (`dev-cert.p12` or production Class 3 Certificate).
-   - The resulting PKCS#7 signature is injected into the PDF, rendering it **Tamper-Evident**. Any subsequent alteration to the file will mathematically break the signature in PDF readers.
+4. **Visual Signature Embedding:**
+   - The user's signature is securely embedded onto the document.
+   - Note: The platform currently relies on a robust database Audit Trail and visual embedding rather than PKCS#7 cryptographic sealing.
 
 ---
 
 ## 5. Finalization & Audit Trail
 
-With the document cryptographically sealed, the system completes the transaction.
+With the document visually signed and verified, the system completes the transaction.
 
 ### Backend Execution
-1. **Storage Update:** The newly sealed PDF overwrites the original file in the storage provider.
+1. **Storage Update:** The newly signed PDF overwrites the original file in the local `/pdf` directory.
 2. **Database Finalization:** 
    - A database transaction marks the recipient as `SIGNED`.
    - Geolocation (Latitude/Longitude) is reverse-geocoded to a City/State and stored.
@@ -125,7 +123,7 @@ Once a document is signed, users must be able to securely download the finalized
 ### Backend Execution & Security
 1. **Recipient Access Check:** The `/download` endpoint explicitly requires the exact, unguessable `secureToken` that was originally emailed to the recipient. Without this token, the document cannot be accessed.
 2. **Sender Access Check:** The `/download-audit` endpoint requires a valid JWT Bearer token. The backend verifies that the `userId` in the JWT matches the `uploaderId` of the document, preventing cross-tenant data leaks.
-3. **Streamed Response:** To prevent server memory exhaustion, the PDF is downloaded from the Storage Provider as a stream and piped directly to the HTTP response using `res.pipe()`.
+3. **Streamed Response:** To prevent server memory exhaustion, the PDF is read from the local `/pdf` directory as a stream and piped directly to the HTTP response using `res.pipe()`.
 
 ---
 
@@ -137,11 +135,10 @@ A legally binding platform requires security infrastructure extending beyond jus
 - **The Threat:** Malicious actors attempting to brute-force the 6-digit OTP or spamming the `/request-otp` endpoint to exhaust Resend email credits.
 - **The Defense:** A strict Rate Limiter (e.g., `express-rate-limit`) must be applied to the `/request-otp` and `/verify-otp` endpoints, limiting users to a maximum of 5 requests per 15 minutes per IP address.
 
-### 2. Cryptographic Key Management (Security Check)
-- **The Threat:** If the server's `.p12` Document Signer Certificate or the `JWT_SECRET` is compromised, the entire legal validity of the platform collapses.
+### 2. Secret Management (Security Check)
+- **The Threat:** If the server's `JWT_SECRET` is compromised, the security of the platform collapses as attackers can forge tokens.
 - **The Defense:** 
-  - The `JWT_SECRET` must be highly entropic (e.g., 64 random hex characters) and injected at runtime via Environment Variables.
-  - The `.p12` Certificate password must NEVER be hardcoded in the repository (as it currently is for development). It must be fetched securely from a Key Management Service (like AWS KMS or HashiCorp Vault) at runtime.
+  - The `JWT_SECRET` must be highly entropic (e.g., 64 random hex characters) and injected securely at runtime via Environment Variables.
 
 ### 3. Link Expiration & Revocation
 - **The Threat:** A recipient's email account is compromised a year after the transaction, giving the attacker access to the `secureToken` link.
