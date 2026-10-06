@@ -25,18 +25,18 @@ export default function ESignatureTypeSelectionPage() {
           
           {/* Digital eSign Card */}
           <Link href="/esign/send/digital" className="group block">
-            <div className="h-full bg-white border border-slate-200 rounded-3xl p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-teal-500 hover:-translate-y-1 relative overflow-hidden cursor-pointer active:scale-[0.98] ease-out">
+            <div className="h-full bg-white border border-slate-200 rounded-3xl p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-amber-500 hover:-translate-y-1 relative overflow-hidden cursor-pointer active:scale-[0.98] ease-out">
               <div className="flex justify-between items-start mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+                <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:bg-amber-400 group-hover:text-slate-900 transition-colors duration-300">
                   <FileBadge size={32} />
                 </div>
                 
-                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-teal-600 group-hover:border-teal-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-amber-400 group-hover:border-amber-600 group-hover:text-slate-900 transition-all duration-300 shadow-sm">
                   <ArrowRight size={20} />
                 </div>
               </div>
               
-              <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-teal-700 transition-colors">Digital eSign</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-amber-700 transition-colors">Digital eSign</h3>
               <p className="text-slate-500 leading-relaxed text-base">
                 Send documents for secure electronic signature via Email and OTP verification. Best for standard contracts and agreements.
               </p>

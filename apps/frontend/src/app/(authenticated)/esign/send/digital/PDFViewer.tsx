@@ -123,7 +123,7 @@ const SignatureBox = ({
         width: 140,
         touchAction: 'none'
       }}
-      className={`border-2 p-2 z-50 group transition-all select-none ${isDraggable ? 'border-dashed border-teal-500 hover:border-solid cursor-grab active:cursor-grabbing' : 'border-transparent cursor-default'}`}
+      className={`border-2 p-2 z-50 group transition-all select-none ${isDraggable ? 'border-dashed border-amber-500 hover:border-solid cursor-grab active:cursor-grabbing' : 'border-transparent cursor-default'}`}
     >
       {isDraggable && onRemove && (
         <button
@@ -137,8 +137,8 @@ const SignatureBox = ({
       {signatureImage ? (
         <img src={signatureImage} alt="Signature" className="w-full h-auto pointer-events-none select-none" draggable={false} />
       ) : (
-        <div className="w-full h-14 bg-teal-50 border-2 border-teal-200 text-teal-800 flex items-center justify-center flex-col rounded-md shadow-sm pointer-events-none text-center p-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600">Sign Here</span>
+        <div className="w-full h-14 bg-amber-50 border-2 border-amber-200 text-amber-800 flex items-center justify-center flex-col rounded-md shadow-sm pointer-events-none text-center p-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Sign Here</span>
           <span className="text-xs font-medium truncate w-full">{activeSignerName || 'Signer'}</span>
         </div>
       )}
@@ -190,7 +190,7 @@ export default function PDFViewer({
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20 bg-slate-900/5">
                   <button 
                     onClick={() => onAddSignatureBox(pageNumber)}
-                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg flex items-center transform transition-transform hover:scale-105"
+                    className="bg-amber-400 hover:bg-amber-400 text-slate-900 px-4 py-2 rounded-lg font-medium shadow-lg flex items-center transform transition-transform hover:scale-105"
                   >
                     + Add Signature for {activeSignerName} here
                   </button>

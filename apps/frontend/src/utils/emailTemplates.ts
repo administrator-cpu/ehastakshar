@@ -16,12 +16,12 @@ export function generateInviteEmailHtml({
         <!-- Header -->
         <div style="margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 24px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 32px; height: 32px; background-color: #0d9488; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">
+            <div style="width: 32px; height: 32px; background-color: #ffb300; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">
               <span style="color: #ffffff; font-weight: bold; font-size: 18px;">e</span>
             </div>
             <span style="font-size: 20px; font-weight: bold; letter-spacing: -0.025em; color: #0f172a; margin-left: 8px; vertical-align: middle;">Ehastakshar</span>
           </div>
-          <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #0d9488; background-color: #f0fdfa; padding: 4px 12px; border-radius: 9999px;">
+          <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #ffb300; background-color: #f0fdfa; padding: 4px 12px; border-radius: 9999px;">
             Action Required
           </span>
         </div>
@@ -57,7 +57,7 @@ export function generateInviteEmailHtml({
           </div>
 
           <div style="padding-top: 16px;">
-            <a href="${link}" style="display: block; background-color: #0d9488; color: #ffffff; font-weight: 500; padding: 12px 24px; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); text-align: center; text-decoration: none;">
+            <a href="${link}" style="display: block; background-color: #ffb300; color: #ffffff; font-weight: 500; padding: 12px 24px; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); text-align: center; text-decoration: none;">
               Review & Sign Document
             </a>
           </div>

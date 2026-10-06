@@ -141,19 +141,19 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
       <div className="flex border-b border-slate-200 mb-6">
         <button
           onClick={() => setMode("type")}
-          className={`flex-1 py-3 font-semibold flex items-center justify-center space-x-2 transition-all ${mode === 'type' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`flex-1 py-3 font-semibold flex items-center justify-center space-x-2 transition-all ${mode === 'type' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-slate-500 hover:text-slate-700'}`}
         >
           <Type size={18} /> <span>Type</span>
         </button>
         <button
           onClick={() => setMode("draw")}
-          className={`flex-1 py-3 font-semibold flex items-center justify-center space-x-2 transition-all ${mode === 'draw' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`flex-1 py-3 font-semibold flex items-center justify-center space-x-2 transition-all ${mode === 'draw' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-slate-500 hover:text-slate-700'}`}
         >
           <PenTool size={18} /> <span>Draw</span>
         </button>
         <button
           onClick={() => setMode("upload")}
-          className={`flex-1 py-3 font-semibold flex items-center justify-center space-x-2 transition-all ${mode === 'upload' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`flex-1 py-3 font-semibold flex items-center justify-center space-x-2 transition-all ${mode === 'upload' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-slate-500 hover:text-slate-700'}`}
         >
           <Upload size={18} /> <span>Upload</span>
         </button>
@@ -168,7 +168,7 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
               placeholder="Your Name"
               value={typedName}
               onChange={(e) => setTypedName(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-900 font-medium"
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-slate-900 font-medium"
             />
             {typedName.trim() && (
               <div>
@@ -178,7 +178,7 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
                     <div
                       key={font.name}
                       onClick={() => setSelectedFont(font)}
-                      className={`p-4 rounded-xl cursor-pointer transition-all flex items-center justify-center bg-slate-50 border ${selectedFont.name === font.name ? 'border-teal-500 ring-1 ring-teal-500' : 'border-transparent hover:border-slate-200'}`}
+                      className={`p-4 rounded-xl cursor-pointer transition-all flex items-center justify-center bg-slate-50 border ${selectedFont.name === font.name ? 'border-amber-500 ring-1 ring-amber-500' : 'border-transparent hover:border-slate-200'}`}
                     >
                       <span style={{ fontFamily: font.family }} className="text-3xl text-slate-900">
                         {typedName}
@@ -218,7 +218,7 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
               <img src={uploadedPreview} alt="Preview" className="max-h-40 object-contain rounded-lg" />
             ) : (
               <div className="text-center pointer-events-none">
-                <div className="bg-teal-600 text-white font-bold py-2 px-6 rounded-xl inline-block mb-2">
+                <div className="bg-amber-400 text-slate-900 font-bold py-2 px-6 rounded-xl inline-block mb-2">
                   Upload Signature
                 </div>
                 <p className="text-slate-500 text-sm">or Drop png, jpg here</p>
@@ -246,7 +246,7 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
           <button
             onClick={handleConfirm}
             disabled={isNextDisabled()}
-            className="flex-[2] cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold transition-all shadow-sm"
+            className="flex-[2] cursor-pointer bg-amber-400 hover:bg-amber-400 disabled:bg-slate-300 disabled:cursor-not-allowed text-slate-900 py-3.5 rounded-xl font-bold transition-all shadow-sm"
           >
             {isSigning ? "Signing..." : "Insert"}
           </button>

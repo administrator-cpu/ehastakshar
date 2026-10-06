@@ -7,7 +7,6 @@ import { AuditLogRepository } from "../repositories/AuditLogRepository.js";
 import { db } from "../db/index.js";
 import { AuthService } from "../services/AuthService.js";
 import { UAParser } from "ua-parser-js";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { getStorageProvider } from "../services/storage.service.js";
 import { OtpRepository } from "../repositories/OtpRepository.js";
 import { logger } from "../utils/logger.js";
@@ -441,7 +440,7 @@ export class ESignController {
       }
       const fileBuffer = Buffer.concat(chunks);
 
-      // 2. Manipulate PDF - Visuals and Cryptographic Sealing
+      // 2. Manipulate PDF - Add Visual Signature
       const ipAddress = (getClientIp(req)).toString();
       
       const positions = (recipient.signaturePositions as { pageNumber: number; pctX: number; pctY: number; }[]) || [];
@@ -454,8 +453,7 @@ export class ESignController {
         positions: positions
       };
       
-      const visuallyModifiedPdf = await DigitalSignatureService.addSignaturePlaceholder(fileBuffer, details);
-      const signedPdfBuffer = await DigitalSignatureService.sealDocument(visuallyModifiedPdf, details);
+      const signedPdfBuffer = await DigitalSignatureService.addVisualSignature(fileBuffer, details);
 
       // 3. Upload signed document back
       // Using a temporary stream to upload the Buffer
@@ -573,17 +571,20 @@ export class ESignController {
    */
   static async downloadDocument(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const uploaderId = req.userId;
+      const requesterId = req.userId;
       const documentId = req.params.id as string;
 
-      if (!uploaderId) {
+      if (!requesterId) {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
 
+      const requester = await UserRepository.findById(requesterId);
+      const isAdmin = requester?.role === "ADMIN";
+
       const document = await DocumentRepository.findById(documentId);
       
-      if (!document || document.uploaderId !== uploaderId) {
+      if (!document || (!isAdmin && document.uploaderId !== requesterId)) {
         res.status(404).json({ error: "Document not found or unauthorized" });
         return;
       }
@@ -635,20 +636,23 @@ export class ESignController {
    */
   static async downloadAuditReport(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const uploaderId = req.userId;
+      const requesterId = req.userId;
       const documentId = req.params.id as string;
-      if (!uploaderId) {
+      if (!requesterId) {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
       
+      const requester = await UserRepository.findById(requesterId);
+      const isAdmin = requester?.role === "ADMIN";
+
       const document = await DocumentRepository.findById(documentId);
-      if (!document || document.uploaderId !== uploaderId) {
+      if (!document || (!isAdmin && document.uploaderId !== requesterId)) {
         res.status(404).json({ error: "Document not found" });
         return;
       }
 
-      const uploader = await UserRepository.findById(uploaderId);
+      const uploader = await UserRepository.findById(document.uploaderId);
       const recipients = await DocumentRecipientRepository.findByDocumentId(documentId);
       const events = await AuditLogRepository.getEventsForDocument(documentId);
 
@@ -729,6 +733,11 @@ export class ESignController {
           
           const signEvent = events.find(e => e.recipientId === r.id && e.action === "SIGNED");
           if (!signEvent) continue;
+
+          const blockHeight = signEvent.photoUrl ? 320 : 200;
+          if (doc.y + blockHeight > doc.page.height - doc.page.margins.bottom) {
+            doc.addPage();
+          }
 
           doc.moveDown(2);
           let currentY = doc.y;
@@ -826,6 +835,11 @@ export class ESignController {
         
         let currentRY = doc.y;
         for (const r of recipients) {
+          if (currentRY + 85 > doc.page.height - doc.page.margins.bottom) {
+            doc.addPage();
+            currentRY = doc.y;
+          }
+
           doc.roundedRect(50, currentRY, 250, 75, 5).lineWidth(1).strokeColor("#d97706").stroke();
           doc.fillColor("#fef3c7").fillOpacity(0.3).roundedRect(51, currentRY + 1, 248, 73, 5).fill().fillOpacity(1);
 

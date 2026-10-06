@@ -54,3 +54,7 @@ docs/**
 docs.md
 
 temp
+
+# Storage Directories
+apps/backend/pdf/
+apps/backend/uploads/

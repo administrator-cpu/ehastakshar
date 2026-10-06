@@ -94,11 +94,27 @@
   /* Emil's custom easing */
   --ease-out-ui: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-ui: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* DIV Brand Colors */
+  --color-brand-magenta: #ff0054;
+  --color-brand-coral: #ff5a5f;
+  --color-brand-amber: #ffb300;
 }
 
 @layer utilities {
   .hero-gradient {
     background: linear-gradient(135deg, rgba(247, 249, 251, 1) 0%, rgba(224, 227, 229, 0.5) 100%);
+  }
+
+  .brand-gradient {
+    background: linear-gradient(90deg, var(--color-brand-magenta) 0%, var(--color-brand-coral) 50%, var(--color-brand-amber) 100%);
+  }
+
+  .brand-gradient-text {
+    background: linear-gradient(90deg, var(--color-brand-magenta) 0%, var(--color-brand-coral) 50%, var(--color-brand-amber) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .glass-card {

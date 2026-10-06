@@ -211,7 +211,7 @@ export default function SendDigitalESignPage() {
               setShowReview(true);
             }}
             disabled={isSendDisabled}
-            className="flex items-center space-x-2 bg-teal-600 hover:bg-teal-700 active:scale-[0.97] transition-all duration-150 ease-out disabled:bg-slate-300 disabled:cursor-not-allowed disabled:active:scale-100 text-white px-8 py-2.5 rounded-full font-medium shadow-sm cursor-pointer"
+            className="flex items-center space-x-2 bg-amber-400 hover:bg-amber-400 active:scale-[0.97] transition-all duration-150 ease-out disabled:bg-slate-300 disabled:cursor-not-allowed disabled:active:scale-100 text-slate-900 px-8 py-2.5 rounded-full font-medium shadow-sm cursor-pointer"
           >
             <span>Review & Send</span>
             <Send size={16} className="ml-1" />
@@ -232,7 +232,7 @@ export default function SendDigitalESignPage() {
                value={title}
                onChange={(e) => setTitle(e.target.value)}
                placeholder="e.g. Employee NDA"
-               className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium"
+               className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
              />
           </div>
 
@@ -240,7 +240,7 @@ export default function SendDigitalESignPage() {
             <div 
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleFileDrop}
-              className="flex-1 border-2 border-dashed border-slate-300 rounded-2xl bg-white flex flex-col items-center justify-center hover:bg-slate-50 hover:border-teal-500/50 transition-colors cursor-pointer min-h-[400px]"
+              className="flex-1 border-2 border-dashed border-slate-300 rounded-2xl bg-white flex flex-col items-center justify-center hover:bg-slate-50 hover:border-amber-500/50 transition-colors cursor-pointer min-h-[400px]"
               onClick={() => fileInputRef.current?.click()}
             >
               <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
@@ -269,12 +269,12 @@ export default function SendDigitalESignPage() {
               </button>
 
               {activeSignerId && (
-                <div className="absolute top-4 left-4 right-16 z-20 bg-teal-600/90 text-white px-4 py-2 rounded-lg backdrop-blur-md shadow-sm flex items-center justify-between animate-in slide-in-from-top-2">
+                <div className="absolute top-4 left-4 right-16 z-20 bg-amber-400/90 text-slate-900 px-4 py-2 rounded-lg backdrop-blur-md shadow-sm flex items-center justify-between animate-in slide-in-from-top-2">
                   <div className="flex items-center space-x-2">
                     <Pencil size={16} />
                     <span className="text-sm font-semibold tracking-wide">Placing signature for <span className="font-bold underline underline-offset-2">{recipients.find(r => r.id === activeSignerId)?.name}</span></span>
                   </div>
-                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveSignerId(null); }} className="text-xs font-bold bg-white text-teal-700 px-3 py-1 rounded-md hover:bg-teal-50 active:scale-95 transition-all cursor-pointer">Done</button>
+                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveSignerId(null); }} className="text-xs font-bold bg-white text-amber-700 px-3 py-1 rounded-md hover:bg-amber-50 active:scale-95 transition-all cursor-pointer">Done</button>
                 </div>
               )}
               
@@ -307,13 +307,13 @@ export default function SendDigitalESignPage() {
           <div className="flex border-b border-slate-200">
             <button 
               onClick={() => setActiveTab('recipient')}
-              className={`flex-1 py-4 text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'recipient' ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50' : 'text-slate-500 hover:text-slate-700 bg-white'}`}
+              className={`flex-1 py-4 text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'recipient' ? 'text-amber-600 border-b-2 border-amber-600 bg-slate-50/50' : 'text-slate-500 hover:text-slate-700 bg-white'}`}
             >
               Recipient
             </button>
             <button 
               onClick={() => setActiveTab('security')}
-              className={`flex-1 py-4 text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'security' ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50' : 'text-slate-500 hover:text-slate-700 bg-white'}`}
+              className={`flex-1 py-4 text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'security' ? 'text-amber-600 border-b-2 border-amber-600 bg-slate-50/50' : 'text-slate-500 hover:text-slate-700 bg-white'}`}
             >
               Security
             </button>
@@ -323,7 +323,7 @@ export default function SendDigitalESignPage() {
             {activeTab === 'recipient' && (
               <>
                 <div className="flex items-center space-x-3 mb-8 shrink-0">
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
               <Users size={20} />
             </div>
             <div>
@@ -344,8 +344,8 @@ export default function SendDigitalESignPage() {
                       <p className="font-semibold text-slate-900 text-sm">{recipient.name}</p>
                       <p className="text-slate-500 text-xs mt-0.5">{recipient.email}</p>
                       <div className="flex space-x-2 mt-2">
-                        {recipient.requireGps && <span className="inline-flex items-center text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium"><MapPin size={10} className="mr-1"/> GPS Required</span>}
-                        {recipient.requirePhoto && <span className="inline-flex items-center text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium"><Camera size={10} className="mr-1"/> Photo Required</span>}
+                        {recipient.requireGps && <span className="inline-flex items-center text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium"><MapPin size={10} className="mr-1"/> GPS Required</span>}
+                        {recipient.requirePhoto && <span className="inline-flex items-center text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium"><Camera size={10} className="mr-1"/> Photo Required</span>}
                       </div>
                     </div>
                   </div>
@@ -368,7 +368,7 @@ export default function SendDigitalESignPage() {
                     </button>
                     <button 
                       onClick={() => handleEditSigner(recipient)}
-                      className="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-50 active:scale-95 cursor-pointer"
+                      className="text-slate-400 hover:text-amber-600 transition-colors p-2 rounded-lg hover:bg-amber-50 active:scale-95 cursor-pointer"
                       title="Edit Signer"
                     >
                       <Pencil size={16} />
@@ -389,7 +389,7 @@ export default function SendDigitalESignPage() {
                   </div>
                   <button 
                     onClick={() => setActiveSignerId(activeSignerId === recipient.id ? null : recipient.id)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-md flex items-center transition-colors cursor-pointer ${activeSignerId === recipient.id ? 'bg-teal-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-md flex items-center transition-colors cursor-pointer ${activeSignerId === recipient.id ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
                   >
                     <Pencil size={12} className="mr-1.5" /> 
                     {activeSignerId === recipient.id ? 'Done Placing' : 'Place Signature'}
@@ -407,7 +407,7 @@ export default function SendDigitalESignPage() {
 
           <button 
             onClick={() => setShowAddSigner(true)}
-            className="w-full py-3.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-600 font-medium flex items-center justify-center hover:bg-slate-50 hover:border-teal-500/30 hover:text-teal-700 transition-colors active:scale-[0.98] cursor-pointer"
+            className="w-full py-3.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-600 font-medium flex items-center justify-center hover:bg-slate-50 hover:border-amber-500/30 hover:text-amber-700 transition-colors active:scale-[0.98] cursor-pointer"
           >
             <UserPlus size={18} className="mr-2" />
             {recipients.length === 0 ? "Add Signer" : "Add Another Signer"}
@@ -435,7 +435,7 @@ export default function SendDigitalESignPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={enableWatermark} onChange={(e) => setEnableWatermark(e.target.checked)} />
-                      <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
+                      <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                     </label>
                   </div>
 
@@ -447,7 +447,7 @@ export default function SendDigitalESignPage() {
                         value={watermarkText}
                         onChange={(e) => setWatermarkText(e.target.value)}
                         placeholder="e.g., CONFIDENTIAL"
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium"
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-medium"
                       />
                     </div>
                   )}
@@ -479,7 +479,7 @@ export default function SendDigitalESignPage() {
                     value={newSigner.name}
                     onChange={(e) => setNewSigner({...newSigner, name: e.target.value})}
                     placeholder="Jane Doe"
-                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-medium"
                   />
                 </div>
                 <div>
@@ -490,7 +490,7 @@ export default function SendDigitalESignPage() {
                     value={newSigner.email}
                     onChange={(e) => setNewSigner({...newSigner, email: e.target.value})}
                     placeholder="jane@example.com"
-                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-medium"
                   />
                 </div>
                 
@@ -505,7 +505,7 @@ export default function SendDigitalESignPage() {
                           type="checkbox" 
                           checked={newSigner.requireGps}
                           onChange={(e) => setNewSigner({...newSigner, requireGps: e.target.checked})}
-                          className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:ring-2 focus:ring-teal-500/30 focus:outline-none checked:bg-teal-600 checked:border-teal-600 transition-colors cursor-pointer" 
+                          className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:ring-2 focus:ring-amber-500/30 focus:outline-none checked:bg-amber-600 checked:border-amber-600 transition-colors cursor-pointer" 
                         />
                         <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -520,7 +520,7 @@ export default function SendDigitalESignPage() {
                           type="checkbox" 
                           checked={newSigner.requirePhoto}
                           onChange={(e) => setNewSigner({...newSigner, requirePhoto: e.target.checked})}
-                          className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:ring-2 focus:ring-teal-500/30 focus:outline-none checked:bg-teal-600 checked:border-teal-600 transition-colors cursor-pointer" 
+                          className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:ring-2 focus:ring-amber-500/30 focus:outline-none checked:bg-amber-600 checked:border-amber-600 transition-colors cursor-pointer" 
                         />
                         <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -612,8 +612,8 @@ export default function SendDigitalESignPage() {
                       <div className="flex justify-between items-center mb-2">
                         <span className="font-bold text-slate-800">{r.name}</span>
                         <div className="flex space-x-1">
-                          {r.requireGps && <span className="text-[10px] uppercase tracking-wider font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">GPS Req</span>}
-                          {r.requirePhoto && <span className="text-[10px] uppercase tracking-wider font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">Photo Req</span>}
+                          {r.requireGps && <span className="text-[10px] uppercase tracking-wider font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">GPS Req</span>}
+                          {r.requirePhoto && <span className="text-[10px] uppercase tracking-wider font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Photo Req</span>}
                         </div>
                       </div>
                       <span className="text-slate-500 text-xs">{r.email}</span>
@@ -633,7 +633,7 @@ export default function SendDigitalESignPage() {
               <button 
                 onClick={handleSend}
                 disabled={isSending}
-                className="flex items-center bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white px-8 py-2.5 rounded-full font-medium shadow-sm transition-all active:scale-[0.97] cursor-pointer"
+                className="flex items-center bg-amber-400 hover:bg-amber-400 disabled:bg-amber-400 text-slate-900 px-8 py-2.5 rounded-full font-medium shadow-sm transition-all active:scale-[0.97] cursor-pointer"
               >
                 {isSending ? (
                   <>
