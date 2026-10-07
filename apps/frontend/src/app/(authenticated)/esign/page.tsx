@@ -81,7 +81,7 @@ export default function ESignDashboardPage() {
         </div>
         
         <Link 
-          href="/esign/send/type"
+          href="/esign/send/digital"
           className="flex items-center space-x-2 bg-amber-400 hover:bg-amber-400 active:scale-[0.97] transition-all duration-150 ease-out text-slate-900 px-6 py-2.5 rounded-full font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
         >
           <Plus size={18} />
@@ -191,7 +191,7 @@ export default function ESignDashboardPage() {
                 You haven't sent any documents for e-signature yet. Click the "Send for eSign" button to get started.
               </p>
               <Link 
-                href="/esign/send/type"
+                href="/esign/send/digital"
                 className="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.97] transition-all duration-150 ease-out text-white px-6 py-3 rounded-full font-medium cursor-pointer shadow-sm"
               >
                 <Plus size={18} />
