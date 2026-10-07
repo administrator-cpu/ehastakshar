@@ -8,7 +8,7 @@ export default function DashboardPage() {
   const { profile, isLoading } = useUser();
 
   return (
-    <div className="min-h-screen relative bg-surface-container-lowest overflow-x-hidden p-6 md:p-12 lg:p-16">
+    <div className="min-h-screen relative bg-surface-container-lowest overflow-x-hidden pt-4 px-6 pb-12 md:pt-6 md:px-12 lg:pt-6 lg:px-16">
       {/* Premium Ambient Workspace Background */}
       <div className="absolute inset-0 opacity-[0.03] z-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "32px 32px" }}></div>
       <div className="absolute top-0 right-0 w-[600px] h-[600px] brand-gradient rounded-full blur-[150px] opacity-10 pointer-events-none"></div>
