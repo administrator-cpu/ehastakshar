@@ -388,7 +388,21 @@ export default function SendDigitalESignPage() {
                     {recipient.signaturePositions.length} signature box{recipient.signaturePositions.length !== 1 && 'es'} placed
                   </div>
                   <button 
-                    onClick={() => setActiveSignerId(activeSignerId === recipient.id ? null : recipient.id)}
+                    onClick={() => {
+                      if (activeSignerId === recipient.id) {
+                        setActiveSignerId(null);
+                      } else {
+                        setActiveSignerId(recipient.id);
+                        if (recipient.signaturePositions.length === 0 && numPages > 0) {
+                          const allPositions = Array.from({ length: numPages }).map((_, i) => ({
+                            pageNumber: i + 1,
+                            pctX: 0.5,
+                            pctY: 0.5
+                          }));
+                          setRecipients(recipients.map(r => r.id === recipient.id ? { ...r, signaturePositions: allPositions } : r));
+                        }
+                      }
+                    }}
                     className={`px-3 py-1.5 text-xs font-bold rounded-md flex items-center transition-colors cursor-pointer ${activeSignerId === recipient.id ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
                   >
                     <Pencil size={12} className="mr-1.5" /> 
