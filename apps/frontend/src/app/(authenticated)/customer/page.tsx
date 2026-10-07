@@ -145,7 +145,7 @@ export default function AdminCustomersPage() {
             </div>
             <input
               type="text"
-              placeholder="Search by name or email (Press Enter)..."
+              placeholder="Search by name or email"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => {

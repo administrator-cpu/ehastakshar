@@ -67,9 +67,12 @@ export default function ESignDashboardPage() {
   }, [currentPage, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className="min-h-screen relative bg-surface-container-lowest text-slate-900 font-sans">
+      {/* Premium Ambient Workspace Background */}
+      <div className="absolute inset-0 opacity-[0.03] z-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "32px 32px" }}></div>
+      
       {/* Top Nav */}
-      <nav className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-40">
+      <nav className="bg-white/80 backdrop-blur-xl border-b border-outline-variant/40 px-8 py-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center space-x-4">
           <Link href="/dashboard" className="p-2 rounded-full hover:bg-slate-100 transition-colors">
             <ArrowLeft size={20} className="text-slate-600" />
@@ -102,31 +105,31 @@ export default function ESignDashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-                <FileText size={24} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[1.5rem] shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] border border-outline-variant/40 hover:-translate-y-1 transition-all duration-300 flex items-center space-x-5">
+              <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <FileText size={26} strokeWidth={2} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-500">Total Documents</p>
+                <p className="text-sm font-semibold text-slate-500 mb-0.5">Total Documents</p>
                 <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
-              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
-                <Clock size={24} />
+            <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[1.5rem] shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] border border-outline-variant/40 hover:-translate-y-1 transition-all duration-300 flex items-center space-x-5">
+              <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <Clock size={26} strokeWidth={2} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-500">Pending Signatures</p>
+                <p className="text-sm font-semibold text-slate-500 mb-0.5">Pending Signatures</p>
                 <p className="text-2xl font-bold text-slate-900">{stats.pending}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
-              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
-                <CheckCircle size={24} />
+            <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[1.5rem] shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] border border-outline-variant/40 hover:-translate-y-1 transition-all duration-300 flex items-center space-x-5">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <CheckCircle size={26} strokeWidth={2} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-500">Completed</p>
+                <p className="text-sm font-semibold text-slate-500 mb-0.5">Completed</p>
                 <p className="text-2xl font-bold text-slate-900">{stats.completed}</p>
               </div>
             </div>
@@ -134,9 +137,9 @@ export default function ESignDashboardPage() {
         )}
 
         {/* Table Section */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-            <h2 className="text-xl font-bold">Recent Documents</h2>
+        <div className="bg-white/70 backdrop-blur-xl rounded-[1.5rem] border border-outline-variant/40 shadow-sm overflow-hidden relative z-10">
+          <div className="p-6 border-b border-outline-variant/40 flex justify-between items-center bg-white/50">
+            <h2 className="text-xl font-bold text-primary">Recent Documents</h2>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
@@ -179,17 +182,17 @@ export default function ESignDashboardPage() {
               </table>
             </div>
           ) : recentDocuments.length === 0 ? (
-            <div className="p-16 flex flex-col items-center justify-center text-center">
-              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-6">
-                <FolderOpen size={40} />
+            <div className="p-16 flex flex-col items-center justify-center text-center bg-white/30 border border-dashed border-outline-variant/60 rounded-xl m-6">
+              <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-slate-300 mb-6 shadow-sm">
+                <FolderOpen size={40} strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">No documents yet</h3>
+              <h3 className="text-xl font-bold text-primary mb-2">No documents yet</h3>
               <p className="text-slate-500 max-w-sm mx-auto mb-8 leading-relaxed">
                 You haven't sent any documents for e-signature yet. Click the "Send for eSign" button to get started.
               </p>
               <Link 
                 href="/esign/send/type"
-                className="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.97] transition-all duration-150 ease-out text-white px-6 py-3 rounded-xl font-medium cursor-pointer"
+                className="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.97] transition-all duration-150 ease-out text-white px-6 py-3 rounded-full font-medium cursor-pointer shadow-sm"
               >
                 <Plus size={18} />
                 <span>Create New Document</span>
@@ -204,7 +207,7 @@ export default function ESignDashboardPage() {
                     {isAdmin && <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Created By</th>}
                     <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
                     <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated On</th>
+                    <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-[140px]">Updated On</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -219,7 +222,7 @@ export default function ESignDashboardPage() {
                       <td className="p-4 text-sm text-slate-600">{doc.signType}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          doc.status === 'COMPLETED' ? 'bg-amber-100 text-amber-800' : 
+                          doc.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' : 
                           doc.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : 
                           'bg-slate-100 text-slate-800'
                         }`}>

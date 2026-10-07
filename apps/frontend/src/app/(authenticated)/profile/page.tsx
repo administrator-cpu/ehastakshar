@@ -151,7 +151,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="pt-4 mb-20">
+        {/* <div className="pt-4 mb-20">
           <div className="bg-white border border-red-100 p-8 rounded-xl shadow-sm">
             <h3 className="text-lg font-semibold text-red-600 mb-2">Danger Zone</h3>
             <p className="text-slate-500 mb-6 text-sm">
@@ -170,7 +170,7 @@ export default function ProfilePage() {
               Sign Out
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

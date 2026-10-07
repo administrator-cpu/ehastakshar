@@ -1,15 +1,17 @@
 import Link from "next/link";
+import Image from "next/image";
+import { MockupDisplay } from "../components/MockupDisplay";
 
 export default function Home() {
   return (
     <>
       {/* Floating Navbar Container */}
       <div className="fixed top-4 left-0 right-0 z-50 px-4 md:px-8 w-full max-w-7xl mx-auto">
-        <nav className="flex justify-between items-center w-full px-6 py-3 bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full">
+        <nav className="flex justify-between items-center w-full px-6 py-3 bg-white/70 backdrop-blur-sm border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full">
           <div className="flex items-center gap-8">
             <span className="font-jakarta text-[22px] font-bold text-primary flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg brand-gradient text-white flex items-center justify-center shadow-md">
-                <span className="material-symbols-outlined text-[18px]" data-icon="draw">draw</span>
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-md border border-slate-100 overflow-hidden">
+                <Image src="/icon.png" alt="Ehastakshar Logo" width={32} height={32} className="object-contain p-[1px]" />
               </div>
               Ehastakshar
             </span>
@@ -35,19 +37,7 @@ export default function Home() {
                 Upload documents, add recipients, and get them signed securely with
                 our seamless Simple eSign flow. Streamline your business workflows with absolute precision and robust audit trails.
               </p>
-              <div className="flex flex-col gap-3 pt-4 w-fit">
-                <div className="flex flex-wrap gap-4">
-                  <Link href="/signup" className="brand-gradient text-white px-8 py-3.5 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:shadow-[0_0_24px_rgba(255,0,84,0.4)] hover:-translate-y-0.5 flex items-center justify-center">
-                    Get Started for FREE
-                  </Link>
-                  <button className="bg-transparent border-2 border-primary/20 text-primary px-8 py-3.5 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:bg-primary/5 hover:border-primary/40">
-                    View Documentation
-                  </button>
-                </div>
-                <p className="text-center text-sm font-inter text-on-surface-variant">
-                  No credit card required
-                </p>
-              </div>
+  
               <div className="flex items-center gap-6 text-sm text-on-surface-variant pt-6">
                 <span className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
@@ -65,66 +55,23 @@ export default function Home() {
             </div>
 
             {/* Mockup Display */}
-            <div className="relative z-10 w-full h-[500px] lg:h-[600px] hover:-translate-y-2 transition-transform duration-700 ease-out-ui">
-              {/* Glassmorphism Container */}
-              <div className="absolute inset-0 bg-white/70 backdrop-blur-xl rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-white/80 overflow-hidden flex flex-col z-10">
-                <div className="h-12 border-b border-white/50 bg-white/40 flex items-center px-4 gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                  </div>
-                  <div className="mx-auto text-xs text-outline font-medium">
-                    NDA_Agreement_Final.pdf
-                  </div>
-                </div>
-                <div className="flex-grow p-6 flex justify-center overflow-hidden bg-gradient-to-b from-transparent to-surface-container-low/30">
-                  <div className="w-full max-w-sm bg-white/90 shadow-sm border border-white/60 rounded flex flex-col h-full relative">
-                    <div className="p-8 space-y-4 text-outline flex-grow">
-                      <div className="h-4 w-3/4 bg-surface-variant/70 rounded"></div>
-                      <div className="h-2 w-full bg-surface-variant/70 rounded"></div>
-                      <div className="h-2 w-full bg-surface-variant/70 rounded"></div>
-                      <div className="h-2 w-5/6 bg-surface-variant/70 rounded"></div>
-                      <div className="pt-12">
-                        <div className="w-48 h-24 border-2 border-dashed border-amber-500 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 relative group cursor-pointer hover:bg-amber-100 transition-colors animate-pulse hover:animate-none">
-                          <span className="material-symbols-outlined mb-1" data-icon="draw">draw</span>
-                          <span className="text-xs font-semibold block mt-6 absolute">Click to Sign</span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Floating Badge */}
-                    <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/60 flex items-center gap-3 hover:-translate-y-2 transition-transform duration-500">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[16px]" data-icon="fingerprint">fingerprint</span>
-                      </div>
-                      <div>
-                        <div className="text-xs font-semibold text-primary">Signature Pending</div>
-                        <div className="text-[10px] text-outline">Waiting for Ajay Negi</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Massive Ambient Glows behind the glass */}
-              <div className="absolute top-10 right-10 w-72 h-72 brand-gradient rounded-full blur-[80px] opacity-20 animate-pulse"></div>
-              <div className="absolute -bottom-10 left-10 w-96 h-96 bg-amber-400 rounded-full blur-[100px] opacity-15"></div>
-            </div>
+            <MockupDisplay />
           </div>
         </section>
 
         {/* Social Proof */}
-        <section className="py-12 border-y border-outline-variant/30 bg-white">
+        {/* <section className="py-12 border-y border-outline-variant/30 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-container-padding text-center">
             <p className="text-sm font-semibold text-outline tracking-wider uppercase mb-8">Trusted by innovative teams</p>
             <div className="flex flex-wrap justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">layers</span> Acme Corp</div>
-              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">api</span> GlobalTech</div>
+              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">wifi</span> Fab5 Network</div>
+              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">support_agent</span> Samadhan</div>
               <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">token</span> Nexus Inc</div>
-              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">language</span> Horizon</div>
+              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">language</span> Horizon</div> 
             </div>
           </div>
-        </section>
+        </section> */}
+
 
         {/* Features Grid (Bento Style) */}
         <section
@@ -155,7 +102,7 @@ export default function Home() {
                     Quick, legally valid signing for internal documents and standard agreements via secure email OTP authentication. No complex setups required.
                   </p>
                 </div>
-                <div className="absolute right-0 bottom-0 w-1/2 h-full bg-gradient-to-l from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute right-0 bottom-0 w-1/2 h-full bg-gradient-to-l from-amber-50 to-transparent opacity-100 transition-opacity duration-500"></div>
               </div>
 
               {/* Feature 2: Audit Trails */}
@@ -229,8 +176,7 @@ export default function Home() {
               {/* Step 1 */}
               <div className="flex-1 bg-white/70 backdrop-blur-xl p-10 rounded-2xl border border-outline-variant/40 relative z-10 text-center group hover:-translate-y-2 transition-transform duration-500 ease-out-ui hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]">
                 {/* Floating Number Badge */}
-                <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full brand-gradient text-white flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300">1</div>
-                
+
                 <div className="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-primary/10 shadow-sm text-primary group-hover:bg-primary/10 transition-colors duration-300 relative overflow-hidden">
                   <div className="absolute inset-0 brand-gradient opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                   <span className="material-symbols-outlined text-[32px] group-hover:scale-110 transition-transform duration-300" data-icon="upload_file">upload_file</span>
@@ -246,7 +192,7 @@ export default function Home() {
               {/* Step 2 */}
               <div className="flex-1 bg-white/70 backdrop-blur-xl p-10 rounded-2xl border border-outline-variant/40 relative z-10 text-center group hover:-translate-y-2 transition-transform duration-500 ease-out-ui hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]">
                 {/* Floating Number Badge */}
-                <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full brand-gradient text-white flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300">2</div>
+                {/* <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full brand-gradient text-white flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300">2</div> */}
                 
                 <div className="w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-amber-100 shadow-sm text-amber-600 group-hover:bg-amber-100 transition-colors duration-300 relative overflow-hidden">
                   <div className="absolute inset-0 bg-amber-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -263,9 +209,9 @@ export default function Home() {
               {/* Step 3 */}
               <div className="flex-1 bg-white/70 backdrop-blur-xl p-10 rounded-2xl border border-outline-variant/40 relative z-10 text-center group hover:-translate-y-2 transition-transform duration-500 ease-out-ui hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]">
                 {/* Floating Number Badge */}
-                <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full brand-gradient text-white flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300">3</div>
+                {/* <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full brand-gradient text-white flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300">3</div> */}
                 
-                <div className="w-20 h-20 brand-gradient rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-md text-white group-hover:shadow-[0_0_20px_rgba(255,0,84,0.4)] transition-shadow duration-300 relative overflow-hidden">
+                <div className="w-20 h-20 brand-gradient rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-md text-white transition-shadow duration-300 relative overflow-hidden">
                   <span className="material-symbols-outlined text-[32px] group-hover:scale-110 transition-transform duration-300" data-icon="task_alt">task_alt</span>
                 </div>
                 <h4 className="font-jakarta text-[22px] font-bold text-primary mb-3">
@@ -294,12 +240,9 @@ export default function Home() {
                 Join thousands of businesses trusting Ehastakshar's secure local vault for their critical document signing needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-                <Link href="/signup" className="brand-gradient text-white px-10 py-4 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:shadow-[0_0_30px_rgba(255,0,84,0.5)] hover:-translate-y-1 flex items-center justify-center">
-                  Get Started for FREE
-                </Link>
-                <button className="bg-transparent border-2 border-slate-600 text-white px-10 py-4 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:bg-white/10 hover:border-white/50">
+                <a href="mailto:info@thediv.in" className="inline-block bg-transparent border-2 border-slate-600 text-white px-10 py-4 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:bg-white/10 hover:border-white/50">
                   Contact Sales
-                </button>
+                </a>
               </div>
             </div>
           </div>
