@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MockupDisplay } from "../components/MockupDisplay";
 
 export default function Home() {
   return (
@@ -65,51 +66,7 @@ export default function Home() {
             </div>
 
             {/* Mockup Display */}
-            <div className="relative z-10 w-full h-[500px] lg:h-[600px] hover:-translate-y-2 transition-transform duration-700 ease-out-ui">
-              {/* Glassmorphism Container */}
-              <div className="absolute inset-0 bg-white/70 backdrop-blur-xl rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-white/80 overflow-hidden flex flex-col z-10">
-                <div className="h-12 border-b border-white/50 bg-white/40 flex items-center px-4 gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                  </div>
-                  <div className="mx-auto text-xs text-outline font-medium">
-                    NDA_Agreement_Final.pdf
-                  </div>
-                </div>
-                <div className="flex-grow p-6 flex justify-center overflow-hidden bg-gradient-to-b from-transparent to-surface-container-low/30">
-                  <div className="w-full max-w-sm bg-white/90 shadow-sm border border-white/60 rounded flex flex-col h-full relative">
-                    <div className="p-8 space-y-4 text-outline flex-grow">
-                      <div className="h-4 w-3/4 bg-surface-variant/70 rounded"></div>
-                      <div className="h-2 w-full bg-surface-variant/70 rounded"></div>
-                      <div className="h-2 w-full bg-surface-variant/70 rounded"></div>
-                      <div className="h-2 w-5/6 bg-surface-variant/70 rounded"></div>
-                      <div className="pt-12">
-                        <div className="w-48 h-24 border-2 border-dashed border-amber-500 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 relative group cursor-pointer hover:bg-amber-100 transition-colors animate-pulse hover:animate-none">
-                          <span className="material-symbols-outlined mb-1" data-icon="draw">draw</span>
-                          <span className="text-xs font-semibold block mt-6 absolute">Click to Sign</span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Floating Badge */}
-                    <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/60 flex items-center gap-3 hover:-translate-y-2 transition-transform duration-500">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[16px]" data-icon="fingerprint">fingerprint</span>
-                      </div>
-                      <div>
-                        <div className="text-xs font-semibold text-primary">Signature Pending</div>
-                        <div className="text-[10px] text-outline">Waiting for Ajay Negi</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Massive Ambient Glows behind the glass */}
-              <div className="absolute top-10 right-10 w-72 h-72 brand-gradient rounded-full blur-[80px] opacity-20 animate-pulse"></div>
-              <div className="absolute -bottom-10 left-10 w-96 h-96 bg-amber-400 rounded-full blur-[100px] opacity-15"></div>
-            </div>
+            <MockupDisplay />
           </div>
         </section>
 
