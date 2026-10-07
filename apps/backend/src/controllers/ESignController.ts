@@ -110,6 +110,15 @@ export class ESignController {
             });
           }
         }
+
+        // 5. Send confirmation email to the Sender
+        if (sender && sender.email) {
+          await AuthService.sendSenderConfirmationEmail({
+            email: sender.email,
+            documentName: newDocument.title,
+            recipientCount: createdRecipients.length,
+          });
+        }
       });
 
       res.status(200).json({ message: "Document sent for eSign successfully", transactionId });
@@ -544,18 +553,25 @@ export class ESignController {
             userAgent: "Backend Worker",
           });
 
-          // Send completion email
+          // Send completion email to Sender
           const sender = await UserRepository.findById(document.uploaderId);
           if (sender && sender.email) {
-            const ccEmails = allRecipients.map(r => r.email).filter(Boolean);
-            
-            // Fire and forget email notification
             AuthService.sendCompletionEmail({
               toEmail: sender.email,
-              ccEmails,
               documentName: document.title,
-              downloadLink: newFileUrl,
-            }).catch(err => logger.error({ err }, "Failed to send completion email"));
+              downloadLink: `${env.FRONTEND_URL}/esign`,
+            }).catch(err => logger.error({ err }, "Failed to send completion email to sender"));
+          }
+
+          // Send completion email to all Signers individually
+          for (const rec of allRecipients) {
+            if (rec.email) {
+              AuthService.sendCompletionEmail({
+                toEmail: rec.email,
+                documentName: document.title,
+                downloadLink: `${env.FRONTEND_URL}/sign/${rec.secureToken}`,
+              }).catch(err => logger.error({ err }, "Failed to send completion email to signer"));
+            }
           }
         }
       });
@@ -791,9 +807,15 @@ export class ESignController {
             doc.font("Helvetica").text("Image", leftLabelX, doc.y);
             doc.font("Helvetica-Bold").text(":", leftValueX - 5, doc.y);
             try {
-              const photoRes = await fetch(signEvent.photoUrl);
-              const arrayBuffer = await photoRes.arrayBuffer();
-              const photoBuffer = Buffer.from(arrayBuffer);
+              let photoBuffer: Buffer;
+              if (signEvent.photoUrl.startsWith("http://") || signEvent.photoUrl.startsWith("https://")) {
+                const photoRes = await fetch(signEvent.photoUrl);
+                const arrayBuffer = await photoRes.arrayBuffer();
+                photoBuffer = Buffer.from(arrayBuffer);
+              } else {
+                const fs = await import("fs/promises");
+                photoBuffer = await fs.readFile(signEvent.photoUrl);
+              }
               doc.image(photoBuffer, leftValueX + 5, doc.y, { fit: [100, 100] });
               doc.y += 115;
             } catch (e) {

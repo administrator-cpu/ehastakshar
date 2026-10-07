@@ -9,8 +9,8 @@
     "start": "node --env-file=.env dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:generate": "drizzle-kit generate",
-    "db:push": "node --env-file=.env node_modules/.bin/drizzle-kit push",
-    "db:studio": "node --env-file=.env node_modules/.bin/drizzle-kit studio"
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
