@@ -36,7 +36,7 @@ export default function Home() {
                 Upload documents, add recipients, and get them signed securely with
                 our seamless Simple eSign flow. Streamline your business workflows with absolute precision and robust audit trails.
               </p>
-              <div className="flex flex-col gap-3 pt-4 w-fit">
+              {/* <div className="flex flex-col gap-3 pt-4 w-fit">
                 <div className="flex flex-wrap gap-4">
                   <Link href="/signup" className="brand-gradient text-white px-8 py-3.5 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:-translate-y-0.5 flex items-center justify-center">
                     Get Started for FREE
@@ -48,7 +48,7 @@ export default function Home() {
                 <p className="text-center text-sm font-inter text-on-surface-variant">
                   No credit card required
                 </p>
-              </div>
+              </div> */}
               <div className="flex items-center gap-6 text-sm text-on-surface-variant pt-6">
                 <span className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
