@@ -1,11 +1,13 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Home, Smartphone, Fingerprint, Usb, Stamp, User, Users, Command, LogOut, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -36,8 +38,10 @@ export default function Sidebar() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
-      window.location.href = "/login";
+      router.push("/login");
+      router.refresh();
     } catch (err) {
       console.error("Logout failed", err);
       setIsLoggingOut(false);
@@ -45,7 +49,22 @@ export default function Sidebar() {
     }
   };
 
-  const menuGroups = [
+  type MenuItem = {
+    href: string;
+    icon: React.ElementType;
+    label: string;
+    activeColor?: string;
+    activeBg?: string;
+    iconColor?: string;
+    isComingSoon?: boolean;
+  };
+
+  type MenuGroup = {
+    title: string;
+    items: MenuItem[];
+  };
+
+  const menuGroups: MenuGroup[] = [
     {
       title: 'OVERVIEW',
       items: [
@@ -75,8 +94,18 @@ export default function Sidebar() {
       <aside className="w-20 bg-white border-r border-slate-200 h-screen sticky top-0 flex flex-col items-center pt-8 pb-6 z-40 shadow-sm shrink-0">
         {/* Brand Header */}
         <div className="pb-8 flex justify-center w-full">
-          <div className="w-10 h-10 rounded-xl brand-gradient flex items-center justify-center text-white shadow-md">
-            <Command size={20} />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white shadow-sm border border-slate-100 overflow-hidden relative group">
+            <Image 
+              src="/icon.png" 
+              alt="Ehastakshar Logo" 
+              width={40} 
+              height={40} 
+              className="object-contain p-0.5"
+            />
+            {/* Tooltip */}
+            <span className="absolute left-14 bg-slate-800 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+              Ehastakshar
+            </span>
           </div>
         </div>
 

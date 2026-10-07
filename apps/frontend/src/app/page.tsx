@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MockupDisplay } from "../components/MockupDisplay";
 
 export default function Home() {
@@ -9,8 +10,8 @@ export default function Home() {
         <nav className="flex justify-between items-center w-full px-6 py-3 bg-white/70 backdrop-blur-sm border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full">
           <div className="flex items-center gap-8">
             <span className="font-jakarta text-[22px] font-bold text-primary flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg brand-gradient text-white flex items-center justify-center shadow-md">
-                <span className="material-symbols-outlined text-[18px]" data-icon="draw">draw</span>
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-md border border-slate-100 overflow-hidden">
+                <Image src="/icon.png" alt="Ehastakshar Logo" width={32} height={32} className="object-contain p-[1px]" />
               </div>
               Ehastakshar
             </span>
