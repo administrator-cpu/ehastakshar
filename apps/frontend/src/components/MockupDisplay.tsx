@@ -81,6 +81,15 @@ export function MockupDisplay() {
         .animate-fade-in {
           animation: fadeIn 0.4s ease-out forwards;
         }
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .animate-shimmer {
+          background: linear-gradient(90deg, rgba(226,232,240,0.5) 25%, rgba(241,245,249,0.8) 50%, rgba(226,232,240,0.5) 75%);
+          background-size: 200% 100%;
+          animation: shimmer 2s infinite linear;
+        }
       `}} />
 
       {/* Glassmorphism Container */}
@@ -133,9 +142,9 @@ export function MockupDisplay() {
                   <div className="flex flex-col items-center w-full px-8 animate-fade-in absolute inset-0 justify-center">
                     <span className="material-symbols-outlined text-4xl mb-2 text-primary">description</span>
                     <span className="text-sm font-medium text-primary mb-4">NDA_Agreement_Final.pdf</span>
-                    <div className="w-full h-1.5 bg-primary/20 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-primary/10 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-primary transition-all ease-out" 
+                        className="h-full brand-gradient transition-all ease-out rounded-full" 
                         style={{ 
                           width: step === 3 ? '0%' : step >= 4 ? '100%' : '0%',
                           transitionDuration: step >= 4 ? '800ms' : '0ms'
@@ -156,10 +165,10 @@ export function MockupDisplay() {
               style={{ opacity: step >= 6 ? 1 : 0, pointerEvents: step >= 6 ? 'auto' : 'none' }}
             >
               <div className="p-8 space-y-4 text-outline flex-grow">
-                <div className="h-4 w-3/4 bg-surface-variant/70 rounded"></div>
-                <div className="h-2 w-full bg-surface-variant/70 rounded"></div>
-                <div className="h-2 w-full bg-surface-variant/70 rounded"></div>
-                <div className="h-2 w-5/6 bg-surface-variant/70 rounded"></div>
+                <div className="h-4 w-3/4 rounded animate-shimmer"></div>
+                <div className="h-2 w-full rounded animate-shimmer"></div>
+                <div className="h-2 w-full rounded animate-shimmer"></div>
+                <div className="h-2 w-5/6 rounded animate-shimmer"></div>
                 
                 <div className="pt-12 relative flex justify-center">
                   {step < 15 ? (
@@ -191,29 +200,31 @@ export function MockupDisplay() {
 
               {/* OTP Sent Toast (Step 16) */}
               <div 
-                className="absolute top-4 right-4 bg-slate-800 text-white text-xs font-medium px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-all duration-500"
+                className="absolute top-4 right-4 bg-white text-slate-800 text-xs font-medium px-4 py-3 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 flex items-center gap-3 transition-all duration-500"
                 style={{
                   transform: step >= 16 && step <= 26 ? 'translateY(0) scale(1)' : 'translateY(-20px) scale(0.9)',
                   opacity: step >= 16 && step <= 26 ? 1 : 0,
                   pointerEvents: 'none'
                 }}
               >
-                <span className="material-symbols-outlined text-[14px] text-blue-400" data-icon="mail">mail</span>
+                <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[14px]" data-icon="mail">mail</span>
+                </div>
                 OTP sent to a***@domain.com
               </div>
 
               {/* Processing Toasts (Step 28-30) */}
               <div 
-                className="absolute bottom-6 left-6 right-6 bg-slate-800 text-white text-xs font-medium px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-all duration-500"
+                className="absolute bottom-6 left-6 right-6 bg-white text-slate-800 text-xs font-medium px-4 py-3 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200 flex items-center gap-3 transition-all duration-500"
                 style={{
                   transform: step >= 28 && step <= 30 ? 'translateY(0)' : 'translateY(20px)',
                   opacity: step >= 28 && step <= 30 ? 1 : 0,
                   pointerEvents: 'none'
                 }}
               >
-                {step === 28 && <><span className="material-symbols-outlined text-[16px] text-amber-400 animate-pulse" data-icon="lock">lock</span> Securing document...</>}
-                {step === 29 && <><span className="material-symbols-outlined text-[16px] text-emerald-400" data-icon="draw">draw</span> Signature logically applied.</>}
-                {step === 30 && <><span className="material-symbols-outlined text-[16px] text-blue-400" data-icon="receipt_long">receipt_long</span> Audit trail generated.</>}
+                {step === 28 && <><div className="w-6 h-6 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center animate-pulse"><span className="material-symbols-outlined text-[14px]" data-icon="lock">lock</span></div> Securing document...</>}
+                {step === 29 && <><div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><span className="material-symbols-outlined text-[14px]" data-icon="draw">draw</span></div> Signature logically applied.</>}
+                {step === 30 && <><div className="w-6 h-6 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><span className="material-symbols-outlined text-[14px]" data-icon="receipt_long">receipt_long</span></div> Audit trail generated.</>}
               </div>
 
               {/* Floating Badge (Original) */}
@@ -252,7 +263,7 @@ export function MockupDisplay() {
 
         {/* OTP Modal */}
         <div 
-          className="absolute inset-0 z-20 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center transition-all duration-700"
+          className="absolute inset-0 z-20 bg-slate-900/20 backdrop-blur-md flex items-center justify-center transition-all duration-700"
           style={{ 
             opacity: (step >= 17 && step <= 26) ? 1 : 0, 
             pointerEvents: (step >= 17 && step <= 26) ? 'auto' : 'none',
@@ -269,7 +280,7 @@ export function MockupDisplay() {
             <p className="text-outline text-xs mb-5">Enter the OTP sent to your email.</p>
             <div className="flex gap-3 justify-center mb-6">
               {[1, 2, 3, 4].map((boxNum) => {
-                let content = '';
+                let content: any = '';
                 const baseStep = 17 + boxNum; // box 1 types at step 18
                 if (step === baseStep) {
                   // Currently typing this box (flashing the digit)
@@ -280,10 +291,17 @@ export function MockupDisplay() {
                 } else if (step > baseStep) {
                   // Already typed and masked
                   content = '•';
+                } else if (step === baseStep - 1) {
+                  // Focus ring + caret
+                  content = <div className="w-0.5 h-5 bg-primary/60 animate-pulse rounded-full"></div>;
                 }
                 
                 return (
-                  <div key={boxNum} className={`w-10 h-11 border ${step >= baseStep ? 'border-primary border-b-2' : 'border-outline-variant/60'} rounded-lg flex items-center justify-center text-primary font-bold text-xl bg-surface-lowest shadow-inner relative transition-colors duration-200`}>
+                  <div key={boxNum} className={`w-10 h-11 border ${
+                    step >= baseStep ? 'border-primary border-b-2' : 
+                    step === baseStep - 1 ? 'border-primary/60 ring-2 ring-primary/20' : 
+                    'border-outline-variant/60'
+                  } rounded-lg flex items-center justify-center text-primary font-bold text-xl bg-surface-lowest shadow-inner relative transition-all duration-200`}>
                     {content}
                   </div>
                 );
