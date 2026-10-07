@@ -208,7 +208,7 @@ export default function PDFViewer({
                   onUpdate={(pctX, pctY) => {
                     if (signaturePositions && onSignaturePositionsChange) {
                       const newPositions = signaturePositions.map(p =>
-                        p.pageNumber === pageNumber ? { ...p, pctX, pctY } : p
+                        ({ ...p, pctX, pctY })
                       );
                       onSignaturePositionsChange(newPositions);
                     }
