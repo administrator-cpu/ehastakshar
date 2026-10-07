@@ -118,7 +118,12 @@ export class AuthService {
     downloadLink: string;
   }): Promise<void> {
     const html = generateCompletionEmailHtml({ documentName, link: downloadLink });
-    await sendEmail({ toEmail, ccEmail: ccEmails, subject: "Document Completely Signed", htmlContent: html });
+    await sendEmail({ 
+      toEmail, 
+      ...(ccEmails ? { ccEmail: ccEmails } : {}), 
+      subject: "Document Completely Signed", 
+      htmlContent: html 
+    });
   }
 
   /**
