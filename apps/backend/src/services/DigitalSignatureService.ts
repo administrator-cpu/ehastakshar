@@ -48,8 +48,16 @@ export class DigitalSignatureService {
     
     if (details.signatureUrl) {
       try {
-        const imageRes = await fetch(details.signatureUrl);
-        const imageArrayBuffer = await imageRes.arrayBuffer();
+        let imageArrayBuffer: ArrayBuffer;
+        if (details.signatureUrl.startsWith("http://") || details.signatureUrl.startsWith("https://")) {
+          const imageRes = await fetch(details.signatureUrl);
+          imageArrayBuffer = await imageRes.arrayBuffer();
+        } else {
+          const fs = await import("fs/promises");
+          const buffer = await fs.readFile(details.signatureUrl);
+          imageArrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+        }
+        
         const firstByte = new Uint8Array(imageArrayBuffer)[0];
         if (firstByte === 0x89) {
           embeddedSignatureImage = await pdfDoc.embedPng(imageArrayBuffer);

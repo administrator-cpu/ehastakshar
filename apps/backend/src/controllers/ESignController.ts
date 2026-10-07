@@ -807,9 +807,15 @@ export class ESignController {
             doc.font("Helvetica").text("Image", leftLabelX, doc.y);
             doc.font("Helvetica-Bold").text(":", leftValueX - 5, doc.y);
             try {
-              const photoRes = await fetch(signEvent.photoUrl);
-              const arrayBuffer = await photoRes.arrayBuffer();
-              const photoBuffer = Buffer.from(arrayBuffer);
+              let photoBuffer: Buffer;
+              if (signEvent.photoUrl.startsWith("http://") || signEvent.photoUrl.startsWith("https://")) {
+                const photoRes = await fetch(signEvent.photoUrl);
+                const arrayBuffer = await photoRes.arrayBuffer();
+                photoBuffer = Buffer.from(arrayBuffer);
+              } else {
+                const fs = await import("fs/promises");
+                photoBuffer = await fs.readFile(signEvent.photoUrl);
+              }
               doc.image(photoBuffer, leftValueX + 5, doc.y, { fit: [100, 100] });
               doc.y += 115;
             } catch (e) {
