@@ -12,8 +12,10 @@ export function MockupDisplay() {
       { step: 2, delay: 600 },  // Click Action
       { step: 3, delay: 1000 }, // OTP Modal Opens
       { step: 4, delay: 2500 }, // Typing OTP (staggered delay 2500ms)
-      { step: 5, delay: 800 },  // Click Verify
-      { step: 6, delay: 4000 }, // Success State
+      { step: 5, delay: 1000 }, // Move to Verify Button
+      { step: 6, delay: 800 },  // Click Action
+      { step: 7, delay: 1500 }, // Verifying... (spinner)
+      { step: 8, delay: 4000 }, // Success State
     ];
 
     let timeoutId: NodeJS.Timeout;
@@ -44,6 +46,10 @@ export function MockupDisplay() {
         @keyframes staggerDot {
           0% { opacity: 0; transform: scale(0.5); }
           100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes clickRipple {
+          0% { transform: scale(0.5); opacity: 0.8; border-width: 4px; }
+          100% { transform: scale(2); opacity: 0; border-width: 1px; }
         }
         .dot-anim {
           animation: staggerDot 200ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
@@ -86,8 +92,8 @@ export function MockupDisplay() {
               <div className="h-2 w-5/6 bg-surface-variant/70 rounded"></div>
               
               <div className="pt-12 relative flex justify-center">
-                {step < 6 ? (
-                  <div className={`w-48 h-24 border-2 border-dashed border-amber-500 bg-amber-50 rounded-xl flex flex-col items-center justify-center text-amber-600 transition-all duration-300 ${(step === 1 || step === 2) ? 'bg-amber-100 scale-[0.97] shadow-inner' : 'animate-pulse'}`}>
+                {step < 8 ? (
+                  <div className={`w-48 h-24 border-2 border-dashed border-amber-500 bg-amber-50 rounded-xl flex flex-col items-center justify-center text-amber-600 transition-all duration-300 ${(step === 1 || step === 2) ? 'bg-amber-100 scale-[0.97] shadow-inner' : ''}`}>
                     <span className="material-symbols-outlined mb-1" data-icon="draw">draw</span>
                     <span className="text-xs font-semibold">Click to Sign</span>
                   </div>
@@ -105,7 +111,7 @@ export function MockupDisplay() {
 
             {/* Floating Badge */}
             <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-xl border border-white/60 flex items-center gap-3 transition-transform duration-500">
-              {step < 6 ? (
+              {step < 8 ? (
                 <>
                   <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
                     <span className="material-symbols-outlined text-[16px]" data-icon="pending">pending</span>
@@ -134,15 +140,15 @@ export function MockupDisplay() {
         <div 
           className="absolute inset-0 z-20 bg-slate-900/20 backdrop-blur-sm flex items-center justify-center transition-all duration-500"
           style={{ 
-            opacity: (step >= 3 && step <= 5) ? 1 : 0, 
-            pointerEvents: (step >= 3 && step <= 5) ? 'auto' : 'none',
-            filter: (step >= 3 && step <= 5) ? 'blur(0)' : 'blur(2px)' // emil-design-eng: blur during transition
+            opacity: (step >= 3 && step <= 7) ? 1 : 0, 
+            pointerEvents: (step >= 3 && step <= 7) ? 'auto' : 'none',
+            filter: (step >= 3 && step <= 7) ? 'blur(0)' : 'blur(2px)' // emil-design-eng: blur during transition
           }}
         >
           <div 
             className="bg-white p-6 rounded-2xl shadow-2xl w-72 border border-white/80 transition-all duration-500"
             style={{ 
-              transform: (step >= 3 && step <= 5) ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(10px)',
+              transform: (step >= 3 && step <= 7) ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(10px)',
               transitionTimingFunction: customEasing
             }}
           >
@@ -158,9 +164,19 @@ export function MockupDisplay() {
               ))}
             </div>
             <div 
-              className={`w-full py-2.5 rounded-lg font-semibold text-sm text-center transition-all duration-200 ${(step === 5) ? 'brand-gradient text-white scale-[0.96] shadow-inner' : 'brand-gradient text-white shadow-md'}`}
+              className={`w-full py-2.5 rounded-lg font-semibold text-sm text-center transition-all duration-200 ${(step === 6 || step === 7) ? 'brand-gradient text-white shadow-inner' : 'brand-gradient text-white shadow-md'} ${step === 6 ? 'scale-[0.96]' : 'scale-100'}`}
             >
-              Verify & Sign
+              {step === 7 ? (
+                <div className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Verifying...
+                </div>
+              ) : (
+                "Verify & Sign"
+              )}
             </div>
           </div>
         </div>
@@ -172,20 +188,30 @@ export function MockupDisplay() {
             top: step === 0 ? '90%' : 
                  step === 1 || step === 2 ? '48%' : 
                  step === 3 || step === 4 ? '55%' : 
-                 step === 5 ? '61%' : '90%',
+                 (step >= 5 && step <= 7) ? '61%' : '90%',
                  
             left: step === 0 ? '95%' : 
                   step === 1 || step === 2 ? '50%' : 
                   step === 3 || step === 4 ? '65%' : 
-                  step === 5 ? '50%' : '95%',
+                  (step >= 5 && step <= 7) ? '50%' : '95%',
                   
-            transform: (step === 2 || step === 5) ? 'scale(0.8)' : 'scale(1)',
-            opacity: step === 6 ? 0 : 1,
+            transform: (step === 2 || step === 6) ? 'scale(0.8)' : 'scale(1)',
+            opacity: step === 8 ? 0 : 1,
             transition: 'top 1000ms, left 1000ms, transform 200ms, opacity 300ms',
             transitionTimingFunction: pointerEasing,
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-lg drop-shadow-[0_8px_12px_rgba(0,0,0,0.2)]">
+          {/* Click Ripple Effect */}
+          <div 
+            className="absolute pointer-events-none rounded-full border border-primary/80"
+            style={{
+              top: '-6px', left: '-6px',
+              width: '24px', height: '24px',
+              animation: (step === 2 || step === 6) ? 'clickRipple 0.6s ease-out forwards' : 'none',
+              opacity: 0,
+            }}
+          ></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-lg drop-shadow-[0_8px_12px_rgba(0,0,0,0.2)] relative z-10">
             <path d="M5.5 3.21V20.8C5.5 21.46 6.27 21.82 6.77 21.4L11.52 17.13L15.42 22.8C15.65 23.14 16.1 23.25 16.47 23.06L18.42 22.06C18.79 21.87 18.94 21.43 18.75 21.07L14.77 15.26H20.25C20.91 15.26 21.28 14.49 20.85 14L6.75 2.5C6.31 2.11 5.5 2.42 5.5 3.21Z" fill="#111827"/>
             <path d="M5.5 3.21V20.8C5.5 21.46 6.27 21.82 6.77 21.4L11.52 17.13L15.42 22.8C15.65 23.14 16.1 23.25 16.47 23.06L18.42 22.06C18.79 21.87 18.94 21.43 18.75 21.07L14.77 15.26H20.25C20.91 15.26 21.28 14.49 20.85 14L6.75 2.5C6.31 2.11 5.5 2.42 5.5 3.21Z" stroke="white" strokeWidth="1.5"/>
           </svg>
