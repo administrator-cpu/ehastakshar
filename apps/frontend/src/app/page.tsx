@@ -36,19 +36,7 @@ export default function Home() {
                 Upload documents, add recipients, and get them signed securely with
                 our seamless Simple eSign flow. Streamline your business workflows with absolute precision and robust audit trails.
               </p>
-              {/* <div className="flex flex-col gap-3 pt-4 w-fit">
-                <div className="flex flex-wrap gap-4">
-                  <Link href="/signup" className="brand-gradient text-white px-8 py-3.5 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:-translate-y-0.5 flex items-center justify-center">
-                    Get Started for FREE
-                  </Link>
-                  <button className="bg-transparent border-2 border-primary/20 text-primary px-8 py-3.5 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:bg-primary/5 hover:border-primary/40">
-                    View Documentation
-                  </button>
-                </div>
-                <p className="text-center text-sm font-inter text-on-surface-variant">
-                  No credit card required
-                </p>
-              </div> */}
+  
               <div className="flex items-center gap-6 text-sm text-on-surface-variant pt-6">
                 <span className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
@@ -71,17 +59,18 @@ export default function Home() {
         </section>
 
         {/* Social Proof */}
-        <section className="py-12 border-y border-outline-variant/30 bg-white">
+        {/* <section className="py-12 border-y border-outline-variant/30 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-container-padding text-center">
             <p className="text-sm font-semibold text-outline tracking-wider uppercase mb-8">Trusted by innovative teams</p>
             <div className="flex flex-wrap justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
               <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">wifi</span> Fab5 Network</div>
               <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">support_agent</span> Samadhan</div>
-              {/* <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">token</span> Nexus Inc</div>
-              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">language</span> Horizon</div> */}
+              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">token</span> Nexus Inc</div>
+              <div className="flex items-center gap-2 text-xl font-jakarta font-bold text-slate-800"><span className="material-symbols-outlined">language</span> Horizon</div> 
             </div>
           </div>
-        </section>
+        </section> */}
+
 
         {/* Features Grid (Bento Style) */}
         <section
@@ -250,12 +239,9 @@ export default function Home() {
                 Join thousands of businesses trusting Ehastakshar's secure local vault for their critical document signing needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-                <Link href="/signup" className="brand-gradient text-white px-10 py-4 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:-translate-y-1 flex items-center justify-center">
-                  Get Started for FREE
-                </Link>
-                <button className="bg-transparent border-2 border-slate-600 text-white px-10 py-4 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:bg-white/10 hover:border-white/50">
+                <a href="mailto:info@thediv.in" className="inline-block bg-transparent border-2 border-slate-600 text-white px-10 py-4 rounded-full font-inter text-label-md font-bold transition-all duration-300 ease-out-ui active:scale-[0.97] hover:bg-white/10 hover:border-white/50">
                   Contact Sales
-                </button>
+                </a>
               </div>
             </div>
           </div>
