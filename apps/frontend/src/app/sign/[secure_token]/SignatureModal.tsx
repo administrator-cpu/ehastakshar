@@ -24,6 +24,7 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
   const [selectedFont, setSelectedFont] = useState(FONTS[0]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
+  const [isAgreed, setIsAgreed] = useState(false);
   
   const sigCanvas = useRef<SignatureCanvas>(null);
 
@@ -123,6 +124,7 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
 
   const isNextDisabled = () => {
     if (isSigning) return true;
+    if (!isAgreed) return true;
     if (mode === "type") return !typedName.trim();
     if (mode === "draw") return false;
     if (mode === "upload") return !uploadedFile;
@@ -230,9 +232,18 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
 
       {/* FOOTER */}
       <div className="mt-8">
-        <div className="flex items-center justify-center space-x-2 text-slate-500 text-sm mb-6">
-          <AlertCircle size={16} />
-          <span>I understand this is true representation of my signature.</span>
+        <div className="flex items-start space-x-3 bg-amber-50/50 p-4 rounded-xl mb-6 border border-amber-100/50">
+          <input 
+            type="checkbox" 
+            id="legal-agreement"
+            checked={isAgreed}
+            onChange={(e) => setIsAgreed(e.target.checked)}
+            className="mt-0.5 w-5 h-5 rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer"
+          />
+          <label htmlFor="legal-agreement" className="text-xs text-slate-600 leading-relaxed cursor-pointer select-none">
+            You are using the Ehastakshar service to sign the document. By continuing, you acknowledge that this electronic signature will be as valid as a handwritten signature to the extent allowed by Indian law.<br/>
+            <span className="font-semibold block mt-1 text-slate-700">I confirm I have read the document and I have a legal right to sign.</span>
+          </label>
         </div>
         
         <div className="flex space-x-3">
