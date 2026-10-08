@@ -453,7 +453,7 @@ export class ESignController {
       const reqPassword = req.body.password;
       if (reqPassword) {
         try {
-          fileBuffer = await QpdfHelper.decryptPdf(fileBuffer, reqPassword as string);
+          fileBuffer = (await QpdfHelper.decryptPdf(fileBuffer as any, reqPassword as string)) as any;
         } catch (e) {
           res.status(401).json({ error: "Invalid document password provided" });
           return;
@@ -476,7 +476,7 @@ export class ESignController {
       let signedPdfBuffer = await DigitalSignatureService.addVisualSignature(fileBuffer, details);
 
       if (reqPassword) {
-        signedPdfBuffer = await QpdfHelper.encryptPdf(signedPdfBuffer, reqPassword as string);
+        signedPdfBuffer = (await QpdfHelper.encryptPdf(signedPdfBuffer as any, reqPassword as string)) as any;
       }
 
       // 3. Upload signed document back
