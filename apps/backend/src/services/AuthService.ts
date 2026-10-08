@@ -158,15 +158,13 @@ export class AuthService {
     documentName: string;
     recipientCount: number;
   }): Promise<void> {
-    const html = `
-      <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #d97706;">Document Sent Successfully</h2>
-        <p>Your document <strong>${documentName}</strong> has been successfully uploaded and sent for e-signature.</p>
-        <p>It has been sent to ${recipientCount} recipient(s).</p>
-        <p>You can track the progress of this document from your eSign Hub dashboard.</p>
-        <p><a href="${env.FRONTEND_URL}/esign" style="background: #fbbf24; color: #1e293b; font-weight: bold; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View Dashboard</a></p>
-      </div>
-    `;
+    const { generateSenderConfirmationEmailHtml } = await import("../utils/emailTemplates.js");
+    const html = generateSenderConfirmationEmailHtml({
+      documentName,
+      recipientCount,
+      link: `${env.FRONTEND_URL}/esign`
+    });
+    
     await sendEmail({ toEmail: email, subject: "Document Sent for eSign", htmlContent: html });
   }
 }
