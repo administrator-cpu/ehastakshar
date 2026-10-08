@@ -6,7 +6,7 @@ import { Type, PenTool, Upload, AlertCircle } from 'lucide-react';
 
 interface SignatureModalProps {
   onCancel: () => void;
-  onConfirm: (signatureText: string, signatureBlob: Blob) => void;
+  onConfirm: (signatureText: string, signatureBlob: Blob, consentTimestamp: string) => void;
   isSigning: boolean;
   initialName?: string;
 }
@@ -106,16 +106,17 @@ export default function SignatureModal({ onCancel, onConfirm, isSigning, initial
 
   const handleConfirm = async () => {
     try {
+      const consentTimestamp = new Date().toISOString();
       if (mode === "type") {
         if (!typedName.trim()) return;
         const blob = await generateTypedSignature();
-        onConfirm(typedName, blob);
+        onConfirm(typedName, blob, consentTimestamp);
       } else if (mode === "draw") {
         const blob = await generateDrawnSignature();
-        onConfirm("Drawn Signature", blob);
+        onConfirm("Drawn Signature", blob, consentTimestamp);
       } else if (mode === "upload") {
         if (!uploadedFile) return;
-        onConfirm("Uploaded Signature", uploadedFile);
+        onConfirm("Uploaded Signature", uploadedFile, consentTimestamp);
       }
     } catch (e) {
       console.error(e);

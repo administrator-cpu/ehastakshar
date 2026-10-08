@@ -49,6 +49,7 @@ export default function SignerPortalPage() {
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [hasConsented, setHasConsented] = useState(false);
+  const [consentTimestamp, setConsentTimestamp] = useState<string>("");
 
   const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null);
   const [signatureImageUrl, setSignatureImageUrl] = useState<string | null>(null);
@@ -233,10 +234,11 @@ export default function SignerPortalPage() {
     setStep("SIGN");
   }, [docInfo?.requirePhoto, webcamRef]);
 
-  const confirmSignatureLocal = (sigText: string, sigBlob: Blob) => {
+  const confirmSignatureLocal = (sigText: string, sigBlob: Blob, timestamp: string) => {
     setSignatureText(sigText);
     setSignatureBlob(sigBlob);
     setSignatureImageUrl(URL.createObjectURL(sigBlob));
+    setConsentTimestamp(timestamp);
 
     if (docInfo?.signaturePositions && docInfo.signaturePositions.length > 0) {
       setSignaturePositions(docInfo.signaturePositions);
@@ -260,6 +262,11 @@ export default function SignerPortalPage() {
       
       if (documentPassword) {
         formData.append("password", documentPassword);
+      }
+
+      formData.append("legalConsent", "true");
+      if (consentTimestamp) {
+        formData.append("consentTimestamp", consentTimestamp);
       }
 
       formData.append("positions", JSON.stringify(signaturePositions));

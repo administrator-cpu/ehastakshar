@@ -335,16 +335,11 @@ export class ESignController {
    */
   static async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
-      const { token, otp, consentGiven } = req.body;
+      const { token, otp } = req.body;
       const recipient = await DocumentRecipientRepository.findBySecureToken(token);
       
       if (!recipient) {
         res.status(400).json({ error: "Invalid token" });
-        return;
-      }
-
-      if (!consentGiven) {
-        res.status(400).json({ error: "Consent is required to verify OTP" });
         return;
       }
 
@@ -360,19 +355,8 @@ export class ESignController {
         return;
       }
 
-      // Record consent in DB
-      await DocumentRecipientRepository.recordConsent(recipient.id);
-
       // Clear the OTP
       await OtpRepository.deleteByEmail(recipient.email);
-
-      await AuditLogRepository.logEvent({
-        documentId: recipient.documentId,
-        recipientId: recipient.id,
-        action: "CONSENT_GIVEN",
-        ipAddress: getClientIp(req),
-        userAgent: req.headers["user-agent"] || "",
-      });
 
       await AuditLogRepository.logEvent({
         documentId: recipient.documentId,
@@ -398,11 +382,16 @@ export class ESignController {
    */
   static async signDocument(req: Request, res: Response): Promise<void> {
     try {
-      const { token, signatureText, signToken } = req.body;
+      const { token, signatureText, signToken, legalConsent, consentTimestamp } = req.body;
       const recipient = await DocumentRecipientRepository.findBySecureToken(token);
       
       if (!recipient || recipient.status === "SIGNED") {
         res.status(400).json({ error: "Invalid token or already signed" });
+        return;
+      }
+
+      if (legalConsent !== "true" || !consentTimestamp) {
+        res.status(400).json({ error: "Legal consent must be strictly given before signing" });
         return;
       }
 
@@ -489,10 +478,21 @@ export class ESignController {
 
       // 4. Update Database inside a transaction
       await db.transaction(async (tx) => {
+        const consentDate = new Date(consentTimestamp);
+        await DocumentRecipientRepository.recordConsent(recipient.id, consentDate);
         await DocumentRecipientRepository.markAsSigned(recipient.id, signatureText);
         await DocumentRepository.updateFileUrl(document.id, newFileUrl);
 
         const userAgentStr = req.headers["user-agent"] || "";
+
+        await AuditLogRepository.logEvent({
+          documentId: document.id,
+          recipientId: recipient.id,
+          action: "CONSENT_GIVEN",
+          ipAddress: getClientIp(req),
+          userAgent: userAgentStr,
+        });
+
         const uap = new UAParser(userAgentStr);
         const browser = uap.getBrowser().name || "Unknown";
         const deviceType = uap.getDevice().type || "Desktop";
