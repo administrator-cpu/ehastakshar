@@ -41,7 +41,15 @@ export default function SignerPortalPage() {
   const [isSigning, setIsSigning] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Password state for encrypted PDFs
+  const [documentPassword, setDocumentPassword] = useState("");
+  const [passwordCallback, setPasswordCallback] = useState<((password: string) => void) | null>(null);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [hasConsented, setHasConsented] = useState(false);
+  const [consentTimestamp, setConsentTimestamp] = useState<string>("");
 
   const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null);
   const [signatureImageUrl, setSignatureImageUrl] = useState<string | null>(null);
@@ -226,10 +234,11 @@ export default function SignerPortalPage() {
     setStep("SIGN");
   }, [docInfo?.requirePhoto, webcamRef]);
 
-  const confirmSignatureLocal = (sigText: string, sigBlob: Blob) => {
+  const confirmSignatureLocal = (sigText: string, sigBlob: Blob, timestamp: string) => {
     setSignatureText(sigText);
     setSignatureBlob(sigBlob);
     setSignatureImageUrl(URL.createObjectURL(sigBlob));
+    setConsentTimestamp(timestamp);
 
     if (docInfo?.signaturePositions && docInfo.signaturePositions.length > 0) {
       setSignaturePositions(docInfo.signaturePositions);
@@ -248,7 +257,17 @@ export default function SignerPortalPage() {
       formData.append("token", token);
       formData.append("signToken", signToken);
       formData.append("signatureText", signatureText);
+      formData.append("signatureUrl", signatureImageUrl || "");
       formData.append("signatureFile", signatureBlob, "signature.png");
+      
+      if (documentPassword) {
+        formData.append("password", documentPassword);
+      }
+
+      formData.append("legalConsent", "true");
+      if (consentTimestamp) {
+        formData.append("consentTimestamp", consentTimestamp);
+      }
 
       formData.append("positions", JSON.stringify(signaturePositions));
 
@@ -451,6 +470,15 @@ export default function SignerPortalPage() {
                     signaturePositions={step === "PLACE_SIGNATURE" ? signaturePositions : undefined}
                     onSignaturePositionsChange={undefined}
                     isDraggable={false}
+                    onPassword={(callback, reason) => {
+                      if (reason === 2) {
+                        setPasswordError("Incorrect password. Please try again.");
+                      } else {
+                        setPasswordError("");
+                      }
+                      setPasswordCallback(() => callback);
+                      setShowPasswordPrompt(true);
+                    }}
                   />
                 </div>
               )}
@@ -633,6 +661,65 @@ export default function SignerPortalPage() {
           )}
         </div>
       )}
+
+      {/* Password Prompt Modal */}
+      {showPasswordPrompt && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Password Protected</h3>
+              <p className="text-sm text-slate-500 mb-4">This document requires a password to view.</p>
+              
+              {passwordError && (
+                <div className="mb-4 text-xs font-semibold text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
+                  {passwordError}
+                </div>
+              )}
+              
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && passwordCallback && passwordInput) {
+                    setDocumentPassword(passwordInput);
+                    passwordCallback(passwordInput);
+                    setShowPasswordPrompt(false);
+                  }
+                }}
+                placeholder="Enter password"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-slate-700"
+                autoFocus
+              />
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowPasswordPrompt(false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (passwordCallback && passwordInput) {
+                      setDocumentPassword(passwordInput);
+                      passwordCallback(passwordInput);
+                      setShowPasswordPrompt(false);
+                    }
+                  }}
+                  disabled={!passwordInput}
+                  className="flex-1 px-4 py-3 bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 rounded-xl font-bold shadow-sm transition-colors"
+                >
+                  Unlock
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

@@ -57,9 +57,14 @@ export const multipartUploadMiddleware = async (req: Request, res: Response, nex
           if (req.body.watermark && typeof req.body.watermark === 'string') {
             fileBuffer = await WatermarkService.applyWatermark(fileBuffer, req.body.watermark);
           }
+          
+          if (req.body.password && typeof req.body.password === 'string') {
+            const { QpdfHelper } = await import("../utils/qpdf.js");
+            fileBuffer = (await QpdfHelper.encryptPdf(fileBuffer as any, req.body.password)) as any;
+          }
 
           // Upload to storage provider
-          const stream = Readable.from(fileBuffer);
+          const stream = Readable.from(fileBuffer as any);
           const url = await storageProvider.upload(uploadFilename, uploadMimeType, stream);
           
           req.body.fileUrl = url;

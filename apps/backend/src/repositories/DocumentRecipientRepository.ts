@@ -41,10 +41,10 @@ export class DocumentRecipientRepository {
     }).where(eq(documentRecipients.id, id));
   }
 
-  static async recordConsent(id: string): Promise<void> {
+  static async recordConsent(id: string, consentGivenAt: Date = new Date()): Promise<void> {
     await db.update(documentRecipients).set({
       consentGiven: true,
-      consentGivenAt: new Date()
+      consentGivenAt
     }).where(eq(documentRecipients.id, id));
   }
 }

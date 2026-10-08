@@ -29,6 +29,7 @@ interface PDFViewerProps {
   isDraggable?: boolean;
   activeSignerName?: string;
   onAddSignatureBox?: (pageNumber: number) => void;
+  onPassword?: (callback: (password: string) => void, reason: number) => void;
 }
 
 const PdfSkeleton = () => (
@@ -156,7 +157,8 @@ export default function PDFViewer({
   watermarkText,
   isDraggable = true,
   activeSignerName,
-  onAddSignatureBox
+  onAddSignatureBox,
+  onPassword
 }: PDFViewerProps) {
   if (!file) return null;
 
@@ -165,6 +167,7 @@ export default function PDFViewer({
       <Document
         file={file}
         onLoadSuccess={onDocumentLoadSuccess}
+        onPassword={onPassword}
         loading={<PdfSkeleton />}
         className="flex flex-col items-center w-full"
       >

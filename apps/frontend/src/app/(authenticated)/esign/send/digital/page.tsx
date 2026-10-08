@@ -47,6 +47,8 @@ export default function SendDigitalESignPage() {
   const [activeTab, setActiveTab] = useState<'recipient' | 'security'>('recipient');
   const [enableWatermark, setEnableWatermark] = useState(false);
   const [watermarkText, setWatermarkText] = useState("");
+  const [enablePassword, setEnablePassword] = useState(false);
+  const [documentPassword, setDocumentPassword] = useState("");
   
   // PDF state
   const [numPages, setNumPages] = useState<number>(0);
@@ -148,6 +150,10 @@ export default function SendDigitalESignPage() {
     
     if (enableWatermark && watermarkText.trim()) {
       formData.append("watermark", watermarkText.trim());
+    }
+    
+    if (enablePassword && documentPassword) {
+      formData.append("password", documentPassword);
     }
 
     try {
@@ -463,6 +469,33 @@ export default function SendDigitalESignPage() {
                         placeholder="e.g., CONFIDENTIAL"
                         className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-medium"
                       />
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 mt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-slate-800 text-sm">Require Password</h3>
+                      <p className="text-xs text-slate-500 mt-1">Encrypt PDF natively (Requires password to open)</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={enablePassword} onChange={(e) => setEnablePassword(e.target.checked)} />
+                      <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </div>
+
+                  {enablePassword && (
+                    <div className="mt-5 pt-5 border-t border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Document Password</label>
+                      <input 
+                        type="password" 
+                        value={documentPassword}
+                        onChange={(e) => setDocumentPassword(e.target.value)}
+                        placeholder="Enter secure password"
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-medium"
+                      />
+                      <p className="text-xs text-slate-500 mt-2">The password will NOT be saved in our systems. Share it with your recipients securely.</p>
                     </div>
                   )}
                 </div>
