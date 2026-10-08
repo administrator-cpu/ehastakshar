@@ -15,6 +15,7 @@ import { DigitalSignatureService } from "../services/DigitalSignatureService.js"
 import PDFDocumentKit from "pdfkit";
 import { UserRepository } from "../repositories/UserRepository.js";
 import { getClientIp } from "../utils/ip.js";
+import { QpdfHelper } from "../utils/qpdf.js";
 
 // Assume user is attached to req by auth middleware
 interface AuthenticatedRequest extends Request {
@@ -447,7 +448,17 @@ export class ESignController {
       for await (const chunk of fileStream) {
         chunks.push(Buffer.from(chunk));
       }
-      const fileBuffer = Buffer.concat(chunks);
+      let fileBuffer = Buffer.concat(chunks);
+
+      const reqPassword = req.body.password;
+      if (reqPassword) {
+        try {
+          fileBuffer = await QpdfHelper.decryptPdf(fileBuffer, reqPassword as string);
+        } catch (e) {
+          res.status(401).json({ error: "Invalid document password provided" });
+          return;
+        }
+      }
 
       // 2. Manipulate PDF - Add Visual Signature
       const ipAddress = (getClientIp(req)).toString();
@@ -462,7 +473,11 @@ export class ESignController {
         positions: positions
       };
       
-      const signedPdfBuffer = await DigitalSignatureService.addVisualSignature(fileBuffer, details);
+      let signedPdfBuffer = await DigitalSignatureService.addVisualSignature(fileBuffer, details);
+
+      if (reqPassword) {
+        signedPdfBuffer = await QpdfHelper.encryptPdf(signedPdfBuffer, reqPassword as string);
+      }
 
       // 3. Upload signed document back
       // Using a temporary stream to upload the Buffer
